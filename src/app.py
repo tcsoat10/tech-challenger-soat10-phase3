@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.adapters.api.v1.routes.health_check import router as health_check_router
+from src.adapters.driver.api.v1.routes.health_check import router as health_check_router
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
