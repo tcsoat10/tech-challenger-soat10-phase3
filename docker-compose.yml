@@ -17,6 +17,12 @@ services:
       - "${APP_PORT}:${APP_PORT}"
     restart: always
     command: poetry run uvicorn src.app:app --host 0.0.0.0 --port ${APP_PORT}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${APP_PORT}/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   mysql-db:
     image: mysql:${MYSQL_VERSION}
     container_name: ${MYSQL_CONTAINER_NAME}
