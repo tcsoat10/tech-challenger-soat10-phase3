@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Configurações de ambiente
 DEBUG = os.getenv("DEBUG", "true").lower() in ("true", "1")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")  # development, staging, production
@@ -10,6 +14,7 @@ SERVER_PORT = int(os.getenv("APP_PORT", 5000))
 
 # Configurações de banco de dados
 DATABASE = {
+    "drivername": "mysql+pymysql",
     "host": os.getenv("MYSQL_HOST", "localhost"),
     "port": int(os.getenv("MYSQL_PORT", 3306)),
     "user": os.getenv("MYSQL_USER", "user"),
