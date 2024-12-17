@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  tech-challenger-net:
+    driver: bridge
+
 services:
   tc-app:
     image: ${APP_NAME}:1.0
@@ -9,6 +13,11 @@ services:
       args:
         PORT: ${APP_PORT}
     container_name: ${APP_NAME}
+    networks:
+      - tech-challenger-net
+    environment:
+      MYSQL_HOST: "mysql-db"
+
     depends_on:
       - mysql-db
     env_file:
@@ -27,6 +36,8 @@ services:
     image: mysql:${MYSQL_VERSION}
     container_name: ${MYSQL_CONTAINER_NAME}
     restart: always
+    networks:
+      - tech-challenger-net
     env_file:
       - .env
     ports:
@@ -39,6 +50,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
 
 volumes:
   mysql-data:
