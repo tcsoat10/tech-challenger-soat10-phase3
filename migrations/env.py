@@ -2,25 +2,31 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 from config.settings import DATABASE
-from config.database import Base
+from src.core.domain.entities import BaseEntity 
 
+
+# Carrega a configuração do Alembic
 config = context.config
 fileConfig(config.config_file_name)
 
+# Geração da URL do banco de dados
 database_url = (
     f"{DATABASE['drivername']}://{DATABASE['user']}:{DATABASE['password']}@"
     f"{DATABASE['host']}:{DATABASE['port']}/{DATABASE['name']}"
 )
 config.set_main_option("sqlalchemy.url", database_url)
 
-target_metadata = Base.metadata
+# Metadados das tabelas (BaseEntity como base para todas as entidades)
+target_metadata = BaseEntity.metadata
 
+# Modo offline: Gera SQL sem conexão ao banco
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
     context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
+# Modo online: Executa as migrações com conexão ativa ao banco
 def run_migrations_online():
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
