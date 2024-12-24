@@ -2,16 +2,12 @@
 name = "tech-challenger-soat10"
 version = "0.1.0"
 description = ""
-authors = [
-    "Carlos Roberto <carlosjr.if@gmail.com>"
-]
-readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.115.6"
 injector = "^0.22.0"
-pytest = "^8.3.4"
 uvicorn = "^0.32.1"
 sqlalchemy = "^2.0.36"
 pydantic = "^2.10.3"
@@ -22,6 +18,14 @@ pymysql = "^1.1.1"
 cryptography = "^44.0.0"
 alembic = "^1.14.0"
 
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+pytest-xdist = "^3.6.1"
+pytest-watch = "^4.2.0"
 
 [build-system]
 requires = ["poetry-core"]
