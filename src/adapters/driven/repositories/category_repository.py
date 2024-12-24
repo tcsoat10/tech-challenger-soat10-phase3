@@ -1,0 +1,14 @@
+from src.core.domain.entities.category import Category
+from src.core.ports.category.i_categorory_repository import ICategoryRepository
+from sqlalchemy.orm import Session
+
+class CategoryRepository(ICategoryRepository):
+
+    def __init__(self, db_session: Session):
+        self.db_session = db_session
+
+    def create(self, category: Category) -> Category:
+        self.db_session.add(category)
+        self.db_session.commit()
+        self.db_session.refresh(category)
+        return category
