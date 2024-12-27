@@ -1,14 +1,15 @@
+import uuid
+import os
+import pytest
 from typing import Generator
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
-import os
-import pytest
 from sqlalchemy import create_engine, inspect, text
 from alembic.config import Config
 from alembic import command
 from src.app import app
 from config import settings
-import uuid
+from config.database import get_db
 
 
 @pytest.fixture(scope="function")
@@ -76,12 +77,12 @@ def setup_test_database():
         created_tables = inspector.get_table_names()
         print(f"Tabelas criadas: {created_tables}")
 
-        # expected_tables = []
-        # if not all(table in created_tables for table in expected_tables):
-        #     pytest.fail(
-        #         f"As seguintes tabelas não foram criadas: "
-        #         f"{[table for table in expected_tables if table not in created_tables]}"
-        #     )
+        expected_tables = ["categories"]
+        if not all(table in created_tables for table in expected_tables):
+            pytest.fail(
+                f"As seguintes tabelas não foram criadas: "
+                f"{[table for table in expected_tables if table not in created_tables]}"
+            )
 
         yield test_database_url
     finally:
@@ -90,6 +91,7 @@ def setup_test_database():
             with root_engine.connect() as connection:
                 connection.execute(text(f"DROP DATABASE IF EXISTS `{test_database}`;"))
                 connection.execute(text(f"DROP USER IF EXISTS '{test_user}'@'%';"))
+                connection.execute(text("FLUSH PRIVILEGES;"))
             print(f"Banco e usuário removidos: {test_database}, {test_user}")
         except Exception as e:
             print(f"Erro ao limpar banco ou usuário de teste: {e}")
@@ -102,20 +104,30 @@ def db_session(setup_test_database):
     """
     Cria uma sessão de banco de dados para cada teste.
     """
-    test_engine = create_engine(setup_test_database, echo=True)
+    test_engine = create_engine(setup_test_database, echo=False)
     SessionLocal = sessionmaker(bind=test_engine)
 
     session = SessionLocal()
+    def override_get_db():
+        try:
+            yield session
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+
     try:
         yield session
     finally:
         session.close()
+        test_engine.dispose()
+        app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture(scope="function")
-def test_client(db_session) -> Generator[TestClient, None, None]:
+def client(db_session) -> Generator[TestClient, None, None]:
     """
     Cria um cliente de teste para a aplicação.
     """
-    with TestClient(app) as client:
-        yield client
+    with TestClient(app) as test_client:
+        yield test_client
