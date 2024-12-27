@@ -1,3 +1,4 @@
+from sqlalchemy.sql import exists
 from src.core.domain.entities.category import Category
 from src.core.ports.category.i_categorory_repository import ICategoryRepository
 from sqlalchemy.orm import Session
@@ -12,3 +13,6 @@ class CategoryRepository(ICategoryRepository):
         self.db_session.commit()
         self.db_session.refresh(category)
         return category
+
+    def exists_by_name(self, name: str) -> bool:
+        return self.db_session.query(exists().where(Category.name == name)).scalar()

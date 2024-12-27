@@ -8,3 +8,7 @@ class ICategoryRepository(ABC):
     @abstractmethod
     def create(category: Category):
         pass
+
+    @abstractmethod
+    def exists_by_name(self, name: str) -> bool:
+        pass
