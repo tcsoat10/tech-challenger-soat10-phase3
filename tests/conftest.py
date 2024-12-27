@@ -77,12 +77,12 @@ def setup_test_database():
         created_tables = inspector.get_table_names()
         print(f"Tabelas criadas: {created_tables}")
 
-        # expected_tables = []
-        # if not all(table in created_tables for table in expected_tables):
-        #     pytest.fail(
-        #         f"As seguintes tabelas não foram criadas: "
-        #         f"{[table for table in expected_tables if table not in created_tables]}"
-        #     )
+        expected_tables = ["categories"]
+        if not all(table in created_tables for table in expected_tables):
+            pytest.fail(
+                f"As seguintes tabelas não foram criadas: "
+                f"{[table for table in expected_tables if table not in created_tables]}"
+            )
 
         yield test_database_url
     finally:
@@ -91,6 +91,7 @@ def setup_test_database():
             with root_engine.connect() as connection:
                 connection.execute(text(f"DROP DATABASE IF EXISTS `{test_database}`;"))
                 connection.execute(text(f"DROP USER IF EXISTS '{test_user}'@'%';"))
+                connection.execute(text("FLUSH PRIVILEGES;"))
             print(f"Banco e usuário removidos: {test_database}, {test_user}")
         except Exception as e:
             print(f"Erro ao limpar banco ou usuário de teste: {e}")
