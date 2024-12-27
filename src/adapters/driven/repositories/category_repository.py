@@ -20,3 +20,6 @@ class CategoryRepository(ICategoryRepository):
     def get_by_name(self, name: str) -> Category:
         return self.db_session.query(Category).filter(Category.name == name).first()
 
+    def get_by_id(self, category_id: int) -> Category:
+        return self.db_session.query(Category).filter(Category.id == category_id).first()
+

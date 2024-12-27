@@ -24,3 +24,7 @@ def create_category(dto: CreateCategoryDTO, service: ICategoryService = Depends(
 def get_category_by_name(category_name: str, service: ICategoryService = Depends(_get_category_service)):
     return service.get_category_by_name(name=category_name)
 
+@router.get("/categories/{category_id}/id", response_model=CategoryDTO, status_code=status.HTTP_200_OK)
+def get_category_by_id(category_id: int, service: ICategoryService = Depends(_get_category_service)):
+    return service.get_category_by_id(category_id=category_id)
+

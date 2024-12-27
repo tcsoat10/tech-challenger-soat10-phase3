@@ -14,3 +14,7 @@ class ICategoryService(ABC):
     def get_category_by_name(self, name: str) -> CategoryDTO:
         pass
 
+    @abstractmethod
+    def get_category_by_id(self, category_id: int) -> CategoryDTO:
+        pass
+

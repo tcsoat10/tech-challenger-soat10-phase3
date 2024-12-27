@@ -85,3 +85,30 @@ class TestCategoryRepository:
         category = self.repository.get_by_name("no name")
 
         assert category is None
+    
+    def test_get_category_by_id_success(self):
+        """
+        Testa a recuperação de uma categoria pelo ID com sucesso.
+        """
+        new_category = Category(name="Drinks", description="Beverages category")
+        created_category = self.repository.create(new_category)
+
+        category = self.repository.get_by_id(created_category.id)
+
+        assert category is not None
+        assert category.id == created_category.id
+        assert category.name == "Drinks"
+        assert category.description == "Beverages category"
+
+    
+    def test_get_category_by_id_with_no_id_registered(self):
+        """
+        Testa a busca de uma categoria por id que não está registrado.
+        """
+        new_category = Category(name="Drinks", description="Beverages category")
+        self.repository.create(new_category)
+
+        category = self.repository.get_by_id(2)
+
+        assert category is None
+

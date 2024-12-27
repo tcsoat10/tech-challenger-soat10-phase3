@@ -17,3 +17,7 @@ class ICategoryRepository(ABC):
     def get_by_name(self, name: str) -> Category:
         pass
 
+    @abstractmethod
+    def get_by_id(self, category_id: int) -> Category:
+        pass
+
