@@ -23,3 +23,6 @@ class CategoryRepository(ICategoryRepository):
     def get_by_id(self, category_id: int) -> Category:
         return self.db_session.query(Category).filter(Category.id == category_id).first()
 
+    def get_all(self) -> Category:
+        return self.db_session.query(Category).all()
+

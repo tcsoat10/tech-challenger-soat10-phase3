@@ -112,3 +112,29 @@ class TestCategoryRepository:
 
         assert category is None
 
+    def test_get_all_categories(self):
+        """
+        Testa a listagem de todas as categorias.
+        """
+        category1 = Category(name="Drinks", description="Beverages category")
+        category2 = Category(name="Burgers", description="Fast food category")
+
+        self.repository.create(category1)
+        self.repository.create(category2)
+
+        categories = self.repository.get_all()
+
+        assert len(categories) == 2
+        assert categories[0].name == "Drinks"
+        assert categories[1].name == "Burgers"
+    
+
+    def test_get_all_categories_with_emtpy_db(self):
+        """
+        Testa a listagem de todas as categorias quando o banco de dados está vazio.
+        """
+        categories = self.repository.get_all()
+
+        assert len(categories) == 0
+        assert categories == []
+    

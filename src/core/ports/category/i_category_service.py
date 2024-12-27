@@ -18,3 +18,7 @@ class ICategoryService(ABC):
     def get_category_by_id(self, category_id: int) -> CategoryDTO:
         pass
 
+    @abstractmethod
+    def get_all_categories(self) -> List[CategoryDTO]:
+        pass
+

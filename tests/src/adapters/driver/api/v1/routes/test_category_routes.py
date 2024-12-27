@@ -73,3 +73,25 @@ def test_get_category_by_id_and_return_success(client):
         "description": "Beverages category"
     }
 
+def test_get_all_categories_return_success(client):
+    client.post("/api/v1/categories", json={"name": "Drinks", "description": "Beverages category"})
+    client.post("/api/v1/categories", json={"name": "Burgers", "description": "Fast food category"})
+    
+    response = client.get("/api/v1/categories")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data == [
+        {
+            "id": 1,
+            "name": "Drinks",
+            "description": "Beverages category"
+        },
+        {
+            "id": 2,
+            "name": "Burgers",
+            "description": "Fast food category"
+        }
+    ]
+

@@ -21,3 +21,7 @@ class ICategoryRepository(ABC):
     def get_by_id(self, category_id: int) -> Category:
         pass
 
+    @abstractmethod
+    def get_all(self) -> Category:
+        pass
+

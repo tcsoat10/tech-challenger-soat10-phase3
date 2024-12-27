@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -28,3 +28,6 @@ def get_category_by_name(category_name: str, service: ICategoryService = Depends
 def get_category_by_id(category_id: int, service: ICategoryService = Depends(_get_category_service)):
     return service.get_category_by_id(category_id=category_id)
 
+@router.get("/categories", response_model=list[CategoryDTO])
+def get_all_categories(service: ICategoryService = Depends(_get_category_service)):
+    return service.get_all_categories()
