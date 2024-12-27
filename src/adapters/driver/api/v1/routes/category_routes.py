@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
+from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.application.services.category_service import CategoryService
 from src.core.domain.dtos.category.category_dto import CategoryDTO
@@ -31,3 +32,8 @@ def get_category_by_id(category_id: int, service: ICategoryService = Depends(_ge
 @router.get("/categories", response_model=list[CategoryDTO])
 def get_all_categories(service: ICategoryService = Depends(_get_category_service)):
     return service.get_all_categories()
+
+@router.put("/categories/{category_id}", response_model=CategoryDTO)
+def update_category(category_id: int, dto: UpdateCategoryDTO, service: ICategoryService = Depends(_get_category_service)):
+    return service.update_category(category_id, dto)
+

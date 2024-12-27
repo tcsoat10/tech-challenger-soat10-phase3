@@ -138,3 +138,18 @@ class TestCategoryRepository:
         assert len(categories) == 0
         assert categories == []
     
+    def test_update_category(self):
+        """
+        Testa a listagem de todas as categorias.
+        """
+        category = Category(name="Drinks", description="Beverages category")
+        created_category = self.repository.create(category)
+
+        created_category.name = f"{created_category.name} - updated"
+        created_category.description = f"{category.description} - updated"
+
+        updated_category = self.repository.update(created_category)
+
+        assert updated_category.name == "Drinks - updated"
+        assert updated_category.description == "Beverages category - updated"
+

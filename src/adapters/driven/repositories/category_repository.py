@@ -26,3 +26,8 @@ class CategoryRepository(ICategoryRepository):
     def get_all(self) -> Category:
         return self.db_session.query(Category).all()
 
+    def update(self, category: Category) -> Category:
+        self.db_session.merge(category)
+        self.db_session.commit()
+        return category
+

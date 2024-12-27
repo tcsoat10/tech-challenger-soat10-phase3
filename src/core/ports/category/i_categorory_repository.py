@@ -25,3 +25,7 @@ class ICategoryRepository(ABC):
     def get_all(self) -> Category:
         pass
 
+    @abstractmethod
+    def update(self, category: Category) -> Category:
+        pass
+

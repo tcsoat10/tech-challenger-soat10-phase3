@@ -1,4 +1,5 @@
 from typing import List
+from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.domain.dtos.category.category_dto import CategoryDTO
@@ -32,6 +33,20 @@ class CategoryService(ICategoryService):
         if not category:
             raise EntityNotFoundException(entity_name="Category")
         return CategoryDTO.from_entity(category)
+
+    def get_all_categories(self) -> List[CategoryDTO]:
+        categories = self.repository.get_all()
+        return [CategoryDTO.from_entity(category) for category in categories]
+
+    def update_category(self, category_id: int, dto: UpdateCategoryDTO) -> CategoryDTO:
+        category = self.repository.get_by_id(category_id)
+        if not category:
+            raise EntityNotFoundException(entity_name="Category")
+
+        category.name = dto.name
+        category.description = dto.description
+        updated_category = self.repository.update(category)
+        return CategoryDTO.from_entity(updated_category)
 
 
 __all__ = ["CategoryService"]
