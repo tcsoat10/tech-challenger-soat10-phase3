@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from pytest import Session
+from sqlalchemy.orm import Session
 
 from config.database import get_db
 from src.adapters.driven.repositories.category_repository import CategoryRepository
