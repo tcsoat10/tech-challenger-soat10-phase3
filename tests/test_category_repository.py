@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.core.domain.entities.category import Category
 
@@ -43,3 +44,19 @@ class TestCategoryRepository:
         db_category = self.db_session.query(Category).filter_by(name="Burgers").first()
         assert db_category is not None
         assert db_category.name == "Burgers"
+
+    def test_repository_create_category_duplicate_error(self, db_session):
+        """
+        Testa erro ao tentar criar uma categoria com nome duplicado.
+        """
+        # Dados da categoria
+        new_category = Category(name="Drinks", description="Beverages category")
+
+        # Cria a primeira categoria
+        self.repository.create(new_category)
+
+        # Tenta criar uma segunda categoria com o mesmo nome
+        duplicate_category = Category(name="Drinks", description="Another description")
+
+        with pytest.raises(IntegrityError):
+            self.repository.create(duplicate_category)
