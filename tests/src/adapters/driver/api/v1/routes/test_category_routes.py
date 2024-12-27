@@ -117,3 +117,20 @@ def test_update_category_and_return_success(client):
         "description": "Beverages category - updated"
     }
 
+def test_delete_category_and_return_success(client):
+    client.post("/api/v1/categories", json={"name": "Drinks", "description": "Beverages category"})
+    client.post("/api/v1/categories", json={"name": "Burgers", "description": "Fast food category"})
+
+    response = client.delete("/api/v1/categories/1")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get("/api/v1/categories")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data == [
+        {
+            "id": 2,
+            "name": "Burgers",
+            "description": "Fast food category"
+        }
+    ]

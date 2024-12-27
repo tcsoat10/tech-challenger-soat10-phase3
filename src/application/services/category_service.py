@@ -48,5 +48,7 @@ class CategoryService(ICategoryService):
         updated_category = self.repository.update(category)
         return CategoryDTO.from_entity(updated_category)
 
+    def delete_category(self, category_id: int) -> None:
+        self.repository.delete(category_id)
 
 __all__ = ["CategoryService"]

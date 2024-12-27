@@ -153,3 +153,20 @@ class TestCategoryRepository:
         assert updated_category.name == "Drinks - updated"
         assert updated_category.description == "Beverages category - updated"
 
+    def test_delete_category(self):
+        """
+        Testa a remoção de uma categoria.
+        """
+        category = Category(name="Drinks", description="Beverages category")
+
+        created_category = self.repository.create(category)
+        self.repository.delete(created_category.id)
+
+        assert len(self.repository.get_all()) == 0
+
+    def test_delete_category_with_inexistent_id(self):
+        category = Category(name="Drinks", description="Beverages category")
+        self.repository.create(category)
+        self.repository.delete(3)
+
+        assert len(self.repository.get_all()) == 1

@@ -31,3 +31,8 @@ class CategoryRepository(ICategoryRepository):
         self.db_session.commit()
         return category
 
+    def delete(self, category_id: int) -> None:
+        category = self.get_by_id(category_id)
+        if category:
+            self.db_session.delete(category)
+            self.db_session.commit()

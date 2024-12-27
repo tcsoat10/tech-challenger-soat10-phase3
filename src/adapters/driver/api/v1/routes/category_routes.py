@@ -37,3 +37,6 @@ def get_all_categories(service: ICategoryService = Depends(_get_category_service
 def update_category(category_id: int, dto: UpdateCategoryDTO, service: ICategoryService = Depends(_get_category_service)):
     return service.update_category(category_id, dto)
 
+@router.delete("/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_category(category_id: int, service: ICategoryService = Depends(_get_category_service)):
+    service.delete_category(category_id)

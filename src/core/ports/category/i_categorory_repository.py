@@ -29,3 +29,6 @@ class ICategoryRepository(ABC):
     def update(self, category: Category) -> Category:
         pass
 
+    @abstractmethod
+    def delete(self, category_id: int) -> None:
+        pass
