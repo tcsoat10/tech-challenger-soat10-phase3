@@ -60,3 +60,28 @@ class TestCategoryRepository:
 
         with pytest.raises(IntegrityError):
             self.repository.create(duplicate_category)
+
+    def test_get_category_by_name_success(self):
+        """
+        Testa a recuperação de uma categoria pelo Nome com sucesso.
+        """
+        new_category = Category(name="Drinks", description="Beverages category")
+        created_category = self.repository.create(new_category)
+
+        category = self.repository.get_by_name(created_category.name)
+
+        assert category is not None
+        assert category.id == created_category.id
+        assert category.name == "Drinks"
+        assert category.description == "Beverages category"
+
+    def test_get_category_by_name_with_no_name_registered(self):
+        """
+        Testa a busca de uma categoria por nome que não está registrado.
+        """
+        new_category = Category(name="Drinks", description="Beverages category")
+        self.repository.create(new_category)
+
+        category = self.repository.get_by_name("no name")
+
+        assert category is None

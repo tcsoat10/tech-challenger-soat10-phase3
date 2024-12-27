@@ -12,3 +12,8 @@ class ICategoryRepository(ABC):
     @abstractmethod
     def exists_by_name(self, name: str) -> bool:
         pass
+
+    @abstractmethod
+    def get_by_name(self, name: str) -> Category:
+        pass
+

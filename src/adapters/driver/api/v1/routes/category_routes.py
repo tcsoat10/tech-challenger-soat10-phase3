@@ -16,6 +16,11 @@ def _get_category_service(db_session: Session = Depends(get_db)) -> ICategorySer
     repository: ICategoryRepository = CategoryRepository(db_session)
     return CategoryService(repository)
 
-@router.post("/categories", response_model=CategoryDTO, status_code=201)
+@router.post("/categories", response_model=CategoryDTO, status_code=status.HTTP_201_CREATED)
 def create_category(dto: CreateCategoryDTO, service: ICategoryService = Depends(_get_category_service)):
     return service.create_category(dto)
+
+@router.get("/categories/{category_name}/name", response_model=CategoryDTO, status_code=status.HTTP_200_OK)
+def get_category_by_name(category_name: str, service: ICategoryService = Depends(_get_category_service)):
+    return service.get_category_by_name(name=category_name)
+

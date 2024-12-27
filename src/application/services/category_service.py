@@ -17,6 +17,13 @@ class CategoryService(ICategoryService):
 
         category = Category(name=dto.name, description=dto.description)
         category = self.repository.create(category)
-        return CategoryDTO(id=category.id, name=category.name, description=category.description)
+        return CategoryDTO.from_entity(category)
+    
+    def get_category_by_name(self, name: str) -> CategoryDTO:
+        category = self.repository.get_by_name(name=name)
+        if not category:
+            raise EntityNotFoundException(entity_name="Category")
+        return CategoryDTO.from_entity(category)
+
 
 __all__ = ["CategoryService"]

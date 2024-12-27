@@ -9,3 +9,8 @@ class ICategoryService(ABC):
     @abstractmethod
     def create_category(self, dto: CreateCategoryDTO) -> CategoryDTO:
         pass
+
+    @abstractmethod
+    def get_category_by_name(self, name: str) -> CategoryDTO:
+        pass
+

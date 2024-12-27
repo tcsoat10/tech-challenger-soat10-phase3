@@ -16,3 +16,7 @@ class CategoryRepository(ICategoryRepository):
 
     def exists_by_name(self, name: str) -> bool:
         return self.db_session.query(exists().where(Category.name == name)).scalar()
+
+    def get_by_name(self, name: str) -> Category:
+        return self.db_session.query(Category).filter(Category.name == name).first()
+
