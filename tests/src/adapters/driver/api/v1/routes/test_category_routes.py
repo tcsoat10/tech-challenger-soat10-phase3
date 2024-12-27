@@ -1,4 +1,4 @@
-from http import HTTPStatus
+from fastapi import status
 
 import pytest
 
@@ -9,7 +9,7 @@ import pytest
 def test_create_category_success(client, payload):
     response = client.post("/api/v1/categories", json=payload)
 
-    assert response.status_code == HTTPStatus.CREATED
+    assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
 
@@ -21,11 +21,11 @@ def test_create_category_duplicate_name_and_return_error(client):
     payload = {"name": "Drinks", "description": "Beverages category"}
     response = client.post("/api/v1/categories", json=payload)
 
-    assert response.status_code == HTTPStatus.CREATED
+    assert response.status_code == status.HTTP_201_CREATED
 
     response = client.post("/api/v1/categories", json=payload)
 
-    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
 
