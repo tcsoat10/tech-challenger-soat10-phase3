@@ -28,3 +28,7 @@ class IPermissionRepository(ABC):
     @abstractmethod
     def update(self, permission: Permission) -> Permission:
         pass
+
+    @abstractmethod
+    def delete(self, category_id: int) -> None:
+        pass
