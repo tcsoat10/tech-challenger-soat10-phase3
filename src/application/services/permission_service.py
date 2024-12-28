@@ -5,6 +5,7 @@ from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedExce
 from src.core.domain.entities.permission import Permission
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from typing import List
+from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
 
 
 class PermissionService(IPermissionRepository):
@@ -35,3 +36,13 @@ class PermissionService(IPermissionRepository):
         permissions = self.repository.get_all()
         return [PermissionDTO.from_entity(permisssion) for permission in permissions]
     
+    def update_permission(self, permission_id: int, dto:UpdatePermissionDTO) -> PermissionDTO:
+        permission = self.repository.get_by_id(permission_id=permission_id)
+        if not permission:
+            raise EntityNotFoundException(entity_name='Permission')
+        
+        permission.name = dto.name
+        permission.description = dto.description
+        updated_permission = self.repository.update(permission=updated_permission)
+        return PermissionDTO.from_entity(updated_permission)
+        

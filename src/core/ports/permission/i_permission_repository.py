@@ -24,3 +24,7 @@ class IPermissionRepository(ABC):
     @abstractmethod
     def get_all(self) -> Permission:
         pass
+
+    @abstractmethod
+    def update(self, permission: Permission) -> Permission:
+        pass
