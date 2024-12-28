@@ -26,5 +26,9 @@ class BaseEntity(DeclarativeBase):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
+    # Timestamp: Record inactivation time
+    inactivated_at: Mapped[datetime] = Column(
+        DateTime(timezone=True), nullable=True
+    )
 
 __all__ = ["BaseEntity"]
