@@ -24,3 +24,8 @@ class PermissionService(IPermissionRepository):
             raise EntityNotFoundException(entity_name='Permission')
         return PermissionDTO.from_entity(permission)
     
+    def get_permission_by_id(self, permission_id: int) -> PermissionDTO:
+        permission = self.repository.get_by_id(permission_id=permission_id)
+        if not permission:
+            raise EntityNotFoundException(entity_name='Permission')
+        return PermissionDTO.from_entity(permission)

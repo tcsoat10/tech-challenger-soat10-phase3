@@ -16,3 +16,8 @@ class IPermissionRepository(ABC):
     @abstractmethod
     def get_by_name(self, name: str) -> Permission:
         pass
+
+    @abstractmethod
+    def get_by_id(self, permission_id: int) -> Permission:
+        pass
+    
