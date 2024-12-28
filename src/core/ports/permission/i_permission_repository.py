@@ -8,3 +8,8 @@ class IPermissionRepository(ABC):
     @abstractmethod
     def create(permission: Permission):
         pass
+
+    @abstractmethod
+    def exists_by_name(self, name: str) -> bool:
+        pass
+    
