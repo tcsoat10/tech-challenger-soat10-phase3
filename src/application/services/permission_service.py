@@ -4,6 +4,7 @@ from src.core.domain.dtos.permission.create_permission_dto import CreatePermissi
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.domain.entities.permission import Permission
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
+from typing import List
 
 
 class PermissionService(IPermissionRepository):
@@ -29,3 +30,8 @@ class PermissionService(IPermissionRepository):
         if not permission:
             raise EntityNotFoundException(entity_name='Permission')
         return PermissionDTO.from_entity(permission)
+    
+    def get_all_permissions(self) -> List[PermissionDTO]:
+        permissions = self.repository.get_all()
+        return [PermissionDTO.from_entity(permisssion) for permission in permissions]
+    
