@@ -40,7 +40,7 @@ def get_all_permissions(service: IPermissionService = Depends(_get_permission_se
     return service.get_all_permissions()
 
 
-@router.put(path='/permission/{permission_id}', response_model=PermissionDTO, status_code=status.HTTP_200_OK)
+@router.put(path='/permissions/{permission_id}', response_model=PermissionDTO, status_code=status.HTTP_200_OK)
 def update_permission(permission_id: int, dto: UpdatePermissionDTO, service: IPermissionService = Depends(_get_permission_service)):
     return service.update_permission(permission_id, dto)
 

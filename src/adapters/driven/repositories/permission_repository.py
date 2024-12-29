@@ -28,7 +28,7 @@ class PermissionRepository(IPermissionRepository):
         return self.db_session.query(Permission).all()
     
     def update(self, permission: Permission) -> Permission:
-        self.db_session.merge(Permission)
+        self.db_session.merge(permission)
         self.db_session.commit()
         return permission
     

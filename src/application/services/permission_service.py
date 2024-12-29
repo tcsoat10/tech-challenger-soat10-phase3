@@ -45,7 +45,7 @@ class PermissionService(IPermissionService):
         
         permission.name = dto.name
         permission.description = dto.description
-        updated_permission = self.repository.update(permission=updated_permission)
+        updated_permission = self.repository.update(permission)
         return PermissionDTO.from_entity(updated_permission)
     
     def delete_permission(self, permission_id: int) -> None:
