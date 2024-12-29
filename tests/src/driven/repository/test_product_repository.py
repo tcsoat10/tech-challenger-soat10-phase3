@@ -76,3 +76,28 @@ class TestProductRepository:
         category = self.repository.get_by_name("no name")
         assert category is None
     
+    def test_get_category_by_id_success(self):
+        category = CategoryFactory()
+        product = ProductFactory(
+            name="Cheeseburger",
+            description="A delicious cheeseburger.",
+            category=category,
+            price=39.90,
+            sla_product="Standard SLA"
+        )
+       
+        product_response = self.repository.get_by_id(product_id=product.id)
+
+        assert product_response.id is not None
+        assert product_response.name == "Cheeseburger"
+        assert product_response.description == "A delicious cheeseburger."
+        assert product_response.category_id == category.id
+        assert product_response.price == 39.90
+        assert product_response.sla_product == "Standard SLA"
+
+    
+    def test_get_by_id_returns_none_for_unregistered_id(self):
+        ProductFactory()
+        category = self.repository.get_by_id(product_id=1)
+        assert category is None
+

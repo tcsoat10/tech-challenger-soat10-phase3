@@ -76,3 +76,31 @@ def test_get_product_by_name_and_return_success(client):
     assert data["category"]["id"] == category2.id
     assert data["category"]["name"] == category2.name
 
+def test_get_category_by_id_and_return_success(client):
+    category1 = CategoryFactory(name="Drinks")
+    category2 = CategoryFactory(name="Fast food")
+    product1 = ProductFactory(
+        name="Coca-Cola",
+        description="Soft drink",
+        price=6.99,
+        category=category1
+    )
+    ProductFactory(
+        name="Big Mac",
+        description="Fast food burger",
+        price=20.99,
+        category=category2
+    )
+    
+    response = client.get(f"/api/v1/products/{product1.id}/id")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert "id" in data
+    assert data["name"] == "Coca-Cola"
+    assert data["description"] == "Soft drink"
+    assert data["price"] == 6.99
+    assert data["category"]["id"] == category1.id
+    assert data["category"]["name"] == category1.name
+

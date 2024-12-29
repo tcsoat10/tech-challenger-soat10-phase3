@@ -20,3 +20,6 @@ class ProductRepository(IProductRepository):
     def get_by_name(self, name: str) -> Product:
         return self.db_session.query(Product).filter(Product.name == name).first()
 
+    def get_by_id(self, product_id: int) -> Product:
+        return self.db_session.query(Product).filter(Product.id == product_id).first()
+

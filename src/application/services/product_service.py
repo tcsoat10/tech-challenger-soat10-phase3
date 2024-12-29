@@ -38,3 +38,9 @@ class ProductService(IProductService):
             raise EntityNotFoundException(entity_name="Product")
         return ProductDTO.from_entity(product)
 
+    def get_product_by_id(self, product_id: int) -> ProductDTO:
+        product = self.repository.get_by_id(product_id=product_id)
+        if not product:
+            raise EntityNotFoundException(entity_name="Product")
+        return ProductDTO.from_entity(product)
+

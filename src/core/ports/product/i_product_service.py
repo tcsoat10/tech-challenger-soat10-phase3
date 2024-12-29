@@ -13,3 +13,7 @@ class IProductService(ABC):
     def get_product_by_name(self, name: str) -> ProductDTO:
         pass
 
+    @abstractmethod
+    def get_product_by_id(self, product_id: int) -> ProductDTO:
+        pass
+

@@ -17,3 +17,7 @@ class IProductRepository(ABC):
     def get_by_name(self, name: str) -> Product:
         pass
 
+    @abstractmethod
+    def get_by_id(self, product_id: int) -> Product:
+        pass
+

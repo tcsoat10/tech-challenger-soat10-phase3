@@ -27,3 +27,7 @@ def create_product(dto: CreateProductDTO, service: IProductService = Depends(_ge
 def get_product_by_name(product_name: str, service: IProductService = Depends(_get_product_service)):
     return service.get_product_by_name(name=product_name)
 
+@router.get("/products/{product_id}/id", response_model=ProductDTO, status_code=status.HTTP_200_OK)
+def get_product_by_id(product_id: int, service: IProductService = Depends(_get_product_service)):
+    return service.get_product_by_id(product_id=product_id)
+
