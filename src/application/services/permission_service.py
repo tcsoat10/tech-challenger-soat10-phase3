@@ -36,7 +36,7 @@ class PermissionService(IPermissionService):
     
     def get_all_permissions(self) -> List[PermissionDTO]:
         permissions = self.repository.get_all()
-        return [PermissionDTO.from_entity(permisssion) for permission in permissions]
+        return [PermissionDTO.from_entity(permission) for permission in permissions]
     
     def update_permission(self, permission_id: int, dto:UpdatePermissionDTO) -> PermissionDTO:
         permission = self.repository.get_by_id(permission_id=permission_id)
