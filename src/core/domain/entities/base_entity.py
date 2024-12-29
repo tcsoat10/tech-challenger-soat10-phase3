@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Any, Dict, Type, TypeVar
 from sqlalchemy import Column, DateTime, Integer, func
 from sqlalchemy.orm import DeclarativeBase, Mapped
 
+T = TypeVar("T", bound="BaseEntity")
 
 class BaseEntity(DeclarativeBase):
     """
