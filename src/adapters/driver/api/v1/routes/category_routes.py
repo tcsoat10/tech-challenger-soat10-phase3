@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
@@ -29,7 +30,7 @@ def get_category_by_name(category_name: str, service: ICategoryService = Depends
 def get_category_by_id(category_id: int, service: ICategoryService = Depends(_get_category_service)):
     return service.get_category_by_id(category_id=category_id)
 
-@router.get("/categories", response_model=list[CategoryDTO])
+@router.get("/categories", response_model=List[CategoryDTO])
 def get_all_categories(service: ICategoryService = Depends(_get_category_service)):
     return service.get_all_categories()
 
