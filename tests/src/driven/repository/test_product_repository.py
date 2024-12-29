@@ -124,6 +124,12 @@ class TestProductRepository:
             product2,
         ]
 
+    def test_get_all_products_with_emtpy_db(self):
+        products = self.repository.get_all()
+
+        assert len(products) == 0
+        assert products == []
+    
     def test_update_product(self):
         category = CategoryFactory(name="Fast food")
         category2 = CategoryFactory(name="Burgers")
