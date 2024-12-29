@@ -4,7 +4,7 @@ from factory.fuzzy import FuzzyFloat
 from faker import Faker
 
 from src.core.domain.entities.product import Product
-from tests.factory.category_factory import CategoryFactory
+from tests.factories.category_factory import CategoryFactory
 
 fake = Faker()
 
