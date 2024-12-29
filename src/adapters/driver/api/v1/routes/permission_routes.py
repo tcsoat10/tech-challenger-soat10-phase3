@@ -9,6 +9,7 @@ from src.adapters.driven.repositories.permission_repository import PermissionRep
 from src.application.services.permission_service import PermissionService
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.core.domain.dtos.permission.create_permission_dto import CreatePermissionDTO
+from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
 
 
 router = APIRouter()
@@ -37,4 +38,8 @@ def get_permission_by_id(permission_id: int, service: IPermissionService = Depen
 @router.get(path='/permissions', response_model=List[PermissionDTO])
 def get_all_permissions(service: IPermissionService = Depends(_get_permission_service)):
     return service.get_all_permissions()
-    
+
+
+@router.put(path='/permission/{permission_id}', response_model=PermissionDTO)
+def update_permission(permission_id: int, dto: UpdatePermissionDTO, service: IPermissionService = Depends(_get_permission_service)):
+    return service.update_permission(permission_id, dto)
