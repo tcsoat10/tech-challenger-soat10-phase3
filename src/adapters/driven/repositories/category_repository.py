@@ -1,6 +1,7 @@
+from typing import List
 from sqlalchemy.sql import exists
 from src.core.domain.entities.category import Category
-from src.core.ports.category.i_categorory_repository import ICategoryRepository
+from core.ports.category.i_category_repository import ICategoryRepository
 from sqlalchemy.orm import Session
 
 class CategoryRepository(ICategoryRepository):
@@ -23,7 +24,7 @@ class CategoryRepository(ICategoryRepository):
     def get_by_id(self, category_id: int) -> Category:
         return self.db_session.query(Category).filter(Category.id == category_id).first()
 
-    def get_all(self) -> Category:
+    def get_all(self) -> List[Category]:
         return self.db_session.query(Category).all()
 
     def update(self, category: Category) -> Category:
