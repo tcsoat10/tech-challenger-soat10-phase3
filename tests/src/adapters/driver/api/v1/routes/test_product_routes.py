@@ -150,3 +150,39 @@ def test_get_all_products_return_success(client):
         },
     ]
 
+
+def test_update_product_and_return_success(client):
+    category = CategoryFactory(name="Fast food")
+    category2 = CategoryFactory(name="Burgers")
+    
+    product = ProductFactory(
+        name="Big Mac",
+        description="Fast food burger",
+        price=20.99,
+        category=category
+    )
+    
+    payload = {
+        "id": 1,
+        "name": "Big Mac - updated",
+        "description": "Fast food burger - updated",
+        "price": 28.99,
+        "category_id": category2.id,
+    }
+
+    response = client.put(f"/api/v1/products/{product.id}", json=payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data == {
+        "id": product.id,
+        "name": "Big Mac - updated",
+        "description": "Fast food burger - updated",
+        "price": 28.99,
+        "category": {
+            "id": category2.id,
+            "name": category2.name,
+            "description": category2.description,
+        },
+    }
+

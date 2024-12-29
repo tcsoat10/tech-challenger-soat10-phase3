@@ -124,3 +124,27 @@ class TestProductRepository:
             product2,
         ]
 
+    def test_update_product(self):
+        category = CategoryFactory(name="Fast food")
+        category2 = CategoryFactory(name="Burgers")
+        
+        product = ProductFactory(
+            name="Big Mac",
+            description="Fast food burger",
+            price=20.99,
+            category=category
+        )
+
+        product.name = "Big Mac - updated"
+        product.description = "Fast food burger - updated"
+        product.price = 28.99
+        product.category_id = category2.id
+        
+        data = self.repository.update(product)
+
+        assert data.id == product.id
+        assert data.name == product.name
+        assert data.description == product.description
+        assert data.price == product.price
+        assert data.category_id == product.category_id
+

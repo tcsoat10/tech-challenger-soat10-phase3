@@ -26,3 +26,7 @@ class IProductRepository(ABC):
     def get_all(self) -> List[Product]:
         pass
 
+    @abstractmethod
+    def update(self, product: Product) -> Product:
+        pass
+    

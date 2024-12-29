@@ -27,3 +27,8 @@ class ProductRepository(IProductRepository):
     def get_all(self) -> List[Product]:
         return self.db_session.query(Product).all()
 
+    def update(self, product: Product) -> Product:
+        self.db_session.merge(product)
+        self.db_session.commit()
+        return product
+

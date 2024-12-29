@@ -1,4 +1,5 @@
 from typing import List
+from src.core.domain.dtos.product.update_product_dto import UpdateProductDTO
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
@@ -48,4 +49,22 @@ class ProductService(IProductService):
     def get_all_products(self) -> List[ProductDTO]:
         products = self.repository.get_all()
         return [ProductDTO.from_entity(product) for product in products]
+
+    def update_product(self, product_id: int, dto: UpdateProductDTO) -> ProductDTO:
+        product = self.repository.get_by_id(product_id)
+        if not product:
+            raise EntityDuplicatedException(entity_name="Product")
+        
+        category = self.category_repository.get_by_id(category_id=dto.category_id)
+        if not category:
+            raise EntityNotFoundException(entity_name="Category")
+
+        product.name=dto.name,
+        product.description=dto.description,
+        product.price=dto.price,
+        product.category=category
+
+        product = self.repository.update(product)
+
+        return ProductDTO.from_entity(product)
 
