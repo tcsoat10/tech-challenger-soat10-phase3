@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from typing import Optional
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -33,8 +34,8 @@ def get_product_by_id(product_id: int, service: IProductService = Depends(_get_p
     return service.get_product_by_id(product_id=product_id)
 
 @router.get("/products", response_model=list[ProductDTO])
-def get_all_products(service: IProductService = Depends(_get_product_service)):
-    return service.get_all_products()
+def get_all_products(include_deleted: Optional[bool] = Query(False), service: IProductService = Depends(_get_product_service)):
+    return service.get_all_products(include_deleted=include_deleted)
 
 @router.put("/products/{product_id}", response_model=ProductDTO)
 def update_product(product_id: int, dto: UpdateProductDTO, service: IProductService = Depends(_get_product_service)):
