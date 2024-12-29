@@ -71,3 +71,8 @@ class TestProductRepository:
         assert product_response.price == 39.90
         assert product_response.sla_product == "Standard SLA"
 
+    def test_get_by_name_returns_none_for_unregistered_name(self):
+        ProductFactory()
+        category = self.repository.get_by_name("no name")
+        assert category is None
+    
