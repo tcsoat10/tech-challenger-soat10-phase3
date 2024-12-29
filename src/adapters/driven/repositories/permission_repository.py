@@ -16,7 +16,7 @@ class PermissionRepository(IPermissionRepository):
         return permission
     
     def exists_by_name(self, name: str) -> bool:
-        return self.db_session.query(exists().where(Permission.name) == name).scalar()
+        return self.db_session.query(exists().where(Permission.name == name)).scalar()
     
     def get_by_name(self, name: str) -> Permission:
         return self.db_session.query(Permission).filter(Permission.name == name).first()
