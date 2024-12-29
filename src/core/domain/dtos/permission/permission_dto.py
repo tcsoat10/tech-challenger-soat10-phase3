@@ -8,5 +8,5 @@ class PermissionDTO(BaseModel):
     description: str
 
     @classmethod
-    def from_entity(cls, permission: Permission) -> PermissionDTO:
+    def from_entity(cls, permission: Permission) -> 'PermissionDTO':
         return cls(id=permission.id, name=permission.name, description=permission.description)
