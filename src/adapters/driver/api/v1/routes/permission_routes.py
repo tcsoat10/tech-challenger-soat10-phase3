@@ -21,3 +21,8 @@ def _get_permission_service(db_session: Session = Depends(get_db)) -> IPermissio
 @router.post(path='/permissions', response_model=PermissionDTO, status_code=status.HTTP_201_CREATED)
 def create_permission(dto: CreatePermissionDTO, service: IPermissionService = Depends(_get_permission_service)) -> PermissionDTO:
     return service.create_permission(dto)
+
+
+@router.get(path='/permissions/{permission_name}/name', response_model=PermissionDTO, status_code=status.HTTP_200_OK)
+def get_permission_by_name(permission_name: str, service: IPermissionService = Depends(_get_permission_service)) -> PermissionDTO:
+    return service.get_permission_by_name(name=permission_name)
