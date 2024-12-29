@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from src.core.domain.entities.category import Category
 
@@ -22,7 +23,7 @@ class ICategoryRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self) -> Category:
+    def get_all(self) -> List[Category]:
         pass
 
     @abstractmethod
