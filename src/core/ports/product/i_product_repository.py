@@ -23,7 +23,7 @@ class IProductRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self) -> List[Product]:
+    def get_all(self, include_deleted: bool = False) -> List[Product]:
         pass
 
     @abstractmethod
@@ -31,7 +31,7 @@ class IProductRepository(ABC):
         pass
     
     @abstractmethod
-    def delete(self, product_id: int) -> None:
+    def delete(self, product: Product) -> None:
         pass
 
 

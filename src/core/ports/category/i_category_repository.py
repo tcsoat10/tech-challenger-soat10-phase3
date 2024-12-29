@@ -23,7 +23,7 @@ class ICategoryRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self) -> List[Category]:
+    def get_all(self, include_deleted: bool = False) -> List[Category]:
         pass
 
     @abstractmethod
@@ -31,5 +31,5 @@ class ICategoryRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, category_id: int) -> None:
+    def delete(self, category: Category) -> None:
         pass

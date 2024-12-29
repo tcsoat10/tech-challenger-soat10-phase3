@@ -198,6 +198,7 @@ def test_delete_category_and_return_success(client):
     response = client.get("/api/v1/products")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
+
     assert data == [{
         "id": product2.id,
         "name": product2.name,

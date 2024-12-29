@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from src.core.domain.entities.product import Product
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from tests.factories.category_factory import CategoryFactory
@@ -160,7 +160,7 @@ class TestProductRepository:
         product1 = ProductFactory(name="Coca-Cola", category=category1)
         product2 = ProductFactory(name="Big Mac", category=category2)
 
-        self.repository.delete(product1.id)
+        self.repository.delete(product1)
         data = self.repository.get_all()
         
         assert len(data) == 1
@@ -172,9 +172,16 @@ class TestProductRepository:
         
 
     def test_delete_product_with_inexistent_id(self):
-        category = CategoryFactory(name="Drinks")
-        ProductFactory(name="Coca-Cola", category=category)
+        category = CategoryFactory(name="Soft Drinks")
+        product = ProductFactory(name="Coca-Cola", category=category)
 
-        self.repository.delete(30)
-        
-        assert len(self.repository.get_all()) == 1
+        product_not_registered = Product(
+            id=999, name="Big Mac", description="Fast food burger", price=20.99, category=category
+        )
+
+        with pytest.raises(InvalidRequestError):
+            self.repository.delete(product_not_registered)
+
+        products = self.repository.get_all()
+        assert len(products) == 1
+        assert products[0] == product

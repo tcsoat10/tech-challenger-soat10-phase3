@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from config.database import DELETE_MODE
 from src.core.domain.dtos.product.update_product_dto import UpdateProductDTO
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
@@ -46,7 +47,7 @@ class ProductService(IProductService):
             raise EntityNotFoundException(entity_name="Product")
         return ProductDTO.from_entity(product)
 
-    def get_all_products(self) -> List[ProductDTO]:
+    def get_all_products(self, include_deleted: Optional[bool] = False) -> List[ProductDTO]:
         products = self.repository.get_all()
         return [ProductDTO.from_entity(product) for product in products]
 
@@ -69,6 +70,17 @@ class ProductService(IProductService):
         return ProductDTO.from_entity(product)
 
     def delete_product(self, product_id: int) -> None:
-        self.repository.delete(product_id)
+        product = self.repository.get_by_id(product_id)
+        if not product:
+            raise EntityNotFoundException(entity_name="Product")
+        
+        if DELETE_MODE == 'soft':
+            if product.is_deleted():
+                raise EntityNotFoundException(entity_name="Product")
+
+            product.soft_delete()
+            self.repository.update(product)
+        else:
+            self.repository.delete(product)
 
 __all__ = ["ProductService"]

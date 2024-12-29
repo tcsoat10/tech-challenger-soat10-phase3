@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from src.core.domain.dtos.product.update_product_dto import UpdateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
@@ -20,7 +20,7 @@ class IProductService(ABC):
         pass
 
     @abstractmethod
-    def get_all_products(self) -> List[ProductDTO]:
+    def get_all_products(self, include_deleted: Optional[bool] = False) -> List[ProductDTO]:
         pass
 
     @abstractmethod

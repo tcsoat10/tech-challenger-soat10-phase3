@@ -1,7 +1,8 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.core.domain.entities.category import Category
+from tests.factories.category_factory import CategoryFactory
 
 
 class TestCategoryRepository:
@@ -157,16 +158,19 @@ class TestCategoryRepository:
         """
         Testa a remoção de uma categoria.
         """
-        category = Category(name="Drinks", description="Beverages category")
-
-        created_category = self.repository.create(category)
-        self.repository.delete(created_category.id)
+        category = CategoryFactory(name="Drinks", description="Beverages category")
+        self.repository.delete(category)
 
         assert len(self.repository.get_all()) == 0
 
     def test_delete_category_with_inexistent_id(self):
-        category = Category(name="Drinks", description="Beverages category")
-        self.repository.create(category)
-        self.repository.delete(3)
+        category = CategoryFactory(name="Soft Drinks")
 
-        assert len(self.repository.get_all()) == 1
+        product_not_registered = Category(name="Drinks", description="Beverages category")
+
+        with pytest.raises(InvalidRequestError):
+            self.repository.delete(product_not_registered)
+
+        categories = self.repository.get_all()
+        assert len(categories) == 1
+        assert categories[0] == category
