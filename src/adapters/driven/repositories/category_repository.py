@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.sql import exists
 from src.core.domain.entities.category import Category
-from core.ports.category.i_category_repository import ICategoryRepository
+from src.core.ports.category.i_category_repository import ICategoryRepository
 from sqlalchemy.orm import Session
 
 class CategoryRepository(ICategoryRepository):

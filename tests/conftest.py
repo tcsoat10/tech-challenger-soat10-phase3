@@ -10,8 +10,8 @@ from alembic import command
 from src.app import app
 from config import settings
 from config.database import get_db
-from tests.factory.category_factory import CategoryFactory
-from tests.factory.product_factory import ProductFactory
+from tests.factories.category_factory import CategoryFactory
+from tests.factories.product_factory import ProductFactory
 
 
 @pytest.fixture(scope="function")
