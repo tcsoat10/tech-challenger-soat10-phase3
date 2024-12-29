@@ -8,7 +8,7 @@ from src.adapters.driven.repositories.category_repository import CategoryReposit
 from src.application.services.category_service import CategoryService
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
-from core.ports.category.i_category_repository import ICategoryRepository
+from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.core.ports.category.i_category_service import ICategoryService
 
 router = APIRouter()
