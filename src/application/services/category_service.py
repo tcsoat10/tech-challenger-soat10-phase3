@@ -5,7 +5,7 @@ from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedExce
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 from src.core.domain.entities.category import Category
-from core.ports.category.i_category_repository import ICategoryRepository
+from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.core.ports.category.i_category_service import ICategoryService
 
 
