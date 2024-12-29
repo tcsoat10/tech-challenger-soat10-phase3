@@ -1,14 +1,16 @@
+from typing import List
+
+from src.core.ports.permission.i_permission_service import IPermissionService
 from src.core.ports.permission.i_permission_repository import IPermissionRepository
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.core.domain.dtos.permission.create_permission_dto import CreatePermissionDTO
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.domain.entities.permission import Permission
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
-from typing import List
 from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
 
 
-class PermissionService(IPermissionRepository):
+class PermissionService(IPermissionService):
     def __init__(self, repository: IPermissionRepository):
         self.repository = repository
 
