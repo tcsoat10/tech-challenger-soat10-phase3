@@ -47,3 +47,32 @@ def test_create_product_duplicate_name_and_return_error(client, db_session):
 
     assert data == {"error": "Product already exists."}
 
+
+def test_get_product_by_name_and_return_success(client):
+    category1 = CategoryFactory(name="Drinks")
+    category2 = CategoryFactory(name="Fast food")
+    ProductFactory(
+        name="Coca-Cola",
+        description="Soft drink",
+        price=6.99,
+        category=category1
+    )
+    ProductFactory(
+        name="Big Mac",
+        description="Fast food burger",
+        price=20.99,
+        category=category2
+    )
+    
+    response = client.get("/api/v1/products/Big Mac/name")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert "id" in data
+    assert data["name"] == "Big Mac"
+    assert data["description"] == "Fast food burger"
+    assert data["price"] == 20.99
+    assert data["category"]["id"] == category2.id
+    assert data["category"]["name"] == category2.name
+

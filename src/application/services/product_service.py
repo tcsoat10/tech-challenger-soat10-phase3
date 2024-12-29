@@ -32,3 +32,9 @@ class ProductService(IProductService):
         product = self.repository.create(product)
         return ProductDTO.from_entity(product)
     
+    def get_product_by_name(self, name: str) -> ProductDTO:
+        product = self.repository.get_by_name(name=name)
+        if not product:
+            raise EntityNotFoundException(entity_name="Product")
+        return ProductDTO.from_entity(product)
+

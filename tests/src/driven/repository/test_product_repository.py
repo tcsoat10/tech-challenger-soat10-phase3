@@ -52,3 +52,22 @@ class TestProductRepository:
         with pytest.raises(IntegrityError):
             self.repository.create(product2)
 
+    def test_get_product_by_name_success(self):
+        category = CategoryFactory()
+        product = ProductFactory(
+            name="Cheeseburger",
+            description="A delicious cheeseburger.",
+            category=category,
+            price=39.90,
+            sla_product="Standard SLA"
+        )
+       
+        product_response = self.repository.get_by_name(product.name)
+
+        assert product_response.id is not None
+        assert product_response.name == "Cheeseburger"
+        assert product_response.description == "A delicious cheeseburger."
+        assert product_response.category_id == category.id
+        assert product_response.price == 39.90
+        assert product_response.sla_product == "Standard SLA"
+

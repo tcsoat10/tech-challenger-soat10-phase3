@@ -9,3 +9,7 @@ class IProductService(ABC):
     def create_product(self, dto: CreateProductDTO) -> ProductDTO:
         pass
 
+    @abstractmethod
+    def get_product_by_name(self, name: str) -> ProductDTO:
+        pass
+

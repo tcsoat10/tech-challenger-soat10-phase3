@@ -9,3 +9,11 @@ class IProductRepository(ABC):
     def create(category: Product):
         pass
 
+    @abstractmethod
+    def exists_by_name(self, name: str) -> bool:
+        pass
+
+    @abstractmethod
+    def get_by_name(self, name: str) -> Product:
+        pass
+

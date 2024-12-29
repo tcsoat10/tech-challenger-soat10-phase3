@@ -17,3 +17,6 @@ class ProductRepository(IProductRepository):
     def exists_by_name(self, name: str) -> bool:
         return self.db_session.query(exists().where(Product.name == name)).scalar()
 
+    def get_by_name(self, name: str) -> Product:
+        return self.db_session.query(Product).filter(Product.name == name).first()
+

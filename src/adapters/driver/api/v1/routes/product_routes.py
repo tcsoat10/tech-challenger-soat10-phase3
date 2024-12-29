@@ -23,3 +23,7 @@ def _get_product_service(db_session: Session = Depends(get_db)) -> IProductServi
 def create_product(dto: CreateProductDTO, service: IProductService = Depends(_get_product_service)):
     return service.create_product(dto)
 
+@router.get("/products/{product_name}/name", response_model=ProductDTO, status_code=status.HTTP_200_OK)
+def get_product_by_name(product_name: str, service: IProductService = Depends(_get_product_service)):
+    return service.get_product_by_name(name=product_name)
+
