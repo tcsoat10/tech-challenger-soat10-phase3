@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from config.database import get_db
 from src.core.ports.permission.i_permission_service import IPermissionService
@@ -31,3 +32,9 @@ def get_permission_by_name(permission_name: str, service: IPermissionService = D
 @router.get(path='/permissions/{permission_id}/id', response_model=PermissionDTO, status_code=status.HTTP_200_OK)
 def get_permission_by_id(permission_id: int, service: IPermissionService = Depends(_get_permission_service)):
     return service.get_permission_by_id(permission_id)
+
+
+@router.get(path='/permissions', response_model=List[PermissionDTO])
+def get_all_permissions(service: IPermissionService = Depends(_get_permission_service)):
+    return service.get_all_permissions()
+    
