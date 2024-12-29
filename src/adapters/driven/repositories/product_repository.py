@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
 from src.core.domain.entities.product import Product
@@ -22,4 +23,7 @@ class ProductRepository(IProductRepository):
 
     def get_by_id(self, product_id: int) -> Product:
         return self.db_session.query(Product).filter(Product.id == product_id).first()
+
+    def get_all(self) -> List[Product]:
+        return self.db_session.query(Product).all()
 

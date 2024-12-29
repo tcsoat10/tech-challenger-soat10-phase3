@@ -31,3 +31,7 @@ def get_product_by_name(product_name: str, service: IProductService = Depends(_g
 def get_product_by_id(product_id: int, service: IProductService = Depends(_get_product_service)):
     return service.get_product_by_id(product_id=product_id)
 
+@router.get("/products", response_model=list[ProductDTO])
+def get_all_products(service: IProductService = Depends(_get_product_service)):
+    return service.get_all_products()
+

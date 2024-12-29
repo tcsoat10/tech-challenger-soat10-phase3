@@ -1,3 +1,4 @@
+from typing import List
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
@@ -43,4 +44,8 @@ class ProductService(IProductService):
         if not product:
             raise EntityNotFoundException(entity_name="Product")
         return ProductDTO.from_entity(product)
+
+    def get_all_products(self) -> List[ProductDTO]:
+        products = self.repository.get_all()
+        return [ProductDTO.from_entity(product) for product in products]
 

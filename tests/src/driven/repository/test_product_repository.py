@@ -76,7 +76,7 @@ class TestProductRepository:
         category = self.repository.get_by_name("no name")
         assert category is None
     
-    def test_get_category_by_id_success(self):
+    def test_get_product_by_id_success(self):
         category = CategoryFactory()
         product = ProductFactory(
             name="Cheeseburger",
@@ -100,4 +100,27 @@ class TestProductRepository:
         ProductFactory()
         category = self.repository.get_by_id(product_id=1)
         assert category is None
+
+    def test_get_all_products_return_success(self):
+        category1 = CategoryFactory(name="Drinks")
+        category2 = CategoryFactory(name="Fast food")
+        product1 = ProductFactory(
+            name="Coca-Cola",
+            description="Soft drink",
+            price=6.99,
+            category=category1
+        )
+        product2 = ProductFactory(
+            name="Big Mac",
+            description="Fast food burger",
+            price=20.99,
+            category=category2
+        )
+        
+        products = self.repository.get_all()
+       
+        assert products == [
+            product1,
+            product2,
+        ]
 
