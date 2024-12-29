@@ -10,6 +10,8 @@ from alembic import command
 from src.app import app
 from config import settings
 from config.database import get_db
+from tests.factory.category_factory import CategoryFactory
+from tests.factory.product_factory import ProductFactory
 
 
 @pytest.fixture(scope="function")
@@ -131,3 +133,12 @@ def client(db_session) -> Generator[TestClient, None, None]:
     """
     with TestClient(app) as test_client:
         yield test_client
+
+@pytest.fixture(scope="function", autouse=True)
+def setup_factories(db_session):
+    """
+    Configura as factories para usar a sessão do banco de dados de teste.
+    """
+
+    CategoryFactory._meta.sqlalchemy_session = db_session
+    ProductFactory._meta.sqlalchemy_session = db_session
