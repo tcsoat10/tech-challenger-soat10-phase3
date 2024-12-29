@@ -41,7 +41,7 @@ def test_create_category_name_great_than_limit_and_return_error(client):
     payload = {"name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "description": "Beverages category"}
     response = client.post("/api/v1/categories", json=payload)
 
-    assert response.status_code == status.HTTP_422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 def test_get_category_by_name_and_return_success(client):
     client.post("/api/v1/categories", json={"name": "Drinks", "description": "Beverages category"})
