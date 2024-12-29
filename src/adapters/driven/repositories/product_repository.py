@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
 from src.core.domain.entities.product import Product
@@ -17,3 +18,22 @@ class ProductRepository(IProductRepository):
     def exists_by_name(self, name: str) -> bool:
         return self.db_session.query(exists().where(Product.name == name)).scalar()
 
+    def get_by_name(self, name: str) -> Product:
+        return self.db_session.query(Product).filter(Product.name == name).first()
+
+    def get_by_id(self, product_id: int) -> Product:
+        return self.db_session.query(Product).filter(Product.id == product_id).first()
+
+    def get_all(self) -> List[Product]:
+        return self.db_session.query(Product).all()
+
+    def update(self, product: Product) -> Product:
+        self.db_session.merge(product)
+        self.db_session.commit()
+        return product
+
+    def delete(self, product_id: int) -> None:
+        product = self.get_by_id(product_id)
+        if product:
+            self.db_session.delete(product)
+            self.db_session.commit()
