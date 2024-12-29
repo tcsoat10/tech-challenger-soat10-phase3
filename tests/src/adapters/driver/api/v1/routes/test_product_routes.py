@@ -186,3 +186,26 @@ def test_update_product_and_return_success(client):
         },
     }
 
+def test_delete_category_and_return_success(client):
+    category1 = CategoryFactory(name="Drinks")
+    category2 = CategoryFactory(name="Fast food")
+    product1 = ProductFactory(name="Coca-Cola", category=category1)
+    product2 = ProductFactory(name="Big Mac", category=category2)
+
+    response = client.delete(f"/api/v1/products/{product1.id}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get("/api/v1/products")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data == [{
+        "id": product2.id,
+        "name": product2.name,
+        "description": product2.description,
+        "price": product2.price,
+        "category": {
+            "id": product2.category.id,
+            "name": product2.category.name,
+            "description": product2.category.description,
+        },
+    }]

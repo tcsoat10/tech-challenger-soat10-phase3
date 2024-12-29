@@ -154,3 +154,27 @@ class TestProductRepository:
         assert data.price == product.price
         assert data.category_id == product.category_id
 
+    def test_delete_product(self):
+        category1 = CategoryFactory(name="Drinks")
+        category2 = CategoryFactory(name="Fast food")
+        product1 = ProductFactory(name="Coca-Cola", category=category1)
+        product2 = ProductFactory(name="Big Mac", category=category2)
+
+        self.repository.delete(product1.id)
+        data = self.repository.get_all()
+        
+        assert len(data) == 1
+        assert data[0].id == product2.id
+        assert data[0].name == product2.name
+        assert data[0].description == product2.description
+        assert data[0].price == product2.price
+        assert data[0].category_id == product2.category_id
+        
+
+    def test_delete_product_with_inexistent_id(self):
+        category = CategoryFactory(name="Drinks")
+        ProductFactory(name="Coca-Cola", category=category)
+
+        self.repository.delete(30)
+        
+        assert len(self.repository.get_all()) == 1

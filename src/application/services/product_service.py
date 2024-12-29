@@ -68,3 +68,7 @@ class ProductService(IProductService):
 
         return ProductDTO.from_entity(product)
 
+    def delete_product(self, product_id: int) -> None:
+        self.repository.delete(product_id)
+
+__all__ = ["ProductService"]

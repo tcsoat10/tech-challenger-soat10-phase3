@@ -30,3 +30,9 @@ class IProductRepository(ABC):
     def update(self, product: Product) -> Product:
         pass
     
+    @abstractmethod
+    def delete(self, product_id: int) -> None:
+        pass
+
+
+__all__ = ["IProductRepository"]

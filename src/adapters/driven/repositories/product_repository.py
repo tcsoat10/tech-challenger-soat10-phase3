@@ -32,3 +32,8 @@ class ProductRepository(IProductRepository):
         self.db_session.commit()
         return product
 
+    def delete(self, product_id: int) -> None:
+        product = self.get_by_id(product_id)
+        if product:
+            self.db_session.delete(product)
+            self.db_session.commit()

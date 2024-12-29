@@ -27,3 +27,6 @@ class IProductService(ABC):
     def update_product(self, product_id: int, dto: UpdateProductDTO) -> ProductDTO:
         pass
 
+    @abstractmethod
+    def delete_product(self, product_id: int) -> None:
+        pass

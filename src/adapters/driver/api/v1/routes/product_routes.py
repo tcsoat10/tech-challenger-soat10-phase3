@@ -40,3 +40,6 @@ def get_all_products(service: IProductService = Depends(_get_product_service)):
 def update_product(product_id: int, dto: UpdateProductDTO, service: IProductService = Depends(_get_product_service)):
     return service.update_product(product_id, dto)
 
+@router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(product_id: int, service: IProductService = Depends(_get_product_service)):
+    service.delete_product(product_id)
