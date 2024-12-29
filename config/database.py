@@ -19,6 +19,8 @@ DATABASE_URL = (
     f"{DATABASE['host']}:{DATABASE['port']}/{DATABASE['name']}"
 )
 
+DELETE_MODE = os.getenv("DELETE_MODE", "soft")
+
 # Criar o motor do SQLAlchemy
 engine = create_engine(DATABASE_URL, echo=True)
 

@@ -40,4 +40,14 @@ class BaseEntity(DeclarativeBase):
     def from_json(cls: Type[T], json_data: Dict[str, Any]) -> T:
         return cls(**json_data)
 
+    def soft_delete(self):
+        self.inactivated_at = datetime.now()
+
+    def is_deleted(self):
+        return self.inactivated_at is not None
+    
+    def __repr__(self):
+        attributes = ", ".join(f"{key}={value!r}" for key, value in vars(self).items() if not key.startswith("_"))
+        return f"<{self.__class__.__name__}({attributes})>"
+
 __all__ = ["BaseEntity"]

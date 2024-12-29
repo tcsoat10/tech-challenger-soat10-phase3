@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.core.domain.dtos.category.category_dto import CategoryDTO
@@ -21,7 +21,7 @@ class ICategoryService(ABC):
         pass
 
     @abstractmethod
-    def get_all_categories(self) -> List[CategoryDTO]:
+    def get_all_categories(self, include_deleted: Optional[bool] = False) -> List[CategoryDTO]:
         pass
 
     @abstractmethod

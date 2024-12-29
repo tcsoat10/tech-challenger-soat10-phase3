@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from config.database import DELETE_MODE
 from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
@@ -34,8 +35,8 @@ class CategoryService(ICategoryService):
             raise EntityNotFoundException(entity_name="Category")
         return CategoryDTO.from_entity(category)
 
-    def get_all_categories(self) -> List[CategoryDTO]:
-        categories = self.repository.get_all()
+    def get_all_categories(self, include_deleted: Optional[bool] = False) -> List[CategoryDTO]:
+        categories = self.repository.get_all(include_deleted=include_deleted)
         return [CategoryDTO.from_entity(category) for category in categories]
 
     def update_category(self, category_id: int, dto: UpdateCategoryDTO) -> CategoryDTO:
@@ -49,6 +50,17 @@ class CategoryService(ICategoryService):
         return CategoryDTO.from_entity(updated_category)
 
     def delete_category(self, category_id: int) -> None:
-        self.repository.delete(category_id)
+        category = self.repository.get_by_id(category_id)
+        if not category:
+            raise EntityNotFoundException(entity_name="Category")
+        
+        if DELETE_MODE == 'soft':
+            if category.is_deleted():
+                raise EntityNotFoundException(entity_name="Category")
+
+            category.soft_delete()
+            self.repository.update(category)
+        else:
+            self.repository.delete(category)
 
 __all__ = ["CategoryService"]

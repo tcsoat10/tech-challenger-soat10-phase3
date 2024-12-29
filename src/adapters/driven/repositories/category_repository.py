@@ -24,16 +24,17 @@ class CategoryRepository(ICategoryRepository):
     def get_by_id(self, category_id: int) -> Category:
         return self.db_session.query(Category).filter(Category.id == category_id).first()
 
-    def get_all(self) -> List[Category]:
-        return self.db_session.query(Category).all()
+    def get_all(self, include_deleted: bool = False) -> List[Category]:
+        query = self.db_session.query(Category)
+        if not include_deleted:
+            query = query.filter(Category.inactivated_at.is_(None))
+        return query.all()
 
     def update(self, category: Category) -> Category:
         self.db_session.merge(category)
         self.db_session.commit()
         return category
 
-    def delete(self, category_id: int) -> None:
-        category = self.get_by_id(category_id)
-        if category:
-            self.db_session.delete(category)
-            self.db_session.commit()
+    def delete(self, category: Category) -> None:
+        self.db_session.delete(category)
+        self.db_session.commit()

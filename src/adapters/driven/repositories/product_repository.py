@@ -24,16 +24,17 @@ class ProductRepository(IProductRepository):
     def get_by_id(self, product_id: int) -> Product:
         return self.db_session.query(Product).filter(Product.id == product_id).first()
 
-    def get_all(self) -> List[Product]:
-        return self.db_session.query(Product).all()
+    def get_all(self, include_deleted: bool = False) -> List[Product]:
+        query = self.db_session.query(Product)
+        if not include_deleted:
+            query = query.filter(Product.inactivated_at.is_(None))
+        return query.all()
 
     def update(self, product: Product) -> Product:
         self.db_session.merge(product)
         self.db_session.commit()
         return product
 
-    def delete(self, product_id: int) -> None:
-        product = self.get_by_id(product_id)
-        if product:
-            self.db_session.delete(product)
-            self.db_session.commit()
+    def delete(self, product: Product) -> None:
+        self.db_session.delete(product)
+        self.db_session.commit()
