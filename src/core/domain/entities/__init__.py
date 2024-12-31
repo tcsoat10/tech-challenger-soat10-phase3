@@ -7,6 +7,7 @@ from .permission import Permission
 __all__ = [
     "BaseEntity",
     "Category",
-    "Product"
     "Permission",
+    "Product",
+    "Profile",    
 ]
