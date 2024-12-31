@@ -7,3 +7,5 @@ class Profile(BaseEntity):
 
     name = Column(String(100), nullable=False, unique=True)
     description = Column(String(300))
+
+__all__ = ["Profile"]
