@@ -48,7 +48,7 @@ class ProductService(IProductService):
         return ProductDTO.from_entity(product)
 
     def get_all_products(self, include_deleted: Optional[bool] = False) -> List[ProductDTO]:
-        products = self.repository.get_all()
+        products = self.repository.get_all(include_deleted=include_deleted)
         return [ProductDTO.from_entity(product) for product in products]
 
     def update_product(self, product_id: int, dto: UpdateProductDTO) -> ProductDTO:
