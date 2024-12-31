@@ -7,7 +7,7 @@ from src.core.domain.entities.product import Product
 class IProductRepository(ABC):
     
     @abstractmethod
-    def create(category: Product):
+    def create(product: Product):
         pass
 
     @abstractmethod
