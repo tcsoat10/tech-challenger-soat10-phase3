@@ -5,6 +5,7 @@ from src.adapters.driver.api.v1.routes.health_check import router as health_chec
 from src.adapters.driver.api.v1.routes.category_routes import router as category_routes
 from src.adapters.driver.api.v1.routes.product_routes import router as product_routes
 from src.adapters.driver.api.v1.routes.permission_routes import router as permission_routes
+from src.adapters.driver.api.v1.routes.profile_routes import router as profile_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
@@ -20,3 +21,4 @@ app.include_router(health_check_router, prefix="/api/v1")
 app.include_router(category_routes, prefix="/api/v1", tags=["categories"])
 app.include_router(product_routes, prefix="/api/v1", tags=["products"])
 app.include_router(permission_routes, prefix="/api/v1", tags=["permissions"])
+app.include_router(profile_routes, prefix="/api/v1", tags=["profiles"])
