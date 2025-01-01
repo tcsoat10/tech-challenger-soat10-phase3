@@ -3,7 +3,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyInteger
 from faker import Faker
 
-from src.core.domain.entities.order_item_model import OrderItem
+from src.core.domain.entities.order_item import OrderItem
 from tests.factories.product_factory import ProductFactory
 
 fake = Faker()

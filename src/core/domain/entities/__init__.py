@@ -3,7 +3,7 @@ from .category import Category
 from .product import Product
 from .permission import Permission
 from .profile import Profile
-from .order_item_model import OrderItem
+from .order_item import OrderItem
 
 __all__ = [
     "BaseEntity",
