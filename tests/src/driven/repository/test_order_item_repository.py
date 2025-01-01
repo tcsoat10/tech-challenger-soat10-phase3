@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from src.core.domain.entities.order_item_model import OrderItem
+from src.core.domain.entities.order_item import OrderItem
 from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
 from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.product_factory import ProductFactory

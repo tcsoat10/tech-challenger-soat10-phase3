@@ -1,6 +1,6 @@
 from typing import List
-from src.core.domain.entities.order_item_model import OrderItem
-from src.core.ports.item_order.i_order_item_repository import IOrderItemRepository
+from src.core.domain.entities.order_item import OrderItem
+from src.core.ports.order_item.i_order_item_repository import IOrderItemRepository
 from sqlalchemy.orm import Session
 
 

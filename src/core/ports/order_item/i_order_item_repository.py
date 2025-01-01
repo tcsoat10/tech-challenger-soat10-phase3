@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.core.domain.entities.order_item_model import OrderItem
+from src.core.domain.entities.order_item import OrderItem
 
 
 class IOrderItemRepository(ABC):
