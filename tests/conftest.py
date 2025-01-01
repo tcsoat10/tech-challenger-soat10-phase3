@@ -11,6 +11,7 @@ from src.app import app
 from config import settings
 from config.database import get_db
 from tests.factories.category_factory import CategoryFactory
+from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.product_factory import ProductFactory
 
 
@@ -142,3 +143,4 @@ def setup_factories(db_session):
 
     CategoryFactory._meta.sqlalchemy_session = db_session
     ProductFactory._meta.sqlalchemy_session = db_session
+    OrderItemFactory._meta.sqlalchemy_session = db_session

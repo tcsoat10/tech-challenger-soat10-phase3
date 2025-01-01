@@ -22,6 +22,8 @@ RUN poetry install --no-interaction --no-ansi
 
 COPY . .
 
+RUN chmod +x /app/config/init_db/init_db.sh
+
 ARG PORT=8000
 ENV PORT=${PORT}
 EXPOSE ${PORT}
