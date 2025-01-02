@@ -4,6 +4,7 @@ from .product import Product
 from .permission import Permission
 from .profile import Profile
 from .order_item import OrderItem
+from .profile_permission import ProfilePermission
 
 __all__ = [
     "BaseEntity",
@@ -11,5 +12,6 @@ __all__ = [
     "Permission",
     "Profile",
     "Product",
-    "OrderItem"
+    "OrderItem",
+    "ProfilePermission",
 ]
