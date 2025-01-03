@@ -13,6 +13,8 @@ from config.database import get_db
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.product_factory import ProductFactory
+from tests.factories.permission_factory import PermissionFactory
+from tests.factories.profile_factory import ProfileFactory
 
 
 @pytest.fixture(scope="function")
@@ -144,3 +146,6 @@ def setup_factories(db_session):
     CategoryFactory._meta.sqlalchemy_session = db_session
     ProductFactory._meta.sqlalchemy_session = db_session
     OrderItemFactory._meta.sqlalchemy_session = db_session
+    PermissionFactory._meta.sqlalchemy_session = db_session
+    ProfileFactory._meta.sqlalchemy_session = db_session
+
