@@ -117,3 +117,74 @@ def test_get_all_profile_permissions_return_success(client):
             }
         }
     ]
+
+
+def test_update_profile_permission_and_return_success(client):
+    permission = PermissionFactory()
+    profile_permission = ProfilePermissionFactory()
+
+    payload = [{
+        'id': profile_permission.id,
+        'permission': {
+            'id': permission.id,
+            'name': permission.name,
+            'description': permission.description
+        },
+        'profile': {
+            'id': profile_permission.profile.id,
+            'name': profile_permission.profile.name,
+            'description': profile_permission.profile.description
+        }
+    }]
+
+    payload = {
+        'id': profile_permission.id,
+        'permission_id': permission.id,
+        'profile_id': profile_permission.profile.id
+    }
+    
+    response = client.put(f'/api/v1/profile_permissions/{profile_permission.id}', json=payload)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data == {
+        'id': profile_permission.id,
+        'permission': {
+            'id': permission.id,
+            'name': permission.name,
+            'description': permission.description
+        },
+        'profile': {
+            'id': profile_permission.profile.id,
+            'name': profile_permission.profile.name,
+            'description': profile_permission.profile.description
+        }
+    }
+
+
+def test_delete_profile_permission_and_return_success(client):
+    profile_permission1 = ProfilePermissionFactory()
+    profile_permission2 = ProfilePermissionFactory()
+
+    response = client.delete(f'api/v1/profile_permissions/{profile_permission1.id}')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get('/api/v1/profile_permissions')
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+
+    assert data == [{
+        'id': profile_permission2.id,
+        'permission': {
+            'id': profile_permission2.permission.id,
+            'name': profile_permission2.permission.name,
+            'description': profile_permission2.permission.description
+        },
+        'profile': {
+            'id': profile_permission2.profile.id,
+            'name': profile_permission2.profile.name,
+            'description': profile_permission2.profile.description
+        }
+    }]
+    
