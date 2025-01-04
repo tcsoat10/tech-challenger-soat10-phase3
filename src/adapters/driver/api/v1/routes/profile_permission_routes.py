@@ -13,6 +13,7 @@ from src.adapters.driven.repositories.profile_repository import ProfileRepositor
 from src.application.services.profile_permission_service import ProfilePermissionService
 from src.core.domain.dtos.profile_permission.profile_permission_dto import ProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.create_profile_permission_dto import CreateProfilePermissionDTO
+from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
 
 
 router = APIRouter()
@@ -48,3 +49,13 @@ def get_profile_permission_by_profile_id(profile_id: int, service: IProfilePermi
 @router.get('/profile_permissions', response_model=List[ProfilePermissionDTO])
 def get_all_profile_permissions(include_deleted: Optional[bool] = False, service: IProfilePermissionService = Depends(_get_profile_permission_service)):
     return service.get_all_profile_permissions(include_deleted=include_deleted)
+
+
+@router.put('/profile_permissions/{profile_permission_id}', response_model=ProfilePermissionDTO)
+def update_profile_permission(profile_permission_id: int, dto: UpdateProfilePermissionDTO, service: IProfilePermissionService = Depends(_get_profile_permission_service)):
+    return service.update_profile_permission(profile_permission_id, dto)
+
+
+@router.delete('/profile_permissions/{profile_permission_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_profile_permission(profile_permission_id: int, service: IProfilePermissionService = Depends(_get_profile_permission_service)):
+    service.delete_profile_permission(profile_permission_id)
