@@ -2,6 +2,7 @@ from src.core.ports.profile_permission.i_profile_permission_repository import IP
 from src.core.domain.entities.profile_permission import ProfilePermission
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import exists
 from typing import List
 
 
@@ -14,6 +15,9 @@ class ProfilePermissionRepository(IProfilePermissionRepository):
         self.db_session.commit()
         self.db_session.refresh(profile_permission)
         return profile_permission
+    
+    def exists_by_permission_id_and_profile_id(self, permission_id: int, profile_id: int) -> bool:
+        return self.db_session.query(exists().where(ProfilePermission.permission_id == permission_id and ProfilePermission.profile_id == profile_id)).scalar()
     
     def get_by_id(self, profile_permission_id: int) -> ProfilePermission:
         return self.db_session.query(ProfilePermission).filter(ProfilePermission.id == profile_permission_id).first()

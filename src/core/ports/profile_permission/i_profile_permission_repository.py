@@ -8,6 +8,9 @@ class IProfilePermissionRepository(ABC):
     @abstractmethod
     def create(profile_permission: ProfilePermission):
         pass
+
+    def exists_by_permission_id_and_profile_id(self, permission_id: int, profile_id: int) -> bool:
+        pass
     
     @abstractmethod
     def get_by_id(self, profile_permission_id: int) -> ProfilePermission:
