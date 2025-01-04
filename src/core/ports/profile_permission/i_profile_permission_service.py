@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from src.core.domain.dtos.profile_permission.create_profile_permission_dto import CreateProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.profile_permission_dto import ProfilePermissionDTO
+from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
 
 
 class IProfilePermissionService(ABC):
@@ -20,4 +21,10 @@ class IProfilePermissionService(ABC):
         pass
 
     def get_all_profile_permissions(self, include_deleted: Optional[bool] = False) -> List[ProfilePermissionDTO]:
+        pass
+
+    def update_profile_permission(self, profile_permission_id: int, dto: UpdateProfilePermissionDTO) -> ProfilePermissionDTO:
+        pass
+
+    def delete_profile_permission(self, profile_permission_id: int) -> None:
         pass
