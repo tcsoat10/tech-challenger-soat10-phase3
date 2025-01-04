@@ -7,6 +7,7 @@ from src.adapters.driver.api.v1.routes.product_routes import router as product_r
 from src.adapters.driver.api.v1.routes.permission_routes import router as permission_routes
 from src.adapters.driver.api.v1.routes.profile_routes import router as profile_routes
 from src.adapters.driver.api.v1.routes.order_item_routes import router as order_item_routes
+from src.adapters.driver.api.v1.routes.profile_permission_routes import router as profile_permission_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
@@ -24,3 +25,4 @@ app.include_router(product_routes, prefix="/api/v1", tags=["products"])
 app.include_router(order_item_routes, prefix="/api/v1", tags=["order-items"])
 app.include_router(permission_routes, prefix="/api/v1", tags=["permissions"])
 app.include_router(profile_routes, prefix="/api/v1", tags=["profiles"])
+app.include_router(profile_permission_routes, prefix='/api/v1', tags=['profile_permissions'])
