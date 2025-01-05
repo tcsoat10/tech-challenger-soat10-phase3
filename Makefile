@@ -1,3 +1,9 @@
+poetry_install_dev:
+	poetry install --with test --sync
+
+poetry_install:
+	poetry install --sync
+
 build:
 	docker compose build
 

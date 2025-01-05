@@ -5,6 +5,7 @@ from .permission import Permission
 from .profile import Profile
 from .order_item import OrderItem
 from .profile_permission import ProfilePermission
+from .payment_method import PaymentMethod
 
 __all__ = [
     "BaseEntity",
@@ -14,4 +15,5 @@ __all__ = [
     "Product",
     "OrderItem",
     "ProfilePermission",
+    "PaymentMethod",
 ]

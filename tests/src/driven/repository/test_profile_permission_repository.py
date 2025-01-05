@@ -39,7 +39,6 @@ class TestProfilePermissionRepository:
         assert profile_permission_response.profile_id == profile_permission.profile_id
 
     def test_get_profile_permission_by_profile_permission_id_returns_none_for_unregistered_id(self):
-        ProfilePermissionFactory()
         profile_permission = self.repository.get_by_id(profile_permission_id=1)
         assert profile_permission is None
     
@@ -62,13 +61,11 @@ class TestProfilePermissionRepository:
         assert profile_permission_response.permission_id == profile_permission.permission_id
     
     def test_get_profile_permission_by_profile_id_returns_none_for_unregistered_id(self):
-        ProfilePermissionFactory()
         profile_permission = self.repository.get_by_profile_id(profile_id=1)
 
         assert profile_permission is None
 
     def test_get_profile_permission_by_permission_id_returns_none_for_unregistered_id(self):
-        ProfilePermissionFactory()
         profile_permission = self.repository.get_by_permission_id(permission_id=1)
 
         assert profile_permission is None

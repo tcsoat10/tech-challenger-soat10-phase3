@@ -1,0 +1,64 @@
+from typing import Optional
+from config.database import DELETE_MODE
+from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
+from src.core.domain.entities.payment_method import PaymentMethod
+from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
+from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
+from src.core.domain.dtos.payment_method.update_payment_method_dto import UpdatePaymentMethodDTO
+from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
+from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
+from src.core.ports.payment_method.i_payment_method_service import IPaymentMethodService
+
+
+class PaymentMethodService(IPaymentMethodService):
+    def __init__(self, payment_method_repository: IPaymentMethodRepository):
+        self.repository = payment_method_repository
+
+    def create_payment_method(self, dto: CreatePaymentMethodDTO):
+        if self.repository.exists_by_name(dto.name):
+            raise EntityDuplicatedException("Payment method")
+
+        payment_method = PaymentMethod.from_json(dto.__dict__)
+
+        payment_method = self.repository.create(payment_method)
+        return PaymentMethodDTO.from_entity(payment_method)
+
+    def get_payment_method_by_name(self, name):
+        payment_method = self.repository.get_by_name(name)
+        return PaymentMethodDTO.from_entity(payment_method)
+
+    def get_payment_method_by_id(self, payment_method_id):
+        payment_method = self.repository.get_by_id(payment_method_id)
+        return PaymentMethodDTO.from_entity(payment_method)
+
+    def get_all_payment_methods(self, include_deleted: Optional[bool] = False):
+        payment_methods = self.repository.get_all(include_deleted=include_deleted)
+        return [PaymentMethodDTO.from_entity(payment_method) for payment_method in payment_methods]
+
+    def update_payment_method(self, payment_method_id, dto: UpdatePaymentMethodDTO):
+        payment_method = self.repository.get_by_id(payment_method_id)
+        if not payment_method:
+            raise EntityNotFoundException(entity_name='Payment method')
+
+        if self.repository.exists_by_name(dto.name):
+            raise EntityDuplicatedException(entity_name='Payment method')
+
+        payment_method.name = dto.name
+        payment_method.description = dto.description
+        payment_method = self.repository.update(payment_method)
+        return PaymentMethodDTO.from_entity(payment_method)
+
+    def delete_payment_method(self, payment_method_id):
+        payment_method = self.repository.get_by_id(payment_method_id)
+        
+        if not payment_method:
+            raise EntityNotFoundException(entity_name='Payment method')
+        
+        if DELETE_MODE == 'soft':
+            if payment_method.is_deleted():
+                raise EntityNotFoundException(entity_name="Payment method")
+
+            payment_method.soft_delete()
+            self.repository.update(payment_method)
+        else:
+            self.repository.delete(payment_method)

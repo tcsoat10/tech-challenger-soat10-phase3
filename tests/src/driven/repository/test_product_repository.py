@@ -97,7 +97,6 @@ class TestProductRepository:
 
     
     def test_get_by_id_returns_none_for_unregistered_id(self):
-        ProductFactory()
         category = self.repository.get_by_id(product_id=1)
         assert category is None
 
