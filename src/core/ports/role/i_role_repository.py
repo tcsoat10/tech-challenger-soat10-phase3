@@ -28,3 +28,7 @@ class IRoleRepository(ABC):
     @abstractmethod
     def delete(self, role_id: int) -> None:
         pass
+
+    @abstractmethod
+    def exists_by_name(self, name: str) -> bool:
+        pass

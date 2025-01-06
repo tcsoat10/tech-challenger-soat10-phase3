@@ -3,6 +3,7 @@ from src.core.domain.entities.role import Role
 
 from sqlalchemy.orm import Session
 from typing import List
+from sqlalchemy.sql import exists
 
 
 class RoleRepository(IRoleRepository):
@@ -34,3 +35,6 @@ class RoleRepository(IRoleRepository):
         if role:
             self.db_session.delete(role)
             self.db_session.commit()
+
+    def exists_by_name(self, name: str) -> bool:
+        return self.db_session.query(exists().where(Role.name == name)).scalar()
