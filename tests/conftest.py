@@ -158,6 +158,7 @@ def setup_factories(db_session):
         ProfileFactory,
         ProfilePermissionFactory,
         PaymentMethodFactory,
+        RoleFactory
     ]
 
     for factory in factories:
