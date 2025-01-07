@@ -13,11 +13,19 @@ class RoleService(IRoleService):
         self.repository = repository
 
     def create_role(self, dto: CreateRoleDTO) -> RoleDTO:
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException(entity_name='Role')
-        
-        role = Role(name=dto.name, description=dto.description)
-        role = self.repository.create(role)
+        role = self.repository.get_by_name(dto.name)
+        if role:
+            if not role.is_deleted():
+                raise EntityDuplicatedException(entity_name='Role')
+            
+            role.name = dto.name
+            role.description = dto.description
+            role.reactivate()
+            self.repository.update(role)
+        else:
+            role = Role(name=dto.name, description=dto.description)
+            role = self.repository.create(role)
+
         return RoleDTO.from_entity(role)
 
     def get_role_by_name(self, name: str) -> RoleDTO:
