@@ -7,6 +7,7 @@ from .order_item import OrderItem
 from .profile_permission import ProfilePermission
 from .payment_method import PaymentMethod
 from .role import Role
+from .payment_status import PaymentStatus
 
 __all__ = [
     "BaseEntity",
@@ -17,5 +18,6 @@ __all__ = [
     "OrderItem",
     "ProfilePermission",
     "PaymentMethod",
-    "Role"
+    "Role",
+    "PaymentStatus",
 ]

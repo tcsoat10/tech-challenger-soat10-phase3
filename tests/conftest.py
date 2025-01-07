@@ -13,6 +13,7 @@ from config.database import get_db
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.payment_method_factory import PaymentMethodFactory
+from tests.factories.payment_status_factory import PaymentStatusFactory
 from tests.factories.product_factory import ProductFactory
 from tests.factories.permission_factory import PermissionFactory
 from tests.factories.profile_factory import ProfileFactory
@@ -158,7 +159,8 @@ def setup_factories(db_session):
         ProfileFactory,
         ProfilePermissionFactory,
         PaymentMethodFactory,
-        RoleFactory
+        RoleFactory,
+        PaymentStatusFactory,
     ]
 
     for factory in factories:
