@@ -15,12 +15,19 @@ class PaymentMethodService(IPaymentMethodService):
         self.repository = payment_method_repository
 
     def create_payment_method(self, dto: CreatePaymentMethodDTO):
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException("Payment method")
+        payment_method = self.repository.get_by_name(dto.name)
+        if payment_method:
+            if not payment_method.is_deleted():
+                raise EntityDuplicatedException("Payment method")
 
-        payment_method = PaymentMethod.from_json(dto.__dict__)
+            payment_method.name = dto.name
+            payment_method.description = dto.description
+            payment_method.reactivate()
+            self.repository.update(payment_method)
+        else:
+            payment_method = PaymentMethod(name=dto.name, description=dto.description)
+            payment_method = self.repository.create(payment_method)
 
-        payment_method = self.repository.create(payment_method)
         return PaymentMethodDTO.from_entity(payment_method)
 
     def get_payment_method_by_name(self, name):
