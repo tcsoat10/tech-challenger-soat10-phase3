@@ -15,11 +15,19 @@ class ProfileService(IProfileService):
         self.repository = repository
 
     def create_profile(self, dto: CreateProfileDTO) -> ProfileDTO:
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException(entity_name='Profile')
-        
-        profile = Profile(name=dto.name, description=dto.description)
-        profile = self.repository.create(profile)
+        profile = self.repository.get_by_name(dto.name)
+        if profile:
+            if not profile.is_deleted():
+                raise EntityDuplicatedException(entity_name='Profile')
+            
+            profile.name = dto.name
+            profile.description = dto.description
+            profile.reactivate()
+            self.repository.update(profile)
+        else:
+            profile = Profile(name=dto.name, description=dto.description)
+            profile = self.repository.create(profile)
+
         return ProfileDTO.from_entity(profile)
     
     def get_profile_by_name(self, name: str) -> ProfileDTO:
