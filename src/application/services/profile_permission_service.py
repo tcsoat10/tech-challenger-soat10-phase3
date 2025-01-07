@@ -20,9 +20,6 @@ class ProfilePermissionService(IProfilePermissionService):
         self.profile_repository = profile_repository
 
     def create_profile_permission(self, dto: CreateProfilePermissionDTO) -> ProfilePermissionDTO:
-        if self.repository.exists_by_permission_id_and_profile_id(dto.permission_id, dto.profile_id):
-            raise EntityDuplicatedException(entity_name='Profile Permission')
-        
         permission = self.permission_repository.get_by_id(permission_id=dto.permission_id)
         if not permission:
             raise EntityNotFoundException(entity_name='Permission')
@@ -31,9 +28,19 @@ class ProfilePermissionService(IProfilePermissionService):
         if not profile:
             raise EntityNotFoundException(entity_name='Profile')
         
-        profile_permission = ProfilePermission(permission=permission, profile=profile)
- 
-        profile_permission = self.repository.create(profile_permission)
+        profile_permission = self.repository.get_by_permission_id_and_profile_id(dto.permission_id, dto.profile_id)
+        if profile_permission:
+            if not profile_permission.is_deleted():
+                raise EntityDuplicatedException(entity_name='Profile Permission')
+            
+            profile_permission.permission = permission
+            profile_permission.profile = profile
+            profile_permission.reactivate()
+            self.repository.update(profile_permission)
+        else:
+            profile_permission = ProfilePermission(permission=permission, profile=profile)
+            profile_permission = self.repository.create(profile_permission)
+        
         return ProfilePermissionDTO.from_entity(profile_permission)
     
     def get_profile_permission_by_id(self, profile_permission_id: int) -> ProfilePermissionDTO:

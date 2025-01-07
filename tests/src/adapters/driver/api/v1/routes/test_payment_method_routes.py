@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import status
 
 import pytest
@@ -30,6 +31,20 @@ def test_create_payment_method_duplicate_name_and_return_error(client):
     data = response.json()
 
     assert data == {'error': 'Payment method already exists.'}
+
+def test_reactivate_payment_method_and_return_success(client):
+    PaymentMethodFactory(name="Pix", description="Pay with Pix", inactivated_at=datetime.now())
+
+    payload = {"name": "Pix", "description": "Pay with Pix"}
+    response = client.post("/api/v1/payment-methods", json=payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+
+    assert "id" in data
+    assert data["name"] == payload["name"]
+    assert data["description"] == payload["description"]
 
 def test_send_unexpected_param_to_create_payment_method_and_return_error(client):
     payload = {"name": "Pix", "description": "Pay with Pix", "unexpected_param": "123"}

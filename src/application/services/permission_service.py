@@ -15,11 +15,19 @@ class PermissionService(IPermissionService):
         self.repository = repository
 
     def create_permission(self, dto: CreatePermissionDTO) -> PermissionDTO:
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException(entity_name='Permission')
-        
-        permission = Permission(name=dto.name, description=dto.description)
-        permission = self.repository.create(permission)
+        permission = self.repository.get_by_name(dto.name)
+        if permission:
+            if not permission.is_deleted():
+                raise EntityDuplicatedException(entity_name='Permission')
+            
+            permission.name = dto.name
+            permission.description = dto.description
+            permission.reactivate()
+            self.repository.update(permission)
+        else:
+            permission = Permission(name=dto.name, description=dto.description)
+            permission = self.repository.create(permission)
+
         return PermissionDTO.from_entity(permission)
     
     def get_permission_by_name(self, name: str) -> PermissionDTO:

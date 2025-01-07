@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from fastapi import status
 
@@ -34,6 +35,20 @@ def test_create_duplicated_role_and_return_error(client):
 
     data = response.json()
     assert data == {'error': 'Role already exists.'}
+
+
+def test_reactivate_role_and_return_success(client):
+    RoleFactory(name='Role1', description='Desc1', inactivated_at=datetime.now())
+
+    payload = {'name': 'Role1', 'description': 'Desc1'}
+    response = client.post('/api/v1/roles', json=payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    response_json = response.json()
+
+    assert 'id' in response_json
+    assert response_json['name'] == payload['name']
+    assert response_json['description'] == payload['description']
 
 
 def test_create_role_name_greater_than_limit_and_return_error(client):

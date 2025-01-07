@@ -1,5 +1,8 @@
+from datetime import datetime
 import pytest
 from fastapi import status
+
+from tests.factories.profile_factory import ProfileFactory
 
 
 @pytest.mark.parametrize('payload', [
@@ -32,6 +35,20 @@ def test_create_profile_duplicate_name_and_return_error(client):
     data = response.json()
 
     assert data == {'error': 'Profile already exists.'}
+
+
+def test_reactivate_profile_and_return_success(client):
+    ProfileFactory(name='Manager', description='Store Manager', inactivated_at=datetime.now())
+
+    payload = {'name': 'Manager', 'description': 'Store Manager'}
+    response = client.post('/api/v1/profiles', json=payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    response_json = response.json()
+
+    assert 'id' in response_json
+    assert response_json['name'] == payload['name']
+    assert response_json['description'] == payload['description']
 
 
 def test_send_unexpected_param_to_create_profile_and_return_error(client):
