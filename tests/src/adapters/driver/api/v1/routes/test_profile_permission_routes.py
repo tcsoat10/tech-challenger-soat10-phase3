@@ -1,3 +1,4 @@
+from datetime import datetime
 from tests.factories.profile_permission_factory import ProfilePermissionFactory
 from tests.factories.permission_factory import PermissionFactory
 from tests.factories.profile_factory import ProfileFactory
@@ -33,6 +34,20 @@ def test_create_duplicate_profile_permission_and_return_error(client, db_session
     data = response.json()
 
     assert data == {'error': 'Profile Permission already exists.'}
+
+def test_reactivate_profile_permission_and_return_success(client, db_session):
+    profile_permission = ProfilePermissionFactory(inactivated_at=datetime.now())
+    payload = {'permission_id': profile_permission.permission_id, 'profile_id': profile_permission.profile_id}
+
+    response = client.post('api/v1/profile_permissions', json=payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+
+    assert 'id' in data
+    assert data['permission']['id'] == profile_permission.permission_id
+    assert data['profile']['id'] == profile_permission.profile_id
 
 
 def test_get_profile_permission_by_id_and_return_sucess(client):

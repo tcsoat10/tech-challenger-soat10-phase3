@@ -17,6 +17,10 @@ class IProfilePermissionRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_permission_id_and_profile_id(self, permission_id: int, profile_id: int) -> ProfilePermission:
+        pass
+    
+    @abstractmethod
     def get_by_profile_id(self, profile_id: int) -> ProfilePermission:
         pass
 
