@@ -46,6 +46,9 @@ class BaseEntity(DeclarativeBase):
     def is_deleted(self):
         return self.inactivated_at is not None
     
+    def reactivate(self):
+        self.inactivated_at = None
+    
     def __repr__(self):
         attributes = ", ".join(f"{key}={value!r}" for key, value in vars(self).items() if not key.startswith("_"))
         return f"<{self.__class__.__name__}({attributes})>"
