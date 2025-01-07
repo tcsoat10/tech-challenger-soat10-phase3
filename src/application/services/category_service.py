@@ -16,11 +16,19 @@ class CategoryService(ICategoryService):
         self.repository = repository
     
     def create_category(self, dto: CreateCategoryDTO) -> CategoryDTO:
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException(entity_name="Category")
+        category = self.repository.get_by_name(name=dto.name)
+        if category:
+            if not category.is_deleted():
+                raise EntityDuplicatedException(entity_name="Category")
+            
+            category.name = dto.name
+            category.description = dto.description
+            category.reactivate()
+            self.repository.update(category)
+        else:
+            category = Category(name=dto.name, description=dto.description)
+            category = self.repository.create(category)
 
-        category = Category(name=dto.name, description=dto.description)
-        category = self.repository.create(category)
         return CategoryDTO.from_entity(category)
     
     def get_category_by_name(self, name: str) -> CategoryDTO:
