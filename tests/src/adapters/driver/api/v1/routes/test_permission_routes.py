@@ -1,5 +1,8 @@
+from datetime import datetime
 import pytest
 from fastapi import status
+
+from tests.factories.permission_factory import PermissionFactory
 
 
 @pytest.mark.parametrize('payload', [
@@ -32,6 +35,20 @@ def test_create_permission_duplicate_name_and_return_error(client):
     data = response.json()
 
     assert data == {'error': 'Permission already exists.'}
+
+
+def test_reactivate_permission_and_return_success(client):
+    PermissionFactory(name='Admin', description='System Admin privileges', inactivated_at=datetime.now())
+
+    payload = {'name': 'Admin', 'description': 'System Admin privileges'}
+    response = client.post('/api/v1/permissions', json=payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    response_json = response.json()
+
+    assert 'id' in response_json
+    assert response_json['name'] == payload['name']
+    assert response_json['description'] == payload['description']
 
 
 def test_send_unexpected_param_to_create_permission_and_return_error(client):
