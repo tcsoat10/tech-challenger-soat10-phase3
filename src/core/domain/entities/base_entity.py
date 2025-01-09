@@ -51,6 +51,6 @@ class BaseEntity(DeclarativeBase):
     
     def __repr__(self):
         attributes = ", ".join(f"{key}={value!r}" for key, value in vars(self).items() if not key.startswith("_"))
-        return f"<{self.__class__.__name__}({attributes})>"
+        return f"<{self.__class__.__name__}({attributes}, created_at={self.created_at}, updated_at={self.updated_at}, inactivated_at={self.inactivated_at})>"
 
 __all__ = ["BaseEntity"]
