@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
-    repository = IUserRepository = UserRepository(db_session)
+    repository: IUserRepository = UserRepository(db_session)
     return UserService(repository)
 
 
