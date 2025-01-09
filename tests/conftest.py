@@ -20,6 +20,7 @@ from tests.factories.profile_factory import ProfileFactory
 from tests.factories.profile_permission_factory import ProfilePermissionFactory
 from tests.factories.role_factory import RoleFactory
 from tests.factories.user_factory import UserFactory
+from tests.factories.user_profile_factory import UserProfileFactory
 
 
 def create_database_url(user: str, password: str, host: str, port: str, database_name: str = ""):
@@ -162,7 +163,8 @@ def setup_factories(db_session):
         PaymentMethodFactory,
         RoleFactory,
         PaymentStatusFactory,
-        UserFactory
+        UserFactory,
+        UserProfileFactory,
     ]
 
     for factory in factories:
