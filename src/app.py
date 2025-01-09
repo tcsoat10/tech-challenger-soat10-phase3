@@ -12,6 +12,7 @@ from src.adapters.driver.api.v1.routes.payment_method_routes import router as pa
 from src.adapters.driver.api.v1.routes.role_routes import router as role_routes
 from src.adapters.driver.api.v1.routes.payment_status_routes import router as payment_status_routes
 from src.adapters.driver.api.v1.routes.user_routes import router as user_routes
+from src.adapters.driver.api.v1.routes.user_profile_routes import router as user_profile_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
@@ -41,3 +42,4 @@ app.include_router(payment_method_routes, prefix="/api/v1", tags=["payment-metho
 app.include_router(role_routes, prefix="/api/v1", tags=["roles"])
 app.include_router(payment_status_routes, prefix="/api/v1", tags=["payment-status"])
 app.include_router(user_routes, prefix="/api/v1", tags=["user"])
+app.include_router(user_profile_routes, prefix="/api/v1", tags=["user-profiles"])

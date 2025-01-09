@@ -31,7 +31,7 @@ def get_user_by_name(user_name: str, service: IUserService = Depends(_get_user_s
 
 
 @router.get(path='/users/{user_id}/id', response_model=UserDTO, status_code=status.HTTP_200_OK)
-def get_user_by_name(user_id: int, service: IUserService = Depends(_get_user_service)):
+def get_user_by_id(user_id: int, service: IUserService = Depends(_get_user_service)):
     return service.get_user_by_id(user_id)
 
 
