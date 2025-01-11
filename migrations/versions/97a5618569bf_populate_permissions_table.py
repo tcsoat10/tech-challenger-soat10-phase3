@@ -120,4 +120,4 @@ def upgrade():
 
 
 def downgrade():
-    op.execute("DELETE FROM roles WHERE name LIKE 'can_%'")
+    op.execute("DELETE FROM permissions WHERE name LIKE 'can_%'")
