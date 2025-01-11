@@ -1,0 +1,17 @@
+from enum import Enum
+
+class ErrorCode(Enum):
+    ENTITY_NOT_FOUND = ("ENTITY_NOT_FOUND", "The requested entity was not found.")
+    DUPLICATED_ENTITY = ("DUPLICATED_ENTITY", "The entity already exists.")
+    INVALID_CREDENTIALS = ("INVALID_CREDENTIALS", "Invalid username or password.")
+    UNEXPECTED_ERROR = ("UNEXPECTED_ERROR", "An unexpected error occurred.")
+    VALIDATION_ERROR = ("VALIDATION_ERROR", "Validation failed for the input.")
+
+    def __init__(self, value: str, description: str):
+        self._value_ = value
+        self.description = description
+
+    def __str__(self):
+        return self.value
+
+__all__ = ["ErrorCode"]

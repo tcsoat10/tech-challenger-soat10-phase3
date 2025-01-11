@@ -1,5 +1,6 @@
 from fastapi import status
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.product_factory import ProductFactory
 from tests.factories.order_item_factory import OrderItemFactory
 
@@ -36,7 +37,13 @@ def test_create_order_item_with_invalid_product_id(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Product not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Product not found.',
+            'details': None,
+        }
+    }
 
 def test_get_order_item_by_id_success(client, db_session):
     order_item = OrderItemFactory()
@@ -60,7 +67,13 @@ def test_get_order_item_by_id_with_invalid_id(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Order Item not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Order Item not found.',
+            'details': None,
+        }
+    }
 
 def test_get_all_order_items_success(client, db_session):
     order_item1 = OrderItemFactory()
@@ -123,7 +136,13 @@ def test_update_order_item_with_invalid_product_id(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Product not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Product not found.',
+            'details': None,
+        }
+    }
 
 def test_update_order_item_with_invalid_order_item_id(client, db_session):
     payload = {
@@ -139,7 +158,13 @@ def test_update_order_item_with_invalid_order_item_id(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Order Item not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Order Item not found.',
+            'details': None,
+        }
+    }
 
 def test_delete_order_item_success(client, db_session):
     order_item = OrderItemFactory()
@@ -155,7 +180,13 @@ def test_delete_order_item_with_invalid_id(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Order Item not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Order Item not found.',
+            'details': None,
+        }
+    }
 
 def test_delete_order_item_twice(client, db_session):
     order_item = OrderItemFactory()
@@ -170,5 +201,11 @@ def test_delete_order_item_twice(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Order Item not found."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Order Item not found.',
+            'details': None,
+        }
+    }
 

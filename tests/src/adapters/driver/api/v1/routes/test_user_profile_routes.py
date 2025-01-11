@@ -1,6 +1,7 @@
 from datetime import datetime
 from fastapi import status
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.profile_factory import ProfileFactory
 from tests.factories.user_factory import UserFactory
 from tests.factories.user_profile_factory import UserProfileFactory
@@ -24,7 +25,13 @@ def test_create_user_profile_with_unregistered_user_id_and_return_error(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'User not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'User not found.',
+            'details': None,
+        }
+    }
 
 def test_reactivate_user_profile_success(client):
     user_profile = UserProfileFactory(inactivated_at=datetime.now())
@@ -45,14 +52,26 @@ def test_create_user_profile_with_unregistered_profile_id_and_return_error(clien
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'Profile not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Profile not found.',
+            'details': None,
+        }
+    }
 
 def test_create_user_profile_with_unregistered_user_id_and_profile_id_and_return_error(client):
     response = client.post('/api/v1/user-profiles', json={'user_id': 999, 'profile_id': 999})
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'User not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'User not found.',
+            'details': None,
+        }
+    }
 
 def test_get_user_profile_by_id_success(client):
     user_profile = UserProfileFactory()
@@ -70,7 +89,13 @@ def test_get_user_profile_by_id_with_unregistered_id_and_return_error(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'UserProfile not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'UserProfile not found.',
+            'details': None,
+        }
+    }
 
 def test_get_user_profile_by_user_id_and_profile_id_success(client):
     UserProfileFactory()
@@ -87,7 +112,13 @@ def test_get_user_profile_by_user_id_and_profile_id_with_unregistered_ids_and_re
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'UserProfile not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'UserProfile not found.',
+            'details': None,
+        }
+    }
 
 def test_get_all_user_profiles_success(client):
     UserProfileFactory.create_batch(3)
@@ -135,7 +166,13 @@ def test_update_user_profile_with_unregistered_user_id_and_return_error(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'User not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'User not found.',
+            'details': None,
+        }
+    }
 
 def test_update_user_profile_with_unregistered_profile_id_and_return_error(client):
     user_profile = UserProfileFactory()
@@ -148,7 +185,13 @@ def test_update_user_profile_with_unregistered_profile_id_and_return_error(clien
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     data = response.json()
-    assert data == {'error': 'Profile not found.'}
+    assert data =={
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Profile not found.',
+            'details': None,
+        }
+    }
 
 def test_delete_user_profile_success(client):
     user_profile = UserProfileFactory()
