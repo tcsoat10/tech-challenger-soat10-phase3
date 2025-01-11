@@ -39,13 +39,13 @@ class TestPersonRepository:
         assert db_person.email == "joao@gmail.com"'''
 #        assert db_person.birth_date == birth
 
-    def test_exists_by_name_success(self):
+    def test_exists_by_cpf_success(self):
         person = PersonFactory()
 
-        assert self.repository.exists_by_name(person.name) is True
+        assert self.repository.exists_by_cpf(person.cpf) is True
 
-    def test_exists_by_name_failure(self):
-        assert self.repository.exists_by_name("JOÃO") is False
+    def test_exists_by_cpf_failure(self):
+        assert self.repository.exists_by_cpf("0000000000") is False
 
     def test_try_create_person_duplicated_with_repository_and_raise_error(self):
         person1 = PersonFactory()
@@ -54,13 +54,14 @@ class TestPersonRepository:
         with pytest.raises(IntegrityError):
             self.repository.create(person2)
 
-    def test_get_by_name_success(self):
+    def test_get_by_cpf_success(self):
         new_person = PersonFactory()
 
-        person = self.repository.get_by_name(new_person.name)
+        person = self.repository.get_by_cpf(new_person.cpf)
 
         assert person is not None
         assert person.id == new_person.id
+        assert person.cpf == new_person.cpf
         assert person.name == new_person.name
         assert person.email == new_person.email
 
