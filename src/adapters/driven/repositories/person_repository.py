@@ -16,11 +16,11 @@ class PersonRepository(IPersonRepository):
         self.db_session.refresh(person)
         return person
 
-    def exists_by_name(self, name: str) -> bool:
-        return self.db_session.query(exists().where(Person.name == name)).scalar()
+    def exists_by_cpf(self, cpf: str) -> bool:
+        return self.db_session.query(exists().where(Person.cpf == cpf)).scalar()
 
-    def get_by_name(self, name: str) -> Person:
-        return self.db_session.query(Person).filter(Person.name == name).first()
+    def get_by_cpf(self, cpf: str) -> Person:
+        return self.db_session.query(Person).filter(Person.cpf == cpf).first()
 
     def get_by_id(self, person_id: int) -> Person:
         return self.db_session.query(Person).filter(Person.id == person_id).first()

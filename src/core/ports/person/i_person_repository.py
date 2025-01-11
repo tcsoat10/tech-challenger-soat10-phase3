@@ -11,11 +11,11 @@ class IPersonRepository(ABC):
         pass
 
     @abstractmethod
-    def exists_by_name(self, name: str) -> bool:
+    def exists_by_cpf(self, cpf: str) -> bool:
         pass
 
     @abstractmethod
-    def get_by_name(self, name: str) -> Person:
+    def get_by_cpf(self, cpf: str) -> Person:
         pass
 
     @abstractmethod
