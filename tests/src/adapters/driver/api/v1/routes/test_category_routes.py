@@ -30,7 +30,13 @@ def test_create_category_duplicate_name_and_return_error(client):
 
     data = response.json()
 
-    assert data == {'error': 'Category already exists.'}
+    assert data == {
+        'detail': {
+            'code': 'DUPLICATED_ENTITY',
+            'message': 'Category already exists.',
+            'details': None,
+        }
+    }
 
 def test_reativate_category_and_return_success(client):
     CategoryFactory(name="Drinks", description="Beverages category", inactivated_at=datetime.now())

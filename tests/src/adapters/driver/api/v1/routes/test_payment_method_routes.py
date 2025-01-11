@@ -3,6 +3,7 @@ from fastapi import status
 
 import pytest
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.payment_method_factory import PaymentMethodFactory
 
 @pytest.mark.parametrize("payload", [
@@ -30,7 +31,13 @@ def test_create_payment_method_duplicate_name_and_return_error(client):
 
     data = response.json()
 
-    assert data == {'error': 'Payment method already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Payment method already exists.',
+            'details': None,
+        }
+    }
 
 def test_reactivate_payment_method_and_return_success(client):
     PaymentMethodFactory(name="Pix", description="Pay with Pix", inactivated_at=datetime.now())
@@ -138,7 +145,13 @@ def test_update_payment_method_duplicate_name_and_return_error(client):
 
     data = response.json()
 
-    assert data == {'error': 'Payment method already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Payment method already exists.',
+            'details': None,
+        }
+    }
 
 def test_delete_payment_method_and_return_success(client):
     PaymentMethodFactory(name="Pix", description="Pay with Pix")
@@ -154,4 +167,10 @@ def test_delete_payment_method_not_found_and_return_error(client):
 
     data = response.json()
 
-    assert data == {'error': 'Payment method not found.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Payment method not found.',
+            'details': None,
+        }
+    }

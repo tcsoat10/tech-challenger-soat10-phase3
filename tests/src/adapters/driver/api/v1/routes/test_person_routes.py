@@ -2,6 +2,7 @@ from fastapi import status
 from datetime import datetime
 import pytest
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.person_factory import PersonFactory
 
 
@@ -38,7 +39,13 @@ def test_create_person_duplicate_cpf_and_return_error(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Person already exists."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Person already exists.',
+            'details': None,
+        }
+    }
 
 
 def test_reactivate_person_return_success(client):

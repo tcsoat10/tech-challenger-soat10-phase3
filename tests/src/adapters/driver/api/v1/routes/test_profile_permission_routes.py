@@ -1,4 +1,5 @@
 from datetime import datetime
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.profile_permission_factory import ProfilePermissionFactory
 from tests.factories.permission_factory import PermissionFactory
 from tests.factories.profile_factory import ProfileFactory
@@ -33,7 +34,13 @@ def test_create_duplicate_profile_permission_and_return_error(client, db_session
 
     data = response.json()
 
-    assert data == {'error': 'Profile Permission already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Profile Permission already exists.',
+            'details': None,
+        }
+    }
 
 def test_reactivate_profile_permission_and_return_success(client, db_session):
     profile_permission = ProfilePermissionFactory(inactivated_at=datetime.now())

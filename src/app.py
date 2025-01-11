@@ -1,6 +1,5 @@
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
-from src.core.exceptions.base_exception import BaseAppException
+from fastapi import FastAPI
+from src.adapters.driver.api.v1.middleware.custom_error_middleware import CustomErrorMiddleware
 from src.adapters.driver.api.v1.routes.health_check import router as health_check_router
 from src.adapters.driver.api.v1.routes.category_routes import router as category_routes
 from src.adapters.driver.api.v1.routes.product_routes import router as product_routes
@@ -17,19 +16,7 @@ from src.adapters.driver.api.v1.routes.person_routes import router as person_rou
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
-@app.exception_handler(BaseAppException)
-async def global_app_exception_handler(request: Request, exc: BaseAppException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"error": exc.message},
-    )
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"error": "Ocorreu um erro inesperado no servidor."},
-    )
+app.add_middleware(CustomErrorMiddleware)
 
 # Adicionando rotas da versão 1
 app.include_router(health_check_router, prefix="/api/v1")

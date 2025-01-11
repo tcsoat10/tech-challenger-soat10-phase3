@@ -2,6 +2,7 @@ from datetime import datetime
 import pytest
 from fastapi import status
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.permission_factory import PermissionFactory
 
 
@@ -34,7 +35,13 @@ def test_create_permission_duplicate_name_and_return_error(client):
 
     data = response.json()
 
-    assert data == {'error': 'Permission already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Permission already exists.',
+            'details': None,
+        }
+    }
 
 
 def test_reactivate_permission_and_return_success(client):

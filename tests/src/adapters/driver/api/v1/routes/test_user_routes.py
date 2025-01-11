@@ -2,6 +2,7 @@ import pytest
 from fastapi import status
 from datetime import datetime
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.user_factory import UserFactory
 
 
@@ -31,7 +32,13 @@ def test_create_user_duplicate_name_return_error(client):
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
-    assert data == {'error': 'User already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'User already exists.',
+            'details': None
+        }
+    }
 
 
 def test_reactivate_permission_return_success(client):

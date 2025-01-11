@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import status
 import pytest
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.payment_status_factory import PaymentStatusFactory
 
 
@@ -29,7 +30,11 @@ def test_create_payment_status_duplicated_and_return_error(client):
 
     data = response.json()
     assert data == {
-        "error": "PaymentStatus already exists."
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'PaymentStatus already exists.',
+            'details': None,
+        }
     }
 
 def test_reactivate_payment_status_and_return_success(client):
@@ -150,7 +155,11 @@ def test_update_payment_status_not_found_and_return_error(client):
 
     data = response.json()
     assert data == {
-        "error": "PaymentStatus not found."
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'PaymentStatus not found.',
+            'details': None,
+        }
     }
 
 def test_delete_payment_status_and_return_success(client):
@@ -171,5 +180,9 @@ def test_delete_payment_status_not_found_and_return_error(client):
 
     data = response.json()
     assert data == {
-        "error": "PaymentStatus not found."
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'PaymentStatus not found.',
+            'details': None,
+        }
     }

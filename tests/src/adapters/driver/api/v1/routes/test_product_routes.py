@@ -3,6 +3,7 @@ from fastapi import status
 
 import pytest
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.product_factory import ProductFactory
 
@@ -46,7 +47,13 @@ def test_create_product_duplicate_name_and_return_error(client, db_session):
 
     data = response.json()
 
-    assert data == {"error": "Product already exists."}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Product already exists.',
+            'details': None,
+        }
+    }
 
 def test_reactivate_product_and_return_success(client, db_session):
     category = CategoryFactory(name="Drinks")

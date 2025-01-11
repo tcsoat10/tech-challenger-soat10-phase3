@@ -2,6 +2,7 @@ from datetime import datetime
 import pytest
 from fastapi import status
 
+from src.core.exceptions.utils import ErrorCode
 from tests.factories.role_factory import RoleFactory
 
 
@@ -34,7 +35,13 @@ def test_create_duplicated_role_and_return_error(client):
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
-    assert data == {'error': 'Role already exists.'}
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Role already exists.',
+            'details': None,
+        }
+    }
 
 
 def test_reactivate_role_and_return_success(client):
