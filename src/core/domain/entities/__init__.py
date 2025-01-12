@@ -11,6 +11,7 @@ from .payment_status import PaymentStatus
 from .user import User
 from .user_profile import UserProfile
 from .person import Person
+from .customer import Customer
 
 __all__ = [
     "BaseEntity",
@@ -25,5 +26,6 @@ __all__ = [
     "PaymentStatus",
     "User",
     "UserProfile",
-    "Person"
+    "Person",
+    "Customer"
 ]
