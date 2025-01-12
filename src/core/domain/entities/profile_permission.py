@@ -7,10 +7,10 @@ class ProfilePermission(BaseEntity):
     __tablename__ = 'profile_permissions'
 
     profile_id = Column(ForeignKey('profiles.id'), nullable=False)
-    profile = relationship('Profile')
+    profile = relationship('Profile', back_populates='profile_permissions')
 
     permission_id = Column(ForeignKey('permissions.id'), nullable=False)
-    permission = relationship('Permission')
+    permission = relationship('Permission', back_populates='profile_permissions')
 
 
 __all__ = ['ProfilePermission']
