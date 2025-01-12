@@ -34,6 +34,13 @@ def setup_test_database():
     test_password = f"temp_pass_{random_id}"
     test_database = f"{os.getenv('MYSQL_DATABASE', 'test_db')}_test_{random_id}"
 
+    envs_to_override = {
+        'ENVIRONMENT': 'testing',
+    }
+
+    for key, value in envs_to_override.items():
+        os.environ[key] = value
+
     # URL BD root user
     root_database_url = create_database_url(
         os.getenv("MYSQL_ROOT_USER", "root"),

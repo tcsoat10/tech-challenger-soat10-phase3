@@ -6,6 +6,7 @@ Create Date: 2025-01-11 18:21:12.951580
 
 """
 
+import os
 from typing import Sequence, Union
 from alembic import op
 from sqlalchemy.sql import table, column
@@ -112,6 +113,9 @@ permissions = [
 
 
 def upgrade():
+    if os.getenv("ENVIRONMENT") == "testing":
+        return
+
     op.bulk_insert(permissions_table, permissions)
 
 

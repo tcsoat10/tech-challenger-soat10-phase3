@@ -6,6 +6,7 @@ Create Date: 2025-01-11 18:45:12.951580
 
 """
 
+import os
 from alembic import op
 from sqlalchemy.sql import table, column, select
 from sqlalchemy import Integer, String, DateTime, MetaData
@@ -76,6 +77,9 @@ profile_permissions = {
 }
 
 def upgrade():
+    if os.getenv("ENVIRONMENT") == "testing":
+        return
+
     connection = op.get_bind()
     metadata = MetaData()
     metadata.reflect(bind=connection)
