@@ -23,11 +23,11 @@ class TestUserRepository:
 
         assert created_user.id is not None
         assert created_user.name == new_user.name
-        assert created_user.verify_password('test_pass') is True
+        assert self.repository.verify_password('test_pass', created_user) is True
     
     def test_verify_wrong_password_return_error(self):
         user = UserFactory(password='test_pass')
-        assert user.verify_password('wrong_pass') is False
+        assert self.repository.verify_password('wrong_pass', user) is False
 
     def test_create_duplicate_user_return_error(self):
         user1 = UserFactory(name='user1')
@@ -93,8 +93,8 @@ class TestUserRepository:
         updated_user = self.repository.update(user)
 
         assert updated_user.name == user.name
-        assert updated_user.verify_password('test_pass') is False
-        assert updated_user.verify_password('new_pass') is True
+        assert self.repository.verify_password('test_pass', updated_user) is False
+        assert self.repository.verify_password('new_pass', updated_user) is True
 
     def test_delete_user(self):
         user = UserFactory()
