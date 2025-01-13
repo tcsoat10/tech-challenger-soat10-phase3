@@ -23,3 +23,12 @@ DATABASE = {
 }
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+# Configurações de autenticação
+JWT_SECRET_KEY = os.getenv("SECRET_KEY")
+if not JWT_SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is not set")
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+
+JWT_ALGORITHM = os.getenv("ALGORITHM_JWT", "HS256")
