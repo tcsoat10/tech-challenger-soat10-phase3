@@ -13,6 +13,9 @@ class ICustomerRepository(ABC):
     def get_by_id(self, customer_id: int) -> Customer:
         pass
 
+    def get_by_cpf(self, cpf: str) -> Customer:
+        pass
+
     @abstractmethod
     def get_by_person_id(self, person_id: int) -> Customer:
         pass

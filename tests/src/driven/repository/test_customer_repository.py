@@ -42,6 +42,22 @@ class TestCustomerRepository:
 
         assert customer_response is None
 
+    def test_get_by_cpf_success(self):
+        customer = CustomerFactory()
+
+        customer_response = self.repository.get_by_cpf(customer.person.cpf)
+
+        assert customer_response is not None
+        assert customer_response.id == customer.id
+        assert customer_response.person_id == customer.person_id
+
+    def test_get_by_cpf_returns_none_for_unregistered_cpf(self):
+        customer = CustomerFactory()
+
+        customer_response = self.repository.get_by_cpf(customer.person.cpf + "1")
+
+        assert customer_response is None
+
     def test_get_customer_by_person_id_success(self):
         customer = CustomerFactory()
 
