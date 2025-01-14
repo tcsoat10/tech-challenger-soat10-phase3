@@ -46,15 +46,15 @@ permissions = [
 
     # Order
     {"name": "can_create_order", "description": "Permission to create an order"},
-    {"name": "can_view_order", "description": "Permission to view all orders"},
+    {"name": "can_view_orders", "description": "Permission to view all orders"},
     {"name": "can_update_order", "description": "Permission to update an order"},
     {"name": "can_delete_order", "description": "Permission to delete an order"},
 
     # Order Status
-    {"name": "can_create_order_status", "description": "Permission to create an order"},
-    {"name": "can_view_order_status", "description": "Permission to view all orders status"},
-    {"name": "can_update_order_status", "description": "Permission to update an order"},
-    {"name": "can_delete_order_status", "description": "Permission to delete an order"},
+    {"name": "can_create_order_status", "description": "Permission to create an order status"},
+    {"name": "can_view_order_statuses", "description": "Permission to view all order statuses"},
+    {"name": "can_update_order_status", "description": "Permission to update an order status"},
+    {"name": "can_delete_order_status", "description": "Permission to delete an order status"},
 
     # Permissions
     {"name": "can_create_permission", "description": "Permission to create a permission"},
@@ -108,7 +108,13 @@ permissions = [
     {"name": "can_create_user_profile", "description": "Permission to create a user profile"},
     {"name": "can_view_user_profiles", "description": "Permission to view all user profiles"},
     {"name": "can_update_user_profile", "description": "Permission to update a user profile"},
-    {"name": "can_delete_user_profile", "description": "Permission to delete a user profile"}
+    {"name": "can_delete_user_profile", "description": "Permission to delete a user profile"},
+
+    # Employees
+    {"name": "can_create_employee", "description": "Permission to create an employee"},
+    {"name": "can_view_employees", "description": "Permission to view all employees"},
+    {"name": "can_update_employee", "description": "Permission to update an employee"},
+    {"name": "can_delete_employee", "description": "Permission to delete an employee"}
 ]
 
 

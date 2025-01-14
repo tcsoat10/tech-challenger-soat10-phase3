@@ -66,13 +66,13 @@ profile_permissions = {
         "can_view_users",  # Apenas visualização de usuários
         "can_view_user_profiles"  # Apenas visualização de perfis de usuários
     ],
-    "3": [  # Client: acesso mínimo
-        "can_create_order", "can_view_order",  # Pode criar e visualizar pedidos
-        "can_create_order_item", "can_view_order_items",  # Pode criar e visualizar itens de pedidos
-        "can_view_categories",  # Apenas visualização de categorias
-        "can_view_products",  # Apenas visualização de produtos
-        "can_create_user_profile", "can_view_user_profiles"  # Pode criar e visualizar perfis relacionados ao cliente
-        "can_create_payment", "can_view_payments"  # Pode criar e visualizar pagamentos
+    "3": [  # Customer: acesso mínimo
+        "can_create_order", "can_view_orders", "can_update_order", "can_delete_order", # Pode criar e visualizar pedidos
+        "can_create_order_item", "can_view_order_items", "can_update_order_item", "can_delete_order_item", # Gerencia itens de pedidos
+        "can_view_categories", "can_view_products", # Apenas visualização de categorias
+        "can_create_user_profile", "can_view_user_profiles", # Apenas visualização de produtos
+        "can_create_payment", "can_view_payments", "can_view_payment_statuses", # Pode criar e visualizar perfis relacionados ao cliente
+        "can_view_order_statuses", # Pode criar e visualizar pagamentos
     ]
 }
 
