@@ -1,3 +1,6 @@
+from src.core.domain.entities.person import Person
+from src.core.domain.entities.role import Role
+from src.core.domain.entities.user import User
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.domain.entities.employee import Employee
 
@@ -19,14 +22,17 @@ class EmployeeRepository(IEmployeeRepository):
         return self.db_session.query(Employee).filter(Employee.id == employee_id).first()
     
     def get_by_person_id(self, person_id: int) -> Employee:
-        return self.db_session.query(Employee).filter(Employee.person_id == person_id).first()
+        return self.db_session.query(Employee).join(Employee.person).filter(Person.id == person_id).first()
     
     def get_by_user_id(self, user_id: int) -> Employee:
-        return self.db_session.query(Employee).filter(Employee.user_id == user_id).first()
+        return self.db_session.query(Employee).join(Employee.user).filter(User.id == user_id).first()
     
     def get_by_role_id(self, role_id: int) -> List[Employee]:
-        return self.db_session.query(Employee).filter(Employee.role_id == role_id).all()
+        return self.db_session.query(Employee).join(Employee.role).filter(Role.id == role_id).all()
     
+    def get_by_username(self, username: str) -> Employee:
+        return self.db_session.query(Employee).join(Employee.user).filter(User.name == username).first()
+
     def get_all(self, include_deleted: bool = False) -> List[Employee]:
         query = self.db_session.query(Employee)
         if not include_deleted:

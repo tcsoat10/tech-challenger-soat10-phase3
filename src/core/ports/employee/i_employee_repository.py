@@ -21,6 +21,9 @@ class IEmployeeRepository(ABC):
     def get_by_role_id(self, role_id: int) -> List[Employee]:
         pass
 
+    def get_by_username(self, username: str) -> Employee:
+        pass
+
     def get_all(self) -> List[Employee]:
         pass
 

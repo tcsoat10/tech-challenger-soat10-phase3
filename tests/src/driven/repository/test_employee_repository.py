@@ -127,6 +127,26 @@ class TestEmployeeRepository:
 
         assert employee_response is None
 
+    def test_get_employee_by_username_success(self):
+        employee = EmployeeFactory()
+
+        employee_response = self.repository.get_by_username(employee.user.name)
+
+        assert employee_response is not None
+        assert employee_response.id == employee.id
+        assert employee_response.admission_date == employee.admission_date
+        assert employee_response.termination_date == employee.termination_date
+        assert employee_response.person_id == employee.person_id
+        assert employee_response.role_id == employee.role_id
+        assert employee_response.user_id == employee.user_id
+
+    def test_get_employee_by_username_returns_none_for_unregistered_username(self):
+        employee = EmployeeFactory()
+
+        employee_response = self.repository.get_by_username(employee.user.name + "1")
+
+        assert employee_response is None
+
     def test_get_all_employees_success(self):
         employee1 = EmployeeFactory()
         employee2 = EmployeeFactory()
