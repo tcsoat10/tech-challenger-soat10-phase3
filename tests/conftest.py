@@ -1,7 +1,8 @@
 import uuid
 import os
+from faker import Faker
 import pytest
-from typing import Dict, Generator, List
+from typing import Dict, Generator, List, Optional
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect, text
@@ -162,22 +163,33 @@ def client(db_session) -> Generator[TestClient, None, None]:
     Cria um cliente de teste para a aplicação.
     Permissões devem ser informadas manualmente para cada requisição, caso contrário, serão vazias.
     """
-
-    def create_mock_token(permissions: List[str]) -> str:
-        mock_payload = {"sub": "test_user", "permissions": permissions}
+    def create_mock_token(permissions: List[str], profile_name: Optional[str]) -> str:
+        fake = Faker("pt_BR")
+        mock_payload = {
+            "profile": {
+                "name": profile_name,
+                "permissions": permissions,
+            },
+            "person": {
+                "id": "1",
+                "name": "Test User",
+                "cpf": fake.ssn(),
+                "email": fake.email()
+            }
+        }
         return JWTUtil.create_token(mock_payload)
 
-    def override_headers(headers: Dict[str, str] = None, permissions: List[str] = None):
+    def override_headers(headers: Dict[str, str] = None, permissions: List[str] = None, profile_name: Optional[str] = "administrator"):
         if headers is None:
             headers = {}
-        token = create_mock_token(permissions or [])
+        token = create_mock_token(permissions or [], profile_name)
         headers.update({"Authorization": f"Bearer {token}"})
         return headers
 
     with TestClient(app) as test_client:
-        def with_permissions(method, url, permissions=None, **kwargs):
+        def with_permissions(method, url, permissions=None, profile_name: Optional[str] = "administrator", **kwargs):
             headers = kwargs.pop("headers", {})
-            kwargs["headers"] = override_headers(headers, permissions=permissions)
+            kwargs["headers"] = override_headers(headers, permissions=permissions, profile_name=profile_name)
             return method(url, **kwargs)
 
         test_client._original_get = test_client.get
