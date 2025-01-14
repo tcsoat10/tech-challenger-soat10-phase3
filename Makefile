@@ -19,6 +19,9 @@ down:
 dev:
 	uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
 
+migrate_db:
+	alembic upgrade head
+
 test_watch:
 	ENV=test ptw --runner 'pytest --ff $(extra)'
 
