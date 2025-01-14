@@ -28,7 +28,7 @@ def auth_service(mock_customer_repository, mock_profile_repository, mock_employe
         employee_repository=mock_employee_repository,
     )
 
-async def test_login_customer_by_cpf(auth_service, mock_customer_repository, mock_profile_repository):
+def test_login_customer_by_cpf(auth_service, mock_customer_repository, mock_profile_repository):
     customer = Customer(
         id=1,
         person=type('Person', (), {"name": "John Doe", "cpf": "12345678900", "email": "john@example.com"})
@@ -40,30 +40,28 @@ async def test_login_customer_by_cpf(auth_service, mock_customer_repository, moc
 
     auth_dto = AuthByCpfDTO(cpf="12345678900")
 
-    token_dto = await auth_service.login_customer_by_cpf(auth_dto)
+    token_dto = auth_service.login_customer_by_cpf(auth_dto)
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-async def test_login_customer_by_cpf_not_found(auth_service, mock_customer_repository):
+def test_login_customer_by_cpf_not_found(auth_service, mock_customer_repository):
     mock_customer_repository.get_by_cpf.return_value = None
     auth_dto = AuthByCpfDTO(cpf="12345678900")
 
     with pytest.raises(EntityNotFoundException, match="Customer not found."):
-        await auth_service.login_customer_by_cpf(auth_dto)
+        auth_service.login_customer_by_cpf(auth_dto)
 
-@pytest.mark.asyncio
-async def test_login_anonymous(auth_service, mock_profile_repository):
+def test_login_anonymous(auth_service, mock_profile_repository):
     profile = Profile(name="Customer", permissions=[Permission(name="view_orders")])
     mock_profile_repository.get_by_name.return_value = profile
 
-    token_dto = await auth_service.login_anonymous()
+    token_dto = auth_service.login_anonymous()
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-@pytest.mark.asyncio
-async def test_login_employee(auth_service, mock_employee_repository, mock_profile_repository):
+def test_login_employee(auth_service, mock_employee_repository, mock_profile_repository):
     employee = Employee(
         id=1,
         person=type('Person', (), {"name": "Jane Doe", "cpf": "12345678900", "email": "jane@example.com"}),
@@ -75,15 +73,14 @@ async def test_login_employee(auth_service, mock_employee_repository, mock_profi
     mock_profile_repository.get_by_name.return_value = profile
 
     login_dto = LoginDTO(username="janedoe", password="password123")
-    token_dto = await auth_service.login_employee(login_dto)
+    token_dto =auth_service.login_employee(login_dto)
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-@pytest.mark.asyncio
-async def test_login_employee_invalid_credentials(auth_service, mock_employee_repository):
+def test_login_employee_invalid_credentials(auth_service, mock_employee_repository):
     mock_employee_repository.get_by_username.return_value = None
     login_dto = LoginDTO(username="janedoe", password="wrongpassword")
 
     with pytest.raises(InvalidCredentialsException, match="Usuário ou senha inválidos."):
-        await auth_service.login_employee(login_dto)
+       auth_service.login_employee(login_dto)
