@@ -11,7 +11,10 @@ from src.app import app
 from config import settings
 from config.database import get_db
 from tests.factories.category_factory import CategoryFactory
+from tests.factories.employee_factory import EmployeeFactory
+from tests.factories.order_factory import OrderFactory
 from tests.factories.order_item_factory import OrderItemFactory
+from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.payment_method_factory import PaymentMethodFactory
 from tests.factories.payment_status_factory import PaymentStatusFactory
 from tests.factories.product_factory import ProductFactory
@@ -23,7 +26,6 @@ from tests.factories.user_factory import UserFactory
 from tests.factories.user_profile_factory import UserProfileFactory
 from tests.factories.person_factory import PersonFactory
 from tests.factories.customer_factory import CustomerFactory
-from tests.factories.employee_factory import EmployeeFactory
 
 
 def create_database_url(user: str, password: str, host: str, port: str, database_name: str = ""):
@@ -177,7 +179,9 @@ def setup_factories(db_session):
         UserProfileFactory,
         PersonFactory,
         CustomerFactory,
-        EmployeeFactory
+        EmployeeFactory,
+        OrderStatusFactory,
+        OrderFactory
     ]
 
     for factory in factories:

@@ -105,6 +105,7 @@ def test_update_role_and_return_success(client):
     role = RoleFactory()
 
     response = client.put(f'/api/v1/roles/{role.id}', json={'id': role.id, 'name': role.name, 'description': 'Updated description'})
+    breakpoint()
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
