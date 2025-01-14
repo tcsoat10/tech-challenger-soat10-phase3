@@ -7,6 +7,9 @@ class ErrorCode(Enum):
     INVALID_TOKEN = ("INVALID_TOKEN", "Invalid token payload.")
     UNEXPECTED_ERROR = ("UNEXPECTED_ERROR", "An unexpected error occurred.")
     VALIDATION_ERROR = ("VALIDATION_ERROR", "Validation failed for the input.")
+    FORBIDDEN = ("FORBIDDEN", "Access denied.")
+    UNAUTHORIZED = ("UNAUTHORIZED", "Unauthorized.")
+    BAD_REQUEST = ("BAD_REQUEST", "Bad request.")
 
     def __init__(self, value: str, description: str):
         self._value_ = value
