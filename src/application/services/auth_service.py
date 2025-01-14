@@ -1,3 +1,4 @@
+import uuid
 from src.core.domain.entities.employee import Employee
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.domain.entities.customer import Customer
@@ -45,7 +46,10 @@ class AuthService(IAuthService):
             raise EntityNotFoundException("Customer profile not found.")
 
         token = JWTUtil.create_token({
-            "person": {},
+            "person": {
+                "id": uuid.uuid4().hex,
+                "name": "Anonymous User",
+            },
             "profile": {
                 "name": customer_profile.name,
                 "permissions": [permission.name for permission in customer_profile.permissions]

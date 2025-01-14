@@ -24,8 +24,3 @@ class JWTUtil:
                 raise InvalidTokenException("Token has expired.")
         except jwt.InvalidTokenError:
                 raise InvalidTokenException("Invalid token.")
-
-    @staticmethod
-    def validate_permissions(token_payload: dict, required_permission: str) -> bool:
-        permissions = token_payload.get("permissions", [])
-        return required_permission in permissions

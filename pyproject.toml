@@ -32,6 +32,10 @@ factory-boy = "^3.3.1"
 faker = "^33.1.0"
 pytest-mock = "^3.14.0"
 
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.31.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
