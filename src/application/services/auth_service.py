@@ -20,7 +20,7 @@ class AuthService(IAuthService):
         if not customer:
             raise EntityNotFoundException("Customer not found.")
 
-        customer_profile = self.profile_repository.get_by_name("Customer")
+        customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
             raise EntityNotFoundException("Customer profile not found.")
 
@@ -40,7 +40,7 @@ class AuthService(IAuthService):
         return TokenDTO(access_token=token, token_type="bearer")
     
     def login_anonymous(self) -> TokenDTO:
-        customer_profile = self.profile_repository.get_by_name("Customer")
+        customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
             raise EntityNotFoundException("Customer profile not found.")
 
@@ -58,7 +58,7 @@ class AuthService(IAuthService):
         if not employee or not employee.user.verify_password(login_dto.password):
             raise InvalidCredentialsException()
 
-        employee_profile = self.profile_repository.get_by_name("Employee")
+        employee_profile = self.profile_repository.get_by_name("employee")
         if not employee_profile:
             raise EntityNotFoundException("Employee profile not found.")
 

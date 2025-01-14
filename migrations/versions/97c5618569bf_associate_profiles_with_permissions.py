@@ -35,7 +35,7 @@ permissions_table = table(
 
 # Perfis e permissões associadas
 profile_permissions = {
-    "1": [  # Administrator: todas as permissões
+    "1": [  # Manager: todas as permissões
         "can_create_category", "can_view_categories", "can_update_category", "can_delete_category",
         "can_create_product", "can_view_products", "can_update_product", "can_delete_product",
         "can_create_order_item", "can_view_order_items", "can_update_order_item", "can_delete_order_item",
