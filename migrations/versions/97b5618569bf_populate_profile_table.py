@@ -26,6 +26,7 @@ profiles_table = table(
 )
 
 profiles = [
+    {"name": "administrator", "description": "Manager with full access."},
     {"name": "manager", "description": "Manager with full access."},
     {"name": "employee", "description": "Employee with restricted access."},
     {"name": "customer", "description": "Customer with limited access."},
