@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 
+from src.adapters.driver.api.v1.routes.dependencies import PermissionChecker
 from config.database import get_db
 from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.adapters.driven.repositories.category_repository import CategoryRepository
@@ -19,7 +20,11 @@ def _get_category_service(db_session: Session = Depends(get_db)) -> ICategorySer
     return CategoryService(repository)
 
 @router.post("/categories", response_model=CategoryDTO, status_code=status.HTTP_201_CREATED)
-def create_category(dto: CreateCategoryDTO, service: ICategoryService = Depends(_get_category_service)):
+def create_category(
+    dto: CreateCategoryDTO,
+    service: ICategoryService = Depends(_get_category_service),
+    _: None = Depends(PermissionChecker(required_permission="can_create_category"))
+):
     return service.create_category(dto)
 
 @router.get("/categories/{category_name}/name", response_model=CategoryDTO, status_code=status.HTTP_200_OK)
