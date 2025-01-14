@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 
 class Employee(BaseEntity):
-    __tablename__ = 'employess'
+    __tablename__ = 'employees'
 
     admission_date = Column(Date)
     termination_date = Column(Date)

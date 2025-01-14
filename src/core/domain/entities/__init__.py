@@ -13,6 +13,8 @@ from .user_profile import UserProfile
 from .person import Person
 from .customer import Customer
 from .employee import Employee
+from .order_status import OrderStatus
+from .order import Order
 
 __all__ = [
     "BaseEntity",
@@ -29,5 +31,7 @@ __all__ = [
     "UserProfile",
     "Person",
     "Customer",
-    "Employee"
+    "Employee",
+    "OrderStatus",
+    "Order"
 ]
