@@ -24,5 +24,11 @@ class User(BaseEntity):
     def password(self, password: str) -> None:
         enc_pw = password.encode('utf-8')
         self.password_hash = bcrypt.hashpw(enc_pw, bcrypt.gensalt()).decode('utf-8')
-    
-    
+
+    def verify_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
+    @classmethod
+    def hash_password(cls, password: str) -> str:
+        enc_pw = password.encode('utf-8')
+        return bcrypt.hashpw(enc_pw, bcrypt.gensalt()).decode('utf-8')

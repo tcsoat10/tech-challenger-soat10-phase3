@@ -2,7 +2,6 @@ from src.core.ports.user.i_user_repository import IUserRepository
 from src.core.domain.entities.user import User
 
 from sqlalchemy.orm import Session
-import bcrypt
 from typing import List
 
 
@@ -15,10 +14,6 @@ class UserRepository(IUserRepository):
         self.db_session.commit()
         self.db_session.refresh(user)
         return user
-    
-    def verify_password(self, password: str, user: User):
-        enc_pw = password.encode('utf-8')
-        return bcrypt.checkpw(enc_pw, bytes(user.password_hash, 'utf-8'))
     
     def get_by_name(self, name: str) -> User:
         return self.db_session.query(User).filter(User.name == name).first()

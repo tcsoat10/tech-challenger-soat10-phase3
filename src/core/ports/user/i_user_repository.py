@@ -10,10 +10,6 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def verify_password(self, password: str, user: User) -> bool:
-        pass
-
-    @abstractmethod
     def get_by_name(self, name: str) -> User:
         pass
 
