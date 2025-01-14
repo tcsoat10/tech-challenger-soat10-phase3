@@ -28,8 +28,8 @@ test_watch:
 test_parallel:
 	ENV=test pytest --cov=src --numprocesses auto --dist loadfile --max-worker-restart 0 $(extra)
 
-test_coverage_percentage:
-	coverage json -q -o /dev/stdout --omit=tests/* | jq .totals.percent_covered
+test_last_failed:
+	ENV=test ptw --runner 'pytest --ff --lf $(extra)'
 
 test_coverage:
 	coverage report --omit=tests/*
