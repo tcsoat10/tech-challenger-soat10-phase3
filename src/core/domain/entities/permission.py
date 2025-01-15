@@ -10,3 +10,7 @@ class Permission(BaseEntity):
     description = Column(String(300))
 
     profile_permissions = relationship("ProfilePermission", back_populates="permission")
+
+    profiles = relationship("Profile", secondary="profile_permissions", back_populates="permissions")
+
+__all__ = ["Permission"]
