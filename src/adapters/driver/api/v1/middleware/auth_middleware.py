@@ -9,6 +9,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         open_routes = [
+            "/openapi.json",
+            "/docs",
+            "/docs/oauth2-redirect",
+            "/redoc",
             "/auth/customer/cpf",
             "/auth/customer/anonymous"
             "/auth/employee",
