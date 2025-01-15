@@ -26,9 +26,10 @@ profiles_table = table(
 )
 
 profiles = [
-    {"name": "Administrator", "description": "System administrator with full access."},
-    {"name": "Employee", "description": "Employee with restricted access."},
-    {"name": "Client", "description": "Clients with limited access."},
+    {"name": "administrator", "description": "Manager with full access."},
+    {"name": "manager", "description": "Manager with full access."},
+    {"name": "employee", "description": "Employee with restricted access."},
+    {"name": "customer", "description": "Customer with limited access."},
 ]
 
 def upgrade():
@@ -39,5 +40,5 @@ def upgrade():
 
 def downgrade():
     op.execute(
-        "DELETE FROM profiles WHERE name IN ('Administrator', 'Employee', 'Client')"
+        "DELETE FROM profiles WHERE name IN ('manager', 'employee', 'customer')"
     )

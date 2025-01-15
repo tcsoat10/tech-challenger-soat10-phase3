@@ -1,3 +1,4 @@
+from src.core.domain.entities.person import Person
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.domain.entities.customer import Customer
 
@@ -17,6 +18,9 @@ class CustomerRepository(ICustomerRepository):
     
     def get_by_id(self, customer_id: int) -> Customer:
         return self.db_session.query(Customer).filter(Customer.id == customer_id).first()
+    
+    def get_by_cpf(self, cpf: str) -> Customer:
+        return self.db_session.query(Customer).join(Customer.person).filter(Person.cpf == cpf).first()
     
     def get_by_person_id(self, person_id: int) -> Customer:
         return self.db_session.query(Customer).filter(Customer.person_id == person_id).first()

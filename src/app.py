@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.adapters.driver.api.v1.middleware.auth_middleware import AuthMiddleware
 from src.adapters.driver.api.v1.middleware.custom_error_middleware import CustomErrorMiddleware
 from src.adapters.driver.api.v1.routes.health_check import router as health_check_router
 from src.adapters.driver.api.v1.routes.category_routes import router as category_routes
@@ -17,13 +18,16 @@ from src.adapters.driver.api.v1.routes.customer_routes import router as customer
 from src.adapters.driver.api.v1.routes.employee_routes import router as employee_routes
 from src.adapters.driver.api.v1.routes.order_status_routes import router as order_status_routes
 from src.adapters.driver.api.v1.routes.order_routes import router as order_routes
+from src.adapters.driver.api.v1.routes.auth_routes import router as auth_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
 app.add_middleware(CustomErrorMiddleware)
+app.add_middleware(AuthMiddleware)
 
 # Adicionando rotas da versão 1
 app.include_router(health_check_router, prefix="/api/v1")
+app.include_router(auth_routes, prefix="/api/v1", tags=['Auth'])
 app.include_router(category_routes, prefix="/api/v1", tags=["categories"])
 app.include_router(product_routes, prefix="/api/v1", tags=["products"])
 app.include_router(order_item_routes, prefix="/api/v1", tags=["order-items"])

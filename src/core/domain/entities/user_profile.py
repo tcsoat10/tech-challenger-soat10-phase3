@@ -7,7 +7,7 @@ class UserProfile(BaseEntity):
     __tablename__ = "user_profiles"
 
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    user = relationship("User")
+    user = relationship("User", back_populates="user_profiles")
 
     profile_id = Column(Integer, ForeignKey('profiles.id'), nullable=False)
-    profile = relationship("Profile")
+    profile = relationship("Profile", back_populates="user_profiles")

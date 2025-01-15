@@ -12,4 +12,7 @@ class Profile(BaseEntity):
     profile_permissions = relationship("ProfilePermission", back_populates="profile")
     permissions = relationship("Permission", secondary="profile_permissions")
 
+    user_profiles = relationship("UserProfile", back_populates="profile")
+    users = relationship("User", secondary="user_profiles")
+
 __all__ = ["Profile"]

@@ -11,6 +11,23 @@ from alembic import op
 from sqlalchemy.sql import table, column, select
 from sqlalchemy import Integer, String, DateTime, MetaData
 from datetime import datetime, timezone
+from src.constants.permissions import (
+    CategoryPermissions,
+    ProductPermissions,
+    OrderItemPermissions,
+    OrderPermissions,
+    OrderStatusPermissions,
+    PermissionPermissions,
+    ProfilePermissions,
+    ProfilePermissionPermissions,
+    PaymentMethodPermissions,
+    PaymentPermissions,
+    PaymentStatusPermissions,
+    RolePermissions,
+    UserPermissions,
+    UserProfilePermissions,
+    EmployeePermissions,
+)
 
 # Revisão e informações básicas da migração
 revision = '97c5618569bf'
@@ -36,43 +53,63 @@ permissions_table = table(
 # Perfis e permissões associadas
 profile_permissions = {
     "1": [  # Administrator: todas as permissões
-        "can_create_category", "can_view_categories", "can_update_category", "can_delete_category",
-        "can_create_product", "can_view_products", "can_update_product", "can_delete_product",
-        "can_create_order_item", "can_view_order_items", "can_update_order_item", "can_delete_order_item",
-        "can_create_order", "can_view_order", "can_update_order", "can_delete_order",
-        "can_create_order_status", "can_view_order_status", "can_update_order_status", "can_delete_order_status",
-        "can_create_permission", "can_view_permissions", "can_update_permission", "can_delete_permission",
-        "can_create_profile", "can_view_profiles", "can_update_profile", "can_delete_profile",
-        "can_create_profile_permission", "can_view_profile_permissions", "can_update_profile_permission", "can_delete_profile_permission",
-        "can_create_payment_method", "can_view_payment_methods", "can_update_payment_method", "can_delete_payment_method",
-        "can_create_payment", "can_view_payments", "can_update_payment", "can_delete_payment",
-        "can_create_payment_status", "can_view_payment_statuses", "can_update_payment_status", "can_delete_payment_status",
-        "can_create_role", "can_view_roles", "can_update_role", "can_delete_role",
-        "can_create_user", "can_view_users", "can_update_user", "can_delete_user",
-        "can_create_user_profile", "can_view_user_profiles", "can_update_user_profile", "can_delete_user_profile"
+        *CategoryPermissions.values(),
+        *ProductPermissions.values(),
+        *OrderPermissions.values(),
+        *OrderItemPermissions.values(),
+        *OrderStatusPermissions.values(),
+        *PermissionPermissions.values(),
+        *ProfilePermissions.values(),
+        *ProfilePermissionPermissions.values(),
+        *PaymentMethodPermissions.values(),
+        *PaymentPermissions.values(),
+        *PaymentStatusPermissions.values(),
+        *RolePermissions.values(),
+        *UserPermissions.values(),
+        *UserProfilePermissions.values(),
+        *EmployeePermissions.values(),
     ],
-    "2": [  # Employee: acesso limitado
-        "can_view_categories", "can_update_category",  # Apenas visualiza e atualiza categorias
-        "can_view_products", "can_update_product",  # Apenas visualiza e atualiza produtos
-        "can_create_order_item", "can_view_order_items", "can_update_order_item", "can_delete_order_item",  # Gerencia itens de pedidos
-        "can_view_order",  # Pode visualizar pedidos
-        "can_view_order_status", "can_update_order_status",  # Pode visualizar e atualizar status de pedidos
-        "can_view_permissions",  # Apenas visualização
-        "can_view_profiles",  # Apenas visualização
-        "can_view_profile_permissions",  # Apenas visualização de permissões de perfis
-        "can_view_roles",  # Apenas visualização de roles
-        "can_view_payment_methods",  # Apenas visualização de métodos de pagamento
-        "can_view_payment_statuses", "can_update_payment_statuses",  # Pode visualizar e atualizar status de pagamentos
-        "can_view_users",  # Apenas visualização de usuários
-        "can_view_user_profiles"  # Apenas visualização de perfis de usuários
+    "2": [  # Manager: todas as permissões
+        *CategoryPermissions.values(),
+        *ProductPermissions.values(),
+        *OrderPermissions.values(),
+        *OrderItemPermissions.values(),
+        *OrderStatusPermissions.values(),
+        *PermissionPermissions.values(),
+        *ProfilePermissions.values(),
+        *ProfilePermissionPermissions.values(),
+        *PaymentMethodPermissions.values(),
+        *PaymentPermissions.values(),
+        *PaymentStatusPermissions.values(),
+        *RolePermissions.values(),
+        *UserPermissions.values(),
+        *UserProfilePermissions.values(),
+        *EmployeePermissions.values(),
     ],
-    "3": [  # Client: acesso mínimo
-        "can_create_order", "can_view_order",  # Pode criar e visualizar pedidos
-        "can_create_order_item", "can_view_order_items",  # Pode criar e visualizar itens de pedidos
-        "can_view_categories",  # Apenas visualização de categorias
-        "can_view_products",  # Apenas visualização de produtos
-        "can_create_user_profile", "can_view_user_profiles"  # Pode criar e visualizar perfis relacionados ao cliente
-        "can_create_payment", "can_view_payments"  # Pode criar e visualizar pagamentos
+    "3": [  # Employee: acesso limitado
+        *CategoryPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *ProductPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *OrderItemPermissions.values(),  # Gerencia itens de pedidos
+        *OrderPermissions.list_only_values(only=["CAN_VIEW"]),
+        *OrderStatusPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *PermissionPermissions.list_only_values(only=["CAN_VIEW"]),
+        *ProfilePermissions.list_only_values(only=["CAN_VIEW"]),
+        *ProfilePermissionPermissions.list_only_values(only=["CAN_VIEW"]),
+        *RolePermissions.list_only_values(only=["CAN_VIEW"]),
+        *PaymentMethodPermissions.list_only_values(only=["CAN_VIEW"]),
+        *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *UserPermissions.list_only_values(only=["CAN_VIEW"]),
+        *UserProfilePermissions.list_only_values(only=["CAN_VIEW"]),
+        *EmployeePermissions.list_only_values(only=["CAN_VIEW"])
+    ],
+    "4": [  # Customer: acesso mínimo
+        *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
+        *OrderItemPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
+        *CategoryPermissions.list_only_values(only=["CAN_VIEW"]),
+        *ProductPermissions.list_only_values(only=["CAN_VIEW"]),
+        *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
+        *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
+        *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
     ]
 }
 

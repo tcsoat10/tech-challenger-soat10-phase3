@@ -1,7 +1,8 @@
 import uuid
 import os
+from faker import Faker
 import pytest
-from typing import Generator
+from typing import Dict, Generator, List, Optional
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect, text
@@ -10,6 +11,7 @@ from alembic import command
 from src.app import app
 from config import settings
 from config.database import get_db
+from src.core.utils.jwt_util import JWTUtil
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.order_factory import OrderFactory
@@ -153,11 +155,61 @@ def db_session(setup_test_database):
 
 
 @pytest.fixture(scope="function")
-def client() -> Generator[TestClient, None, None]:
+def client(db_session) -> Generator[TestClient, None, None]:
     """
     Cria um cliente de teste para a aplicação.
     """
+    """
+    Cria um cliente de teste para a aplicação.
+    Permissões devem ser informadas manualmente para cada requisição, caso contrário, serão vazias.
+    """
+    def create_mock_token(permissions: List[str], profile_name: Optional[str]) -> str:
+        fake = Faker("pt_BR")
+        mock_payload = {
+            "profile": {
+                "name": profile_name,
+                "permissions": permissions,
+            },
+            "person": {
+                "id": "1",
+                "name": "Test User",
+                "cpf": fake.ssn(),
+                "email": fake.email()
+            }
+        }
+        return JWTUtil.create_token(mock_payload)
+
+    def override_headers(headers: Dict[str, str] = None, permissions: List[str] = None, profile_name: Optional[str] = "administrator"):
+        if headers is None:
+            headers = {}
+        token = create_mock_token(permissions or [], profile_name)
+        headers.update({"Authorization": f"Bearer {token}"})
+        return headers
+
     with TestClient(app) as test_client:
+        def with_permissions(method, url, permissions=None, profile_name: Optional[str] = "administrator", **kwargs):
+            headers = kwargs.pop("headers", {})
+            kwargs["headers"] = override_headers(headers, permissions=permissions, profile_name=profile_name)
+            return method(url, **kwargs)
+
+        test_client._original_get = test_client.get
+        test_client._original_post = test_client.post
+        test_client._original_put = test_client.put
+        test_client._original_delete = test_client.delete
+
+        test_client.get = lambda url, permissions=None, **kwargs: with_permissions(
+            test_client._original_get, url, permissions=permissions, **kwargs
+        )
+        test_client.post = lambda url, permissions=None, **kwargs: with_permissions(
+            test_client._original_post, url, permissions=permissions, **kwargs
+        )
+        test_client.put = lambda url, permissions=None, **kwargs: with_permissions(
+            test_client._original_put, url, permissions=permissions, **kwargs
+        )
+        test_client.delete = lambda url, permissions=None, **kwargs: with_permissions(
+            test_client._original_delete, url, permissions=permissions, **kwargs
+        )
+
         yield test_client
 
 @pytest.fixture(scope="function", autouse=True)
