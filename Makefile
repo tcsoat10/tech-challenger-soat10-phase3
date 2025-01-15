@@ -16,11 +16,17 @@ up_build:
 down:
 	docker compose down --remove-orphans
 
-dev:
-	uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
-
 migrate_db:
 	alembic upgrade head
+
+dev:
+	@echo "Starting MySQL container..."
+	@docker compose up -d --build mysql-db
+	@echo "Applying migrations..."
+	@./config/init_db/init_db.sh
+	@echo "Starting Uvicorn..."
+	@trap 'docker compose down --remove-orphans' INT TERM EXIT; \
+	uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
 
 test_watch:
 	ENV=test ptw --runner 'pytest --ff $(extra)'
