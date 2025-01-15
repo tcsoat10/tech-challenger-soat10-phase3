@@ -1,6 +1,8 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends
 from config.database import get_db
 from sqlalchemy.orm import Session
+from src.core.auth.oauth2_password_request_form_custom import OAuth2PasswordRequestFormCustom
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
 from src.adapters.driven.repositories.profile_repository import ProfileRepository
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
@@ -19,17 +21,15 @@ def _get_auth_service(db_session: Session = Depends(get_db)) -> IAuthService:
     profile_repository: IProfileRepository = ProfileRepository(db_session)
     return AuthService(customer_repository, profile_repository, employee_repository)
 
-@router.post("/auth/customer/cpf", response_model=TokenDTO)
-def login_customer_cpf(dto: AuthByCpfDTO, auth_service: IAuthService = Depends(_get_auth_service)):
-    token = auth_service.login_customer_by_cpf(dto)
-    return token
 
-@router.post("/auth/employee", response_model=TokenDTO)
-def login_employee(dto: LoginDTO, auth_service: IAuthService = Depends(_get_auth_service)):
-    token = auth_service.login_employee(dto)
-    return token
-
-@router.post("/auth/customer/anonymous", response_model=TokenDTO)
-def login_anonymous(auth_service: IAuthService = Depends(_get_auth_service)):
-    token = auth_service.login_anonymous()
-    return token
+@router.post("/auth/token", response_model=TokenDTO)
+def get_oauth_token(
+    form_data: Annotated[OAuth2PasswordRequestFormCustom, Depends()],
+    auth_service: AuthService = Depends(_get_auth_service)
+):
+    if form_data.username and form_data.password:
+        return auth_service.login_employee(LoginDTO(username=form_data.username, password=form_data.password))
+    elif form_data.username:
+        return auth_service.login_customer_by_cpf(AuthByCpfDTO(cpf=form_data.username))
+   
+    return auth_service.login_anonymous()
