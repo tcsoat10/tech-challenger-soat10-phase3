@@ -12,8 +12,8 @@ class User(BaseEntity):
     name = Column(String(100), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False, unique=False)
 
-    user_profiles = relationship("UserProfile", back_populates="user")
-    profiles = relationship("Profile", secondary="user_profiles")
+    user_profiles = relationship("UserProfile", back_populates="user", overlaps="profiles")
+    profiles = relationship("Profile", secondary="user_profiles", back_populates="users", overlaps="user_profiles")
     
 
     @property 

@@ -9,8 +9,8 @@ class Permission(BaseEntity):
     name = Column(String(100), nullable=False, unique=True)
     description = Column(String(300))
 
-    profile_permissions = relationship("ProfilePermission", back_populates="permission")
+    profile_permissions = relationship("ProfilePermission", back_populates="permission", overlaps="profiles")
+    profiles = relationship("Profile", secondary="profile_permissions", back_populates="permissions", overlaps="profile_permissions")
 
-    profiles = relationship("Profile", secondary="profile_permissions", back_populates="permissions")
 
 __all__ = ["Permission"]
