@@ -9,8 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from alembic.config import Config
 from alembic import command
 from src.app import app
-from config import settings
-from config.database import get_db
+from config.database import DATABASE, get_db
 from src.core.utils.jwt_util import JWTUtil
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.employee_factory import EmployeeFactory
@@ -83,7 +82,7 @@ def setup_test_database():
         )
 
         # Redefinindo a constante DATABASE que será executada no env.py 
-        settings.DATABASE.update({
+        DATABASE.update({
             "drivername": "mysql+pymysql",
             "host": os.getenv("MYSQL_HOST", "localhost"),
             "port": os.getenv("MYSQL_PORT", "3306"),
@@ -92,7 +91,7 @@ def setup_test_database():
             "name": test_database,
         })
 
-        print(f"Usando configuração DATABASE={settings.DATABASE}")
+        print(f"Usando configuração DATABASE={DATABASE}")
 
         # Executando as migrações no banco de teste
         alembic_config = Config("alembic.ini")
