@@ -19,11 +19,11 @@ class AuthService(IAuthService):
     def login_customer_by_cpf(self, dto: AuthByCpfDTO) -> TokenDTO:
         customer: Customer = self.customer_repository.get_by_cpf(dto.cpf)
         if not customer:
-            raise EntityNotFoundException("Customer not found.")
+            raise EntityNotFoundException(entity_name="Customer")
 
         customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
-            raise EntityNotFoundException("Customer profile not found.")
+            raise EntityNotFoundException(entity_name="Customer profile")
 
         token = JWTUtil.create_token({
             "person": {
@@ -43,7 +43,7 @@ class AuthService(IAuthService):
     def login_anonymous(self) -> TokenDTO:
         customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
-            raise EntityNotFoundException("Customer profile not found.")
+            raise EntityNotFoundException(entity_name="Customer profile")
 
         token = JWTUtil.create_token({
             "person": {
@@ -64,7 +64,7 @@ class AuthService(IAuthService):
 
         employee_profile = self.profile_repository.get_by_name("employee")
         if not employee_profile:
-            raise EntityNotFoundException("Employee profile not found.")
+            raise EntityNotFoundException(entity_name="Employee profile")
 
         token = JWTUtil.create_token({
             "person": {
