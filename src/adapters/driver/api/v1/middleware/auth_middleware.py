@@ -1,12 +1,12 @@
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.security import HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
-from src.core.exceptions.forbidden_exception import ForbiddenException
-from src.core.exceptions.unauthorized_access_exception import UnauthorizedAccessException
+from starlette.responses import JSONResponse
+from src.core.exceptions.utils import ErrorCode
 from src.core.utils.jwt_util import JWTUtil
+import logging
 
 class AuthMiddleware(BaseHTTPMiddleware):
-
     async def dispatch(self, request: Request, call_next):
         open_routes = [
             "/openapi.json",
@@ -26,10 +26,30 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             token = await bearer(request)
             payload = JWTUtil.decode_token(token.credentials)
+            request.state.user = payload
         except ValueError as e:
-            raise UnauthorizedAccessException(details=str(e))
-        except Exception:
-            raise ForbiddenException()
+            logging.error(f"Unauthorized access: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={
+                    "error": {
+                        "code": ErrorCode.UNAUTHORIZED.value,
+                        "message": ErrorCode.UNAUTHORIZED.description,
+                        "details": str(e),
+                    }
+                },
+            )
+        except Exception as e:
+            logging.error(f"Forbidden access: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={
+                    "error": {
+                        "code": ErrorCode.FORBIDDEN.value,
+                        "message": ErrorCode.FORBIDDEN.description,
+                        "details": str(e),
+                    }
+                },
+            )
 
-        request.state.user = payload
         return await call_next(request)

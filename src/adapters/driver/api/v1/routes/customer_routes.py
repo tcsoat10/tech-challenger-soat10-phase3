@@ -34,7 +34,7 @@ def get_customer_by_id(customer_id: int, service: ICustomerService = Depends(_ge
 
 
 @router.get('/customers/{person_id}/person_id', response_model=CustomerDTO, status_code=status.HTTP_200_OK)
-def get_customer_by_id(person_id: int, service: ICustomerService = Depends(_get_customer_service)):
+def get_customer_by_person_id(person_id: int, service: ICustomerService = Depends(_get_customer_service)):
     return service.get_customer_by_person_id(person_id)
 
 
