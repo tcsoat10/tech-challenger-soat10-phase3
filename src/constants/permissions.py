@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 class BasePermissionEnum(str, Enum):
 
@@ -34,6 +34,10 @@ class BasePermissionEnum(str, Enum):
                 if any(filter_value.upper() in name for filter_value in only)
             ]
         return cls.values()
+    
+    @classmethod
+    def permission_and_description_as_dict(cls) -> Dict[str, str]:
+        return {member.value: member.description for member in cls}
 
     def __str__(self):
         return self.value

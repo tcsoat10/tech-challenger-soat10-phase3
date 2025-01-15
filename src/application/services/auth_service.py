@@ -25,19 +25,24 @@ class AuthService(IAuthService):
         if not customer_profile:
             raise EntityNotFoundException(entity_name="Customer profile")
 
-        token = JWTUtil.create_token({
+        permissions = [permission.name for permission in customer_profile.permissions]
+        if not permissions:
+            raise EntityNotFoundException(entity_name="Customer permissions")
+
+        token_payload = {
             "person": {
-                "id": customer.id,
+                "id": str(customer.id),
                 "name": customer.person.name,
                 "cpf": customer.person.cpf,
                 "email": customer.person.email,
             },
             "profile": {
                 "name": customer_profile.name,
-                "permissions": [permission.name for permission in customer_profile.permissions]
+                "permissions": permissions,
             },
-        })
+        }
 
+        token = JWTUtil.create_token(token_payload)
         return TokenDTO(access_token=token, token_type="bearer")
     
     def login_anonymous(self) -> TokenDTO:
@@ -45,16 +50,18 @@ class AuthService(IAuthService):
         if not customer_profile:
             raise EntityNotFoundException(entity_name="Customer profile")
 
-        token = JWTUtil.create_token({
+        token_payload = {
             "person": {
-                "id": uuid.uuid4().hex,
+                "id": str(uuid.uuid4().hex),
                 "name": "Anonymous User",
             },
             "profile": {
                 "name": customer_profile.name,
-                "permissions": [permission.name for permission in customer_profile.permissions]
-            }
-        })
+                "permissions": [permission.name for permission in customer_profile.permissions],
+            },
+        }
+
+        token = JWTUtil.create_token(token_payload)
         return TokenDTO(access_token=token, token_type="bearer")
 
     def login_employee(self, login_dto: LoginDTO) -> TokenDTO:
@@ -65,17 +72,23 @@ class AuthService(IAuthService):
         employee_profile = self.profile_repository.get_by_name("employee")
         if not employee_profile:
             raise EntityNotFoundException(entity_name="Employee profile")
+ 
+        permissions = [permission.name for permission in employee_profile.permissions]
+        if not permissions:
+            raise EntityNotFoundException(entity_name="Employee permissions")
 
-        token = JWTUtil.create_token({
+        token_payload = {
             "person": {
-                "id": employee.id,
+                "id": str(employee.id),
                 "name": employee.person.name,
                 "cpf": employee.person.cpf,
                 "email": employee.person.email,
             },
             "profile": {
                 "name": employee_profile.name,
-                "permissions": [permission.name for permission in employee_profile.permissions]
-            }
-        })
+                "permissions": permissions,
+            },
+        }
+
+        token = JWTUtil.create_token(token_payload)
         return TokenDTO(access_token=token, token_type="bearer")

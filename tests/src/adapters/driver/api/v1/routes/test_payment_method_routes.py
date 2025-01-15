@@ -155,7 +155,7 @@ def test_update_payment_method_duplicate_name_and_return_error(client):
 
 def test_delete_payment_method_and_return_success(client):
     PaymentMethodFactory(name="Pix", description="Pay with Pix")
-    # breakpoint()
+
     response = client.delete("/api/v1/payment-methods/1")
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
