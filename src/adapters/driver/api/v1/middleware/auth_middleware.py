@@ -13,9 +13,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/docs/oauth2-redirect",
             "/redoc",
-            "/auth/customer/cpf",
-            "/auth/customer/anonymous"
-            "/auth/employee",
+            "/api/v1/auth/customer/cpf",
+            "/api/v1/auth/customer/anonymous",
+            "/api/v1/auth/employee",
             "/api/v1/health"
         ]
 

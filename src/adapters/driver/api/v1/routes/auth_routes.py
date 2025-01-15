@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends
+from config.database import get_db
+from sqlalchemy.orm import Session
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
 from src.adapters.driven.repositories.profile_repository import ProfileRepository
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
@@ -11,10 +13,10 @@ from src.application.services.auth_service import AuthService
 
 router = APIRouter()
 
-def _get_auth_service() -> IAuthService:
-    employee_repository: IEmployeeRepository = EmployeeRepository()
-    customer_repository: ICustomerRepository = CustomerRepository()
-    profile_repository: IProfileRepository = ProfileRepository()
+def _get_auth_service(db_session: Session = Depends(get_db)) -> IAuthService:
+    employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
+    customer_repository: ICustomerRepository = CustomerRepository(db_session)
+    profile_repository: IProfileRepository = ProfileRepository(db_session)
     return AuthService(customer_repository, profile_repository, employee_repository)
 
 @router.post("/auth/customer/cpf", response_model=TokenDTO)
