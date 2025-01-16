@@ -12,13 +12,13 @@ class IOrderItemService(ABC):
     def create_order_item(self, dto: CreateOrderItemDTO) -> OrderItemDTO:
         pass
 
-    # @abstractmethod
-    # def get_order_item_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItemDTO]:
-    #     pass
+    @abstractmethod
+    def get_order_item_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItemDTO]:
+        pass
 
-    # @abstractmethod
-    # def get_order_item_by_product_name(self, order_id: int, product_name: str) -> OrderItemDTO:
-    #     pass
+    @abstractmethod
+    def get_order_item_by_product_name(self, order_id: int, product_name: str) -> OrderItemDTO:
+        pass
 
     @abstractmethod
     def get_order_item_by_id(self, order_item_id: int) -> OrderItemDTO:

@@ -1,13 +1,16 @@
 from fastapi import status
 
 from src.core.exceptions.utils import ErrorCode
+from tests.factories.order_factory import OrderFactory
 from tests.factories.product_factory import ProductFactory
 from tests.factories.order_item_factory import OrderItemFactory
 from src.constants.permissions import OrderItemPermissions
 
 def test_create_order_item_success(client, db_session):
     product = ProductFactory(name="Burger", price=10.0)
+    order = OrderFactory()
     payload = {
+        "order_id": order.id,
         "product_id": product.id,
         "quantity": 2,
         "observation": "No onions",
@@ -26,7 +29,9 @@ def test_create_order_item_success(client, db_session):
     assert data["total"] == product.price * payload["quantity"]
 
 def test_create_order_item_with_invalid_product_id(client, db_session):
+    order = OrderFactory()
     payload = {
+        "order_id": order.id,
         "product_id": 1,
         "quantity": 2,
         "observation": "No onions",
@@ -101,9 +106,11 @@ def test_get_all_order_items_with_empty_db(client, db_session):
 
 def test_update_order_item_success(client, db_session):
     order_item = OrderItemFactory(quantity=1, observation="No onions")
+    order = OrderFactory(order_items=[order_item])
 
     payload = {
         "id": order_item.id,
+        "order_id": order.id,
         "product_id": order_item.product_id,
         "quantity": 3,
         "observation": "No onions, please.",
@@ -123,9 +130,11 @@ def test_update_order_item_success(client, db_session):
 
 def test_update_order_item_with_invalid_product_id(client, db_session):
     order_item = OrderItemFactory(product__id=1)
+    order = OrderFactory(order_items=[order_item])
 
     payload = {
         "id": order_item.id,
+        "order_id": order.id,
         "product_id": 5,
         "quantity": 3,
         "observation": "No onions, please.",
@@ -148,6 +157,7 @@ def test_update_order_item_with_invalid_product_id(client, db_session):
 def test_update_order_item_with_invalid_order_item_id(client, db_session):
     payload = {
         "id": 1,
+        "order_id": 1,
         "product_id": 1,
         "quantity": 3,
         "observation": "No onions, please.",

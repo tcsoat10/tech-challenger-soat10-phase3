@@ -10,6 +10,7 @@ class ErrorCode(Enum):
     FORBIDDEN = ("FORBIDDEN", "Access denied.")
     UNAUTHORIZED = ("UNAUTHORIZED", "Unauthorized.")
     BAD_REQUEST = ("BAD_REQUEST", "Bad request.")
+    INTERNAL_SERVER_ERROR = ("INTERNAL_SERVER_ERROR", "Internal server error.")
 
     def __init__(self, value: str, description: str):
         self._value_ = value

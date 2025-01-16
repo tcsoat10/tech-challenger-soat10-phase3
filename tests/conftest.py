@@ -157,9 +157,6 @@ def db_session(setup_test_database):
 def client(db_session) -> Generator[TestClient, None, None]:
     """
     Cria um cliente de teste para a aplicação.
-    """
-    """
-    Cria um cliente de teste para a aplicação.
     Permissões devem ser informadas manualmente para cada requisição, caso contrário, serão vazias.
     """
     def create_mock_token(permissions: List[str], profile_name: Optional[str]) -> str:

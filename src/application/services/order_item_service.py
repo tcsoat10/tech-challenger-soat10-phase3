@@ -1,5 +1,6 @@
 from typing import List
 from config.database import DELETE_MODE
+from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.order_item.update_order_item_dto import UpdateOrderItemDTO
@@ -12,22 +13,36 @@ from src.core.ports.product.i_product_repository import IProductRepository
 
 class OrderItemService(IOrderItemService):
 
-    def __init__(self, repository: IOrderItemRepository, product_repository: IProductRepository):
+    def __init__(self, repository: IOrderItemRepository, product_repository: IProductRepository, order_repository: IOrderRepository):
         self.repository = repository
         self.product_repository = product_repository
+        self.order_repository = order_repository
 
     def create_order_item(self, dto: CreateOrderItemDTO) -> OrderItemDTO:
         product = self.product_repository.get_by_id(dto.product_id)
         if not product:
             raise EntityNotFoundException(entity_name="Product")
 
+        order = self.order_repository.get_by_id(dto.order_id)
+        if not order:
+            raise EntityNotFoundException(entity_name="Order")
+
         order_item = OrderItem(
+            order=order,
             product=product,
             quantity=dto.quantity,
             observation=dto.observation,
         )
 
         order_item = self.repository.create(order_item)
+        return OrderItemDTO.from_entity(order_item)
+    
+    def get_order_item_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItemDTO]:
+        order_items = self.repository.get_by_order_id(order_id, include_deleted)
+        return [OrderItemDTO.from_entity(order_item) for order_item in order_items]
+
+    def get_order_item_by_product_name(self, order_id: int, product_name: str) -> OrderItemDTO:
+        order_item = self.repository.get_by_product_name(order_id, product_name)
         return OrderItemDTO.from_entity(order_item)
     
     def get_order_item_by_id(self, order_item_id: int) -> OrderItemDTO:
