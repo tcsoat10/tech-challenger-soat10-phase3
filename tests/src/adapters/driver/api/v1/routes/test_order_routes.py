@@ -5,6 +5,7 @@ from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.order_factory import OrderFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
+from src.constants.permissions import OrderPermissions
 
 
 def test_create_order_success(client):
@@ -19,7 +20,7 @@ def test_create_order_success(client):
         "id_employee": employee.id
     }
 
-    response = client.post("/api/v1/order", json=payload)
+    response = client.post("/api/v1/order", json=payload, permissions=[OrderPermissions.CAN_CREATE_ORDER])
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
@@ -63,7 +64,7 @@ def test_get_order_by_customer_id_and_return_success(client):
     employee = EmployeeFactory(person=person2)
     order_status = OrderStatusFactory()
     OrderFactory(customer=customer, employee=employee, order_status=order_status)
-    response = client.get(f"/api/v1/orders/{customer.id}/id_customer")
+    response = client.get(f"/api/v1/orders/{customer.id}/id_customer", permissions=[OrderPermissions.CAN_VIEW_ORDERS])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert "id" in data[0]
@@ -90,7 +91,7 @@ def test_get_order_by_employee_id_and_return_success(client):
     order_status = OrderStatusFactory()
     OrderFactory(customer=customer, employee=employee, order_status=order_status)
     
-    response = client.get(f"/api/v1/orders/{employee.id}/id_employee")
+    response = client.get(f"/api/v1/orders/{employee.id}/id_employee", permissions=[OrderPermissions.CAN_VIEW_ORDERS])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -118,7 +119,7 @@ def test_get_order_by_id_and_return_success(client):
     order_status = OrderStatusFactory()
     order = OrderFactory(customer=customer, employee=employee, order_status=order_status)
     
-    response = client.get(f"/api/v1/order/{order.id}/id")
+    response = client.get(f"/api/v1/order/{order.id}/id", permissions=[OrderPermissions.CAN_VIEW_ORDERS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -155,7 +156,7 @@ def test_get_all_order_return_success(client):
     order_status = OrderStatusFactory()
     order2 = OrderFactory(customer=customer2, employee=employee, order_status=order_status)
     
-    response = client.get("/api/v1/orders")
+    response = client.get("/api/v1/orders", permissions=[OrderPermissions.CAN_VIEW_ORDERS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -197,7 +198,7 @@ def test_update_order_and_return_success(client):
         "id_employee": employee.id
     }
 
-    response = client.put(f"/api/v1/order/{order.id}", json=payload)
+    response = client.put(f"/api/v1/order/{order.id}", json=payload, permissions=[OrderPermissions.CAN_UPDATE_ORDER])
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -207,10 +208,10 @@ def test_delete_customer_and_return_success(client):
     order1 = OrderFactory()
     order2 = OrderFactory()
 
-    response = client.delete(f"/api/v1/order/{order1.id}")
+    response = client.delete(f"/api/v1/order/{order1.id}", permissions=[OrderPermissions.CAN_DELETE_ORDER])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get("/api/v1/orders")
+    response = client.get("/api/v1/orders", permissions=[OrderPermissions.CAN_VIEW_ORDERS])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 
