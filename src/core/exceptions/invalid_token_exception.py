@@ -1,13 +1,15 @@
-from fastapi import HTTPException, status
+from fastapi import status
 
+from src.core.exceptions.base_exception import BaseAppException
 from src.core.exceptions.utils import ErrorCode
 
-class InvalidTokenException(HTTPException):
+class InvalidTokenException(BaseAppException):
     def __init__(self, **kwargs):
+        message = kwargs.pop("message")
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            code=str(ErrorCode.INVALID_TOKEN),
-            message="Invalid token payload",
+            error_code=ErrorCode.INVALID_TOKEN,
+            message= message or "Invalid token payload",
             headers={"WWW-Authenticate": "Bearer"},
             **kwargs,
         )

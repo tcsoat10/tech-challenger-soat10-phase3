@@ -44,19 +44,20 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     "error": {
                         "code": ErrorCode.UNAUTHORIZED.value,
                         "message": ErrorCode.UNAUTHORIZED.description,
-                        "details": str(e),
+                        "details": e.detail.get('message', str(e)),
                     }
                 },
             )
         except Exception as e:
             logging.error(f"Forbidden access: {e}")
+            breakpoint()
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content={
                     "error": {
                         "code": ErrorCode.FORBIDDEN.value,
                         "message": ErrorCode.FORBIDDEN.description,
-                        "details": str(e),
+                        "details": e.detail.get('message', str(e)),
                     }
                 },
             )

@@ -14,6 +14,6 @@ class PersonFactory(SQLAlchemyModelFactory):
 
     id = factory.Sequence(lambda n: n + 1)
     cpf = factory.LazyAttribute(lambda _: fake.ssn())
-    name = factory.LazyAttribute(lambda _: fake.unique.word().capitalize())
+    name = factory.LazyAttribute(lambda _: fake.name())
     email = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))
     birth_date = factory.LazyAttribute(lambda _: fake.date_of_birth(minimum_age=5, maximum_age=100))

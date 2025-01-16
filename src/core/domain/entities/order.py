@@ -12,6 +12,8 @@ class Order(BaseEntity):
     order_status = relationship('OrderStatus')
     id_employee = Column('id_employee', Integer, ForeignKey('employees.id'), nullable=True)
     employee = relationship('Employee')
+
+    order_items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
     
     @property
     def order_status_name(self):
@@ -24,5 +26,9 @@ class Order(BaseEntity):
     @property
     def employee_name(self):
         return self.employee.person.name
+    
+    @property
+    def total(self):
+        return sum([item.total for item in self.order_items])
 
     __all__ = ['Order']

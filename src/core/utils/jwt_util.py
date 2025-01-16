@@ -18,9 +18,9 @@ class JWTUtil:
         try:
             payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
             if not payload:
-                raise InvalidTokenException("Invalid token payload")
+                raise InvalidTokenException(message="Invalid token payload")
             return payload
         except jwt.ExpiredSignatureError:
-                raise InvalidTokenException("Token has expired.")
+                raise InvalidTokenException(message="Token has expired.")
         except jwt.InvalidTokenError:
-                raise InvalidTokenException("Invalid token.")
+                raise InvalidTokenException(message="Invalid token.")

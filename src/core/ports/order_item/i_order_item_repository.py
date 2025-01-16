@@ -10,13 +10,13 @@ class IOrderItemRepository(ABC):
     def create(order_item: OrderItem):
         pass
 
-    # @abstractmethod
-    # def get_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItem]:
-    #     pass
+    @abstractmethod
+    def get_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItem]:
+        pass
 
-    # @abstractmethod
-    # def get_by_product_name(self, order_id: int, product_name: str) -> OrderItem:
-    #     pass
+    @abstractmethod
+    def get_by_product_name(self, order_id: int, product_name: str) -> OrderItem:
+        pass
 
     @abstractmethod
     def get_by_id(self, order_item_id: int) -> OrderItem:
