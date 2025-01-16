@@ -3,8 +3,9 @@ from fastapi import status
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.product_factory import ProductFactory
 from tests.factories.order_item_factory import OrderItemFactory
+from src.constants.permissions import OrderItemPermissions
 
-def test_create_product_success(client, db_session):
+def test_create_order_item_success(client, db_session):
     product = ProductFactory(name="Burger", price=10.0)
     payload = {
         "product_id": product.id,
@@ -12,7 +13,7 @@ def test_create_product_success(client, db_session):
         "observation": "No onions",
     }
 
-    response = client.post("/api/v1/order-items", json=payload)
+    response = client.post("/api/v1/order-items", json=payload, permissions=[OrderItemPermissions.CAN_CREATE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -31,7 +32,7 @@ def test_create_order_item_with_invalid_product_id(client, db_session):
         "observation": "No onions",
     }
 
-    response = client.post("/api/v1/order-items", json=payload)
+    response = client.post("/api/v1/order-items", json=payload, permissions=[OrderItemPermissions.CAN_CREATE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -47,7 +48,7 @@ def test_create_order_item_with_invalid_product_id(client, db_session):
 
 def test_get_order_item_by_id_success(client, db_session):
     order_item = OrderItemFactory()
-    response = client.get(f"/api/v1/order-items/{order_item.id}/id")
+    response = client.get(f"/api/v1/order-items/{order_item.id}/id", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -61,7 +62,7 @@ def test_get_order_item_by_id_success(client, db_session):
 
 
 def test_get_order_item_by_id_with_invalid_id(client, db_session):
-    response = client.get("/api/v1/order-items/1/id")
+    response = client.get("/api/v1/order-items/1/id", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -79,7 +80,7 @@ def test_get_all_order_items_success(client, db_session):
     order_item1 = OrderItemFactory()
     order_item2 = OrderItemFactory()
 
-    response = client.get("/api/v1/order-items")
+    response = client.get("/api/v1/order-items", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -90,7 +91,7 @@ def test_get_all_order_items_success(client, db_session):
     assert data[1]["id"] == order_item2.id
 
 def test_get_all_order_items_with_empty_db(client, db_session):
-    response = client.get("/api/v1/order-items")
+    response = client.get("/api/v1/order-items", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -108,7 +109,7 @@ def test_update_order_item_success(client, db_session):
         "observation": "No onions, please.",
     }
 
-    response = client.put(f"/api/v1/order-items/{order_item.id}", json=payload)
+    response = client.put(f"/api/v1/order-items/{order_item.id}", json=payload, permissions=[OrderItemPermissions.CAN_UPDATE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -130,7 +131,7 @@ def test_update_order_item_with_invalid_product_id(client, db_session):
         "observation": "No onions, please.",
     }
 
-    response = client.put(f"/api/v1/order-items/{order_item.id}", json=payload)
+    response = client.put(f"/api/v1/order-items/{order_item.id}", json=payload, permissions=[OrderItemPermissions.CAN_UPDATE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -152,7 +153,7 @@ def test_update_order_item_with_invalid_order_item_id(client, db_session):
         "observation": "No onions, please.",
     }
 
-    response = client.put("/api/v1/order-items/1", json=payload)
+    response = client.put("/api/v1/order-items/1", json=payload, permissions=[OrderItemPermissions.CAN_UPDATE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -169,12 +170,12 @@ def test_update_order_item_with_invalid_order_item_id(client, db_session):
 def test_delete_order_item_success(client, db_session):
     order_item = OrderItemFactory()
 
-    response = client.delete(f"/api/v1/order-items/{order_item.id}")
+    response = client.delete(f"/api/v1/order-items/{order_item.id}", permissions=[OrderItemPermissions.CAN_DELETE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 def test_delete_order_item_with_invalid_id(client, db_session):
-    response = client.delete("/api/v1/order-items/1")
+    response = client.delete("/api/v1/order-items/1", permissions=[OrderItemPermissions.CAN_DELETE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -191,11 +192,11 @@ def test_delete_order_item_with_invalid_id(client, db_session):
 def test_delete_order_item_twice(client, db_session):
     order_item = OrderItemFactory()
 
-    response = client.delete(f"/api/v1/order-items/{order_item.id}")
+    response = client.delete(f"/api/v1/order-items/{order_item.id}", permissions=[OrderItemPermissions.CAN_DELETE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.delete(f"/api/v1/order-items/{order_item.id}")
+    response = client.delete(f"/api/v1/order-items/{order_item.id}", permissions=[OrderItemPermissions.CAN_DELETE_ORDER_ITEM])
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
