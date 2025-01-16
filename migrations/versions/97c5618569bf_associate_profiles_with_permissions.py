@@ -13,6 +13,7 @@ from sqlalchemy import Integer, String, DateTime, MetaData
 from datetime import datetime, timezone
 from src.constants.permissions import (
     CategoryPermissions,
+    CustomerPermissions,
     ProductPermissions,
     OrderItemPermissions,
     OrderPermissions,
@@ -68,6 +69,7 @@ profile_permissions = {
         *UserPermissions.values(),
         *UserProfilePermissions.values(),
         *EmployeePermissions.values(),
+        *CustomerPermissions.values(),
     ],
     "2": [  # Manager: todas as permissões
         *CategoryPermissions.values(),
@@ -85,6 +87,7 @@ profile_permissions = {
         *UserPermissions.values(),
         *UserProfilePermissions.values(),
         *EmployeePermissions.values(),
+        *CustomerPermissions.values(),
     ],
     "3": [  # Employee: acesso limitado
         *CategoryPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
@@ -100,7 +103,8 @@ profile_permissions = {
         *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *UserPermissions.list_only_values(only=["CAN_VIEW"]),
         *UserProfilePermissions.list_only_values(only=["CAN_VIEW"]),
-        *EmployeePermissions.list_only_values(only=["CAN_VIEW"])
+        *EmployeePermissions.list_only_values(only=["CAN_VIEW"]),
+        *CustomerPermissions.list_only_values(only=["CAN_VIEW"]),
     ],
     "4": [  # Customer: acesso mínimo
         *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
@@ -110,6 +114,7 @@ profile_permissions = {
         *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
         *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
         *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
+        *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
     ]
 }
 
