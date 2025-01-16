@@ -24,7 +24,6 @@ def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerSer
     person_repository: IPersonRepository = PersonRepository(db_session)
     return CustomerService(customer_repository, person_repository)
 
-
 @router.post(
         '/customers',
         response_model=CustomerDTO,
