@@ -3,6 +3,7 @@ from tests.factories.role_factory import RoleFactory
 from tests.factories.user_factory import UserFactory
 from tests.factories.employee_factory import EmployeeFactory
 from src.core.exceptions.utils import ErrorCode
+from src.constants.permissions import EmployeePermissions
 
 from fastapi import status
 from datetime import datetime
@@ -14,7 +15,7 @@ def test_create_employee_success(client):
     user = UserFactory()
     payload = {'person_id': person.id, 'role_id': role.id, 'user_id': user.id}
     
-    response = client.post('/api/v1/employees', json=payload)
+    response = client.post('/api/v1/employees', json=payload, permissions=[EmployeePermissions.CAN_CREATE_EMPLOYEE])
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
@@ -28,7 +29,7 @@ def test_create_duplicate_employee_return_error(client):
     employee = EmployeeFactory()
     payload = {'person_id': employee.person_id, 'role_id': employee.role_id, 'user_id': employee.user_id}
 
-    response = client.post('/api/v1/employees', json=payload)
+    response = client.post('/api/v1/employees', json=payload, permissions=[EmployeePermissions.CAN_CREATE_EMPLOYEE])
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
@@ -45,7 +46,7 @@ def test_reactivate_employee_success(client):
     employee = EmployeeFactory(inactivated_at=datetime.now())
     payload = {'person_id': employee.person_id, 'role_id': employee.role_id, 'user_id': employee.user_id}
 
-    response = client.post('/api/v1/employees', json=payload)
+    response = client.post('/api/v1/employees', json=payload, permissions=[EmployeePermissions.CAN_CREATE_EMPLOYEE])
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
@@ -58,7 +59,7 @@ def test_reactivate_employee_success(client):
 def test_get_employee_by_id_success(client):
     employee = EmployeeFactory()
 
-    response = client.get(f'/api/v1/employees/{employee.id}/id')
+    response = client.get(f'/api/v1/employees/{employee.id}/id', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -71,7 +72,7 @@ def test_get_employee_by_id_success(client):
 def test_get_employee_by_person_id_success(client):
     employee = EmployeeFactory()
 
-    response = client.get(f'/api/v1/employees/{employee.person_id}/person_id')
+    response = client.get(f'/api/v1/employees/{employee.person_id}/person_id', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -84,7 +85,7 @@ def test_get_employee_by_person_id_success(client):
 def test_get_employee_by_user_id_success(client):
     employee = EmployeeFactory()
 
-    response = client.get(f'/api/v1/employees/{employee.user_id}/user_id')
+    response = client.get(f'/api/v1/employees/{employee.user_id}/user_id', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -100,7 +101,7 @@ def test_get_employees_by_role_id_success(client):
     employee2 = EmployeeFactory(role=role)
     employee3 = EmployeeFactory()
 
-    response = client.get(f'/api/v1/employees/{role.id}/role_id')
+    response = client.get(f'/api/v1/employees/{role.id}/role_id', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -151,7 +152,7 @@ def test_get_all_employees_success(client):
     employee1 = EmployeeFactory()
     employee2 = EmployeeFactory()
 
-    response = client.get('/api/v1/employees')
+    response = client.get('/api/v1/employees', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -204,7 +205,7 @@ def update_employee_success(client):
 
     payload = {'id': employee.id, 'person_id': person.id, 'role_id': employee.role.id, 'user_id': employee.user.id}
 
-    response = client.put(f'/api/v1/employees/{employee.id}', json=payload)
+    response = client.put(f'/api/v1/employees/{employee.id}', json=payload, permissions=[EmployeePermissions.CAN_UPDATE_EMPLOYEE])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
@@ -233,10 +234,10 @@ def test_delete_employee_success(client):
     employee1 = EmployeeFactory()
     employee2 = EmployeeFactory()
 
-    response = client.delete(f'/api/v1/employees/{employee1.id}')
+    response = client.delete(f'/api/v1/employees/{employee1.id}', permissions=[EmployeePermissions.CAN_DELETE_EMPLOYEE])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get('/api/v1/employees')
+    response = client.get('/api/v1/employees', permissions=[EmployeePermissions.CAN_VIEW_EMPLOYEES])
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
