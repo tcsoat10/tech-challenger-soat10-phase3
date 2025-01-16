@@ -13,5 +13,5 @@ class OrderStatusFactory(SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)
-    status = factory.LazyAttribute(lambda _: fake.random_element(elements=('RECEIVED', 'IN_PREPARATION', 'READY', 'FINISHED', 'CANCELED')))
+    status = factory.LazyAttribute(lambda _: fake.sentence(nb_words=2))
     status_description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))
