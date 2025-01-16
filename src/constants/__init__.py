@@ -15,6 +15,7 @@ from .permissions import (
     UserPermissions,
     UserProfilePermissions,
     EmployeePermissions,
+    CustomerPermissions,
 )
 
 __all__ = [
@@ -34,4 +35,5 @@ __all__ = [
     "UserPermissions",
     "UserProfilePermissions",
     "EmployeePermissions",
+    "CustomerPermissions",
 ]

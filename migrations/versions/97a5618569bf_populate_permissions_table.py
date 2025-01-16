@@ -14,6 +14,7 @@ from sqlalchemy import String
 
 from src.constants.permissions import (
     CategoryPermissions,
+    CustomerPermissions,
     ProductPermissions,
     OrderItemPermissions,
     OrderPermissions,
@@ -88,6 +89,9 @@ permissions = [
 
     # Employees
     *EmployeePermissions.values_and_descriptions(),
+
+    # Customers
+    *CustomerPermissions.values_and_descriptions(),
 ]
 
 
