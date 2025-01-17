@@ -3,6 +3,7 @@ from fastapi import status
 import pytest
 
 from tests.factories.order_status_factory import OrderStatusFactory
+from src.constants.permissions import OrderStatusPermissions
 
 
 @pytest.mark.parametrize("payload", [
@@ -11,7 +12,7 @@ from tests.factories.order_status_factory import OrderStatusFactory
 ])
 
 def test_create_order_status_success(client, db_session, payload):
-    response = client.post("/api/v1/order_status", json=payload)
+    response = client.post("/api/v1/order_status", json=payload, permissions=[OrderStatusPermissions.CAN_CREATE_ORDER_STATUS])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -29,7 +30,7 @@ def test_create_order_status_duplicate_status_and_return_error(client, db_sessio
         "status_description": "TESTE DE STATUS ATIVO"
     }
 
-    response = client.post("/api/v1/order_status", json=payload)
+    response = client.post("/api/v1/order_status", json=payload, permissions=[OrderStatusPermissions.CAN_CREATE_ORDER_STATUS])
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
@@ -45,7 +46,7 @@ def test_get_order_status_by_status_and_return_success(client):
         status_description="TESTE DE STATUS INATIVO"
     )
     
-    response = client.get("/api/v1/order_status/ATIVO/status")
+    response = client.get("/api/v1/order_status/ATIVO/status", permissions=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -64,7 +65,7 @@ def test_get_order_status_by_id_and_return_success(client):
         status_description="TESTE DE STATUS INATIVO"
     )
     
-    response = client.get(f"/api/v1/order_status/{order_status1.id}/id")
+    response = client.get(f"/api/v1/order_status/{order_status1.id}/id", permissions=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -83,7 +84,7 @@ def test_get_all_order_status_return_success(client):
         status_description="TESTE DE STATUS INATIVO"
     )
     
-    response = client.get("/api/v1/order_status")
+    response = client.get("/api/v1/order_status", permissions=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -113,7 +114,7 @@ def test_update_order_status_and_return_success(client):
         "status_description": "TESTE DE STATUS ATIVO - UPDATED"
     }
 
-    response = client.put(f"/api/v1/order_status/{order_status.id}", json=payload)
+    response = client.put(f"/api/v1/order_status/{order_status.id}", json=payload, permissions=[OrderStatusPermissions.CAN_UPDATE_ORDER_STATUS])
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -127,10 +128,10 @@ def test_delete_order_status_and_return_success(client):
     order_status1 = OrderStatusFactory(status="ATIVO", status_description="TESTE DE STATUS ATIVO")
     order_status2 = OrderStatusFactory(status="INATIVO", status_description="TESTE DE STATUS INATIVO")
 
-    response = client.delete(f"/api/v1/order_status/{order_status1.id}")
+    response = client.delete(f"/api/v1/order_status/{order_status1.id}", permissions=[OrderStatusPermissions.CAN_DELETE_ORDER_STATUS])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get("/api/v1/order_status")
+    response = client.get("/api/v1/order_status", permissions=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 
