@@ -1,9 +1,9 @@
 from datetime import datetime
+from src.constants.permissions import ProfilePermissionPermissions
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.profile_permission_factory import ProfilePermissionFactory
 from tests.factories.permission_factory import PermissionFactory
 from tests.factories.profile_factory import ProfileFactory
-from src.adapters.driven.repositories.profile_permission_repository import ProfilePermissionRepository
 
 from fastapi import status
 
@@ -13,7 +13,7 @@ def test_create_profile_permission(client, db_session):
     profile = ProfileFactory()
     payload = {'permission_id': permission.id, 'profile_id': profile.id}
     
-    response = client.post('api/v1/profile_permissions', json=payload)
+    response = client.post('api/v1/profile_permissions', json=payload, permissions=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -28,7 +28,7 @@ def test_create_duplicate_profile_permission_and_return_error(client, db_session
     profile_permission = ProfilePermissionFactory()
     payload = {'permission_id': profile_permission.permission_id, 'profile_id': profile_permission.profile_id}
     
-    response = client.post('api/v1/profile_permissions', json=payload)
+    response = client.post('api/v1/profile_permissions', json=payload, permissions=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])
 
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -46,7 +46,7 @@ def test_reactivate_profile_permission_and_return_success(client, db_session):
     profile_permission = ProfilePermissionFactory(inactivated_at=datetime.now())
     payload = {'permission_id': profile_permission.permission_id, 'profile_id': profile_permission.profile_id}
 
-    response = client.post('api/v1/profile_permissions', json=payload)
+    response = client.post('api/v1/profile_permissions', json=payload, permissions=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -61,7 +61,7 @@ def test_get_profile_permission_by_id_and_return_sucess(client):
     profile_permission_1 = ProfilePermissionFactory()
     profile_permission_2 = ProfilePermissionFactory()
 
-    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.id}/id')
+    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.id}/id', permissions=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -77,7 +77,7 @@ def test_get_profile_permission_by_permission_id_and_return_success(client):
     profile_permission_1 = ProfilePermissionFactory()
     profile_permission_2 = ProfilePermissionFactory()
 
-    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.permission_id}/permission_id')
+    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.permission_id}/permission_id', permissions=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -91,7 +91,7 @@ def test_get_profile_permission_by_profile_id_and_return_success(client):
     profile_permission_1 = ProfilePermissionFactory()
     profile_permission_2 = ProfilePermissionFactory()
 
-    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.profile_id}/profile_id')
+    response = client.get(f'/api/v1/profile_permissions/{profile_permission_2.profile_id}/profile_id', permissions=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -106,7 +106,7 @@ def test_get_all_profile_permissions_return_success(client):
     profile_permission_1 = ProfilePermissionFactory()
     profile_permission_2 = ProfilePermissionFactory()
 
-    response = client.get('/api/v1/profile_permissions')
+    response = client.get('/api/v1/profile_permissions', permissions=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -165,7 +165,7 @@ def test_update_profile_permission_and_return_success(client):
         'profile_id': profile_permission.profile.id
     }
     
-    response = client.put(f'/api/v1/profile_permissions/{profile_permission.id}', json=payload)
+    response = client.put(f'/api/v1/profile_permissions/{profile_permission.id}', json=payload, permissions=[ProfilePermissionPermissions.CAN_UPDATE_PROFILE_PERMISSION])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -189,10 +189,10 @@ def test_delete_profile_permission_and_return_success(client):
     profile_permission1 = ProfilePermissionFactory()
     profile_permission2 = ProfilePermissionFactory()
 
-    response = client.delete(f'api/v1/profile_permissions/{profile_permission1.id}')
+    response = client.delete(f'api/v1/profile_permissions/{profile_permission1.id}', permissions=[ProfilePermissionPermissions.CAN_DELETE_PROFILE_PERMISSION])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get('/api/v1/profile_permissions')
+    response = client.get('/api/v1/profile_permissions', permissions=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 

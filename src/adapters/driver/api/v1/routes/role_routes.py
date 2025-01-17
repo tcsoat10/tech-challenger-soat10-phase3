@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
 from typing import List
 
 from config.database import get_db
+from src.core.auth.dependencies import get_current_user
+from src.constants.permissions import RolePermissions
 from src.core.ports.role.i_role_service import IRoleService
 from src.core.ports.role.i_role_repository import IRoleRepository
 from src.adapters.driven.repositories.role_repository import RoleRepository
@@ -20,31 +22,84 @@ def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
     return RoleService(repository)
 
 
-@router.post('/roles', response_model=RoleDTO, status_code=status.HTTP_201_CREATED)
-def create_role(dto: CreateRoleDTO, service: IRoleService = Depends(_get_role_service)):
+@router.post(
+    '/roles',
+    response_model=RoleDTO,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_CREATE_ROLE])]
+)
+def create_role(
+    dto: CreateRoleDTO,
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     return service.create_role(dto)
 
 
-@router.get('/roles/{role_name}/name', response_model=RoleDTO, status_code=status.HTTP_200_OK)
-def get_role_by_name(role_name: str, service: IRoleService = Depends(_get_role_service)):
+@router.get(
+    '/roles/{role_name}/name',
+    response_model=RoleDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
+)
+def get_role_by_name(
+    role_name: str,
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     return service.get_role_by_name(role_name)
 
 
-@router.get('/roles/{role_id}/id', response_model=RoleDTO, status_code=status.HTTP_200_OK)
-def get_role_by_id(role_id: str, service: IRoleService = Depends(_get_role_service)):
+@router.get(
+    '/roles/{role_id}/id',
+    response_model=RoleDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
+)
+def get_role_by_id(
+    role_id: str,
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     return service.get_role_by_id(role_id)
 
 
-@router.get('/roles', response_model=List[RoleDTO], status_code=status.HTTP_200_OK)
-def get_all_roles(service: IRoleService = Depends(_get_role_service)):
+@router.get(
+    '/roles',
+    response_model=List[RoleDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
+)
+def get_all_roles(
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     return service.get_all_roles()
 
 
-@router.put('/roles/{role_id}', response_model=RoleDTO, status_code=status.HTTP_200_OK)
-def update_role(role_id: int, dto: UpdateRoleDTO, service: IRoleService = Depends(_get_role_service)):
+@router.put(
+    '/roles/{role_id}',
+    response_model=RoleDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_UPDATE_ROLE])]
+)
+def update_role(
+    role_id: int,
+    dto: UpdateRoleDTO,
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     return service.update_role(role_id, dto)
 
 
-@router.delete('/roles/{role_id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_role(role_id: int, service: IRoleService = Depends(_get_role_service)):
+@router.delete(
+    '/roles/{role_id}',
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_DELETE_ROLE])]
+)
+def delete_role(
+    role_id: int,
+    service: IRoleService = Depends(_get_role_service),
+    user=Depends(get_current_user)
+):
     service.delete_role(role_id)

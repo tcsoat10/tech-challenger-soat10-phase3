@@ -50,7 +50,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
         except Exception as e:
             logging.error(f"Forbidden access: {e}")
-            breakpoint()
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content={
