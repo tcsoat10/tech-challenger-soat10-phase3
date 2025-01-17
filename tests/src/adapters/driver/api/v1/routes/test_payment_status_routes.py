@@ -5,6 +5,7 @@ import pytest
 
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.payment_status_factory import PaymentStatusFactory
+from src.constants.permissions import PaymentStatusPermissions
 
 
 @pytest.mark.parametrize("payload", [
@@ -14,7 +15,7 @@ from tests.factories.payment_status_factory import PaymentStatusFactory
     {"name": "Refunded", "description": "Payment refunded"},
 ])
 def test_create_payment_status_and_return_success(client, payload):
-    response = client.post("/api/v1/payment-status", json=payload)
+    response = client.post("/api/v1/payment-status", json=payload, permissions=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -24,7 +25,11 @@ def test_create_payment_status_and_return_success(client, payload):
 def test_create_payment_status_duplicated_and_return_error(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
 
-    response = client.post("/api/v1/payment-status", json={"name": "Pending", "description": "Payment pending"})
+    response = client.post(
+        "/api/v1/payment-status",
+        json={"name": "Pending", "description": "Payment pending"},
+        permissions=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -40,7 +45,7 @@ def test_create_payment_status_duplicated_and_return_error(client):
 def test_reactivate_payment_status_and_return_success(client):
     PaymentStatusFactory(name="Pending", description="Payment pending", inactivated_at=datetime.now())
 
-    response = client.post("/api/v1/payment-status", json={"name": "Pending", "description": "Payment pending"})
+    response = client.post("/api/v1/payment-status", json={"name": "Pending", "description": "Payment pending"}, permissions=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -52,7 +57,11 @@ def test_reactivate_payment_status_and_return_success(client):
     }
 
 def test_send_unexpected_param_to_create_payment_status_and_return_error(client):
-    response = client.post("/api/v1/payment-status", json={"name": "Pending", "description": "Payment pending", "unexpected_param": "123"})
+    response = client.post(
+        "/api/v1/payment-status",
+        json={"name": "Pending", "description": "Payment pending", "unexpected_param": "123"},
+        permissions=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -70,7 +79,10 @@ def test_get_payment_status_by_name_and_return_success(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
     PaymentStatusFactory(name="Paid", description="Payment paid")
     
-    response = client.get("/api/v1/payment-status/Paid/name")
+    response = client.get(
+        "/api/v1/payment-status/Paid/name",
+        permissions=[PaymentStatusPermissions.CAN_VIEW_PAYMENT_STATUSES]
+    )
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -85,7 +97,10 @@ def test_get_payment_status_by_id_and_return_success(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
     PaymentStatusFactory(name="Paid", description="Payment paid")
     
-    response = client.get("/api/v1/payment-status/1/id")
+    response = client.get(
+        "/api/v1/payment-status/1/id",
+        permissions=[PaymentStatusPermissions.CAN_VIEW_PAYMENT_STATUSES]
+    )
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -100,7 +115,7 @@ def test_get_all_payment_status_and_return_success(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
     PaymentStatusFactory(name="Paid", description="Payment paid")
     
-    response = client.get("/api/v1/payment-status")
+    response = client.get("/api/v1/payment-status", permissions=[PaymentStatusPermissions.CAN_VIEW_PAYMENT_STATUSES])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -128,7 +143,11 @@ def test_update_payment_status_and_return_success(client):
         "description": "Payment pending updated"
     }
     
-    response = client.put("/api/v1/payment-status/1", json=payload)
+    response = client.put(
+        "/api/v1/payment-status/1",
+        json=payload,
+        permissions=[PaymentStatusPermissions.CAN_UPDATE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -149,7 +168,9 @@ def test_update_payment_status_not_found_and_return_error(client):
         "description": "Payment pending updated"
     }
     
-    response = client.put("/api/v1/payment-status/3", json=payload)
+    response = client.put(
+        "/api/v1/payment-status/3", json=payload, permissions=[PaymentStatusPermissions.CAN_UPDATE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -166,7 +187,9 @@ def test_delete_payment_status_and_return_success(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
     PaymentStatusFactory(name="Paid", description="Payment paid")
     
-    response = client.delete("/api/v1/payment-status/1")
+    response = client.delete(
+        "/api/v1/payment-status/1", permissions=[PaymentStatusPermissions.CAN_DELETE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -174,7 +197,9 @@ def test_delete_payment_status_not_found_and_return_error(client):
     PaymentStatusFactory(name="Pending", description="Payment pending")
     PaymentStatusFactory(name="Paid", description="Payment paid")
     
-    response = client.delete("/api/v1/payment-status/3")
+    response = client.delete(
+        "/api/v1/payment-status/3", permissions=[PaymentStatusPermissions.CAN_DELETE_PAYMENT_STATUS]
+    )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
