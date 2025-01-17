@@ -28,6 +28,7 @@ from src.constants.permissions import (
     UserPermissions,
     UserProfilePermissions,
     EmployeePermissions,
+    PersonPermissions
 )
 
 # Revisão e informações básicas da migração
@@ -70,6 +71,7 @@ profile_permissions = {
         *UserProfilePermissions.values(),
         *EmployeePermissions.values(),
         *CustomerPermissions.values(),
+        *PersonPermissions.values(),
     ],
     "2": [  # Manager: todas as permissões
         *CategoryPermissions.values(),
@@ -88,6 +90,7 @@ profile_permissions = {
         *UserProfilePermissions.values(),
         *EmployeePermissions.values(),
         *CustomerPermissions.values(),
+        *PersonPermissions.values(),
     ],
     "3": [  # Employee: acesso limitado
         *CategoryPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
@@ -105,6 +108,7 @@ profile_permissions = {
         *UserProfilePermissions.list_only_values(only=["CAN_VIEW"]),
         *EmployeePermissions.list_only_values(only=["CAN_VIEW"]),
         *CustomerPermissions.list_only_values(only=["CAN_VIEW"]),
+        *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
     ],
     "4": [  # Customer: acesso mínimo
         *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
@@ -115,6 +119,7 @@ profile_permissions = {
         *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
         *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
         *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
     ]
 }
 

@@ -3,6 +3,7 @@ from fastapi import status
 
 import pytest
 
+from src.constants.permissions import ProductPermissions
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.product_factory import ProductFactory
@@ -16,7 +17,7 @@ def test_create_product_success(client, db_session, payload):
     category = CategoryFactory()
     payload["category_id"] = category.id
 
-    response = client.post("/api/v1/products", json=payload)
+    response = client.post("/api/v1/products", json=payload, permissions=[ProductPermissions.CAN_CREATE_PRODUCT])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -41,7 +42,7 @@ def test_create_product_duplicate_name_and_return_error(client, db_session):
         "category_id": category.id,
     }
 
-    response = client.post("/api/v1/products", json=payload)
+    response = client.post("/api/v1/products", json=payload, permissions=[ProductPermissions.CAN_CREATE_PRODUCT])
 
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -66,7 +67,7 @@ def test_reactivate_product_and_return_success(client, db_session):
         "category_id": category.id,
     }
 
-    response = client.post("/api/v1/products", json=payload)
+    response = client.post("/api/v1/products", json=payload, permissions=[ProductPermissions.CAN_CREATE_PRODUCT])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -96,7 +97,7 @@ def test_get_product_by_name_and_return_success(client):
         category=category2
     )
     
-    response = client.get("/api/v1/products/Big Mac/name")
+    response = client.get("/api/v1/products/Big Mac/name", permissions=[ProductPermissions.CAN_VIEW_PRODUCTS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -124,7 +125,7 @@ def test_get_product_by_id_and_return_success(client):
         category=category2
     )
     
-    response = client.get(f"/api/v1/products/{product1.id}/id")
+    response = client.get(f"/api/v1/products/{product1.id}/id", permissions=[ProductPermissions.CAN_VIEW_PRODUCTS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -152,7 +153,7 @@ def test_get_all_products_return_success(client):
         category=category2
     )
     
-    response = client.get("/api/v1/products")
+    response = client.get("/api/v1/products", permissions=[ProductPermissions.CAN_VIEW_PRODUCTS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -202,7 +203,7 @@ def test_update_product_and_return_success(client):
         "category_id": category2.id,
     }
 
-    response = client.put(f"/api/v1/products/{product.id}", json=payload)
+    response = client.put(f"/api/v1/products/{product.id}", json=payload, permissions=[ProductPermissions.CAN_UPDATE_PRODUCT])
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -224,10 +225,10 @@ def test_delete_category_and_return_success(client):
     product1 = ProductFactory(name="Coca-Cola", category=category1)
     product2 = ProductFactory(name="Big Mac", category=category2)
 
-    response = client.delete(f"/api/v1/products/{product1.id}")
+    response = client.delete(f"/api/v1/products/{product1.id}", permissions=[ProductPermissions.CAN_DELETE_PRODUCT])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get("/api/v1/products")
+    response = client.get("/api/v1/products", permissions=[ProductPermissions.CAN_VIEW_PRODUCTS])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 
