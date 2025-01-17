@@ -2,6 +2,7 @@ from fastapi import status
 from datetime import datetime
 import pytest
 
+from src.constants.permissions import PersonPermissions
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.person_factory import PersonFactory
 
@@ -12,7 +13,7 @@ from tests.factories.person_factory import PersonFactory
 ])
 
 def test_create_person_success(client, payload):
-    response = client.post("/api/v1/person", json=payload)
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -33,7 +34,7 @@ def test_create_person_duplicate_cpf_and_return_error(client, db_session):
          "birth_date": "1999-01-01"
      }
     
-    response = client.post("/api/v1/person", json=payload)
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -52,7 +53,7 @@ def test_reactivate_person_return_success(client):
     person = PersonFactory(inactivated_at=datetime.now())
 
     payload = {'name': person.name, 'cpf': person.cpf, 'email': person.email, 'birth_date': person.birth_date.strftime('%Y-%m-%d')}
-    response = client.post("/api/v1/person", json=payload)
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -66,7 +67,7 @@ def test_reactivate_person_return_success(client):
 
 def test_create_person_send_unexpected_param_return_error(client):
     payload = {'name': 'test', 'cpf': '12345678901', 'email': 'abc@gmail.com', 'birth_date': "1999-01-01", 'fubar': 'fubar'}
-    response = client.post("/api/v1/person", json=payload)
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -74,7 +75,7 @@ def test_create_person_send_unexpected_param_return_error(client):
 def test_get_person_by_cpf_and_return_success(client):
     person = PersonFactory()
     
-    response = client.get(f"/api/v1/person/{person.cpf}/cpf")
+    response = client.get(f"/api/v1/person/{person.cpf}/cpf", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -88,7 +89,7 @@ def test_get_person_by_cpf_and_return_success(client):
 def test_get_person_by_id_and_return_success(client):
     person = PersonFactory()
     
-    response = client.get(f"/api/v1/person/{person.id}/id")
+    response = client.get(f"/api/v1/person/{person.id}/id", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -103,7 +104,7 @@ def test_get_all_person_return_success(client):
     person1 = PersonFactory()
     person2 = PersonFactory()
     
-    response = client.get("/api/v1/person")
+    response = client.get("/api/v1/person", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -136,7 +137,7 @@ def test_update_person_and_return_success(client):
         "birth_date": "1999-01-01"
     }
 
-    response = client.put(f"/api/v1/person/{person.id}", json=payload)
+    response = client.put(f"/api/v1/person/{person.id}", json=payload, permissions=[PersonPermissions.CAN_UPDATE_PERSON])
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -151,10 +152,10 @@ def test_update_person_and_return_success(client):
 def test_delete_person_and_return_success(client):
     person = PersonFactory()
 
-    response = client.delete(f"/api/v1/person/{person.id}")
+    response = client.delete(f"/api/v1/person/{person.id}", permissions=[PersonPermissions.CAN_DELETE_PERSON])
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get("/api/v1/person")
+    response = client.get("/api/v1/person", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 

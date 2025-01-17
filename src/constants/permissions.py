@@ -155,3 +155,9 @@ class CustomerPermissions(BasePermissionEnum):
     CAN_VIEW_CUSTOMERS = ("can_view_customers", "Permission to view all customers")
     CAN_UPDATE_CUSTOMER = ("can_update_customer", "Permission to update a customer")
     CAN_DELETE_CUSTOMER = ("can_delete_customer", "Permission to delete a customer")
+
+class PersonPermissions(BasePermissionEnum):
+    CAN_CREATE_PERSON = ("can_create_person", "Permission to create a person")
+    CAN_VIEW_PERSONS = ("can_view_persons", "Permission to view all persons")
+    CAN_UPDATE_PERSON = ("can_update_person", "Permission to update a person")
+    CAN_DELETE_PERSON = ("can_delete_person", "Permission to delete a person")
