@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -10,6 +10,8 @@ from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
 from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrderStatusDTO
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.core.ports.order_status.i_order_status_service import IOrderStatusService
+from src.core.auth.dependencies import get_current_user
+from src.constants.permissions import OrderStatusPermissions
 
 router = APIRouter()
 
@@ -18,26 +20,77 @@ def _get_order_status_service(db_session: Session = Depends(get_db)) -> IOrderSt
     repository: IOrderStatusRepository = OrderStatusRepository(db_session)
     return OrderStatusService(repository)
 
-@router.post("/order_status", response_model=OrderStatusDTO, status_code=status.HTTP_201_CREATED)
-def create_order_status(dto: CreateOrderStatusDTO, service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.post(
+        "/order_status",
+        response_model=OrderStatusDTO,
+        status_code=status.HTTP_201_CREATED,
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_CREATE_ORDER_STATUS])]
+)
+def create_order_status(
+    dto: CreateOrderStatusDTO,
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     return service.create_order_status(dto)
 
-@router.get("/order_status/{order_status}/status", response_model=OrderStatusDTO, status_code=status.HTTP_200_OK)
-def get_order_status_by_status(order_status: str, service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.get(
+        "/order_status/{order_status}/status",
+        response_model=OrderStatusDTO,
+        status_code=status.HTTP_200_OK,
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
+)
+def get_order_status_by_status(
+    order_status: str,
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     return service.get_order_status_by_status(status=order_status)
 
-@router.get("/order_status/{order_status_id}/id", response_model=OrderStatusDTO, status_code=status.HTTP_200_OK)
-def get_order_status_by_id(order_status_id: int, service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.get(
+        "/order_status/{order_status_id}/id",
+        response_model=OrderStatusDTO,
+        status_code=status.HTTP_200_OK,
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
+)
+def get_order_status_by_id(
+    order_status_id: int,
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     return service.get_order_status_by_id(order_status_id=order_status_id)
 
-@router.get("/order_status", response_model=List[OrderStatusDTO])
-def get_all_order_status(service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.get(
+        "/order_status",
+        response_model=List[OrderStatusDTO],
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
+)
+def get_all_order_status(
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     return service.get_all_orders_status()
 
-@router.put("/order_status/{order_status_id}", response_model=OrderStatusDTO)
-def update_order_status(order_status_id: int, dto: UpdateOrderStatusDTO, service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.put(
+        "/order_status/{order_status_id}",
+        response_model=OrderStatusDTO,
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_UPDATE_ORDER_STATUS])]
+)
+def update_order_status(
+    order_status_id: int,
+    dto: UpdateOrderStatusDTO,
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     return service.update_order_status(order_status_id, dto)
 
-@router.delete("/order_status/{order_status_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_order_status(order_status_id: int, service: IOrderStatusService = Depends(_get_order_status_service)):
+@router.delete(
+        "/order_status/{order_status_id}",
+        status_code=status.HTTP_204_NO_CONTENT,
+        dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_DELETE_ORDER_STATUS])]
+)
+def delete_order_status(
+    order_status_id: int,
+    service: IOrderStatusService = Depends(_get_order_status_service),
+    user: dict = Security(get_current_user)
+):
     service.delete_order_status(order_status_id)
