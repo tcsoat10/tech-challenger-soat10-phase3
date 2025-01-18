@@ -1,3 +1,4 @@
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
@@ -5,6 +6,9 @@ from src.core.domain.entities.order_item import OrderItem
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
+
+if TYPE_CHECKING:
+    from src.adapters.driven.repositories.order_repository import OrderRepository
 
 # tabelas
 class Order(BaseEntity):
@@ -35,7 +39,7 @@ class Order(BaseEntity):
     def total(self):
         return sum([item.total for item in self.order_items])
     
-    def add_item(self, item: OrderItem, repository) -> None:
+    def add_item(self, item: OrderItem, repository: Optional['OrderRepository']) -> None:
         if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
             raise BadRequestException(message='Pedido não está pendente. Não é possível adicionar itens.')
         
@@ -44,4 +48,16 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
 
+    def remove_item(self, item: OrderItem, repository: Optional['OrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
+            raise BadRequestException(message='Pedido não está pendente. Não é possível adicionar itens.')
+
+        self.order_items.remove(item)
+
+        if repository:
+            repository.update(self)
+
+        if repository:
+            repository.update(self)
+    
     __all__ = ['Order']
