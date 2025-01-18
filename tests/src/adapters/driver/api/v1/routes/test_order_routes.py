@@ -27,7 +27,7 @@ def test_create_order_success(client):
 
     assert "id" in data
     assert data["order_status"]["status"] == order_status.status
-    assert data["order_status"]["status_description"] == order_status.status_description
+    assert data["order_status"]["description"] == order_status.description
     assert data["customer"]["person"]["cpf"] == person.cpf
     assert data["customer"]["person"]["name"] == person.name
     assert data["customer"]["person"]["email"] == person.email

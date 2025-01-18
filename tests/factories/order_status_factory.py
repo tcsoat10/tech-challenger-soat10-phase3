@@ -14,4 +14,4 @@ class OrderStatusFactory(SQLAlchemyModelFactory):
 
     id = factory.Sequence(lambda n: n + 1)
     status = factory.LazyAttribute(lambda _: fake.sentence(nb_words=2))
-    status_description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))
+    description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))

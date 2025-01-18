@@ -6,7 +6,7 @@ class OrderStatusDTO(BaseModel):
 
     id: int
     status: str = Field(..., min_length=3, max_length=100)
-    status_description: str = Field(..., min_length=3, max_length=500)
+    description: str = Field(..., min_length=3, max_length=500)
     
 
     @classmethod
@@ -14,7 +14,7 @@ class OrderStatusDTO(BaseModel):
         return cls(
             id=order_status.id,
             status=order_status.status,
-            status_description=order_status.status_description
+            description=order_status.description
         )
     
 

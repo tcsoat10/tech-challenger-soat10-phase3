@@ -21,7 +21,7 @@ class OrderStatusService(IOrderStatusService):
         
         order_status = OrderStatus(
             status=dto.status,
-            status_description=dto.status_description
+            description=dto.description
         )
 
         order_status = self.repository.create(order_status)
@@ -49,7 +49,7 @@ class OrderStatusService(IOrderStatusService):
             raise EntityDuplicatedException(entity_name="OrderStatus")
     
         order_status.status=dto.status,
-        order_status.status_description=dto.status_description
+        order_status.description=dto.description
         
         order_status = self.repository.update(order_status)
 

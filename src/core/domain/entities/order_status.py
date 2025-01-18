@@ -9,6 +9,6 @@ class OrderStatus(BaseEntity):
     __tablename__ = 'order_status'
 
     status = Column('status', String(100), unique=True, nullable=False)
-    status_description = Column('status_description', String(500), nullable=True)
+    description = Column('description', String(500), nullable=True)
 
     __all__ = ['OrderStatus']
