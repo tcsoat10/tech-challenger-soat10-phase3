@@ -27,7 +27,7 @@ app.add_middleware(AuthMiddleware)
 
 # Adicionando rotas da versão 1
 app.include_router(health_check_router, prefix="/api/v1")
-app.include_router(auth_routes, prefix="/api/v1", tags=['Auth'])
+app.include_router(auth_routes, prefix="/api/v1", tags=['auth'])
 app.include_router(category_routes, prefix="/api/v1", tags=["categories"])
 app.include_router(product_routes, prefix="/api/v1", tags=["products"])
 app.include_router(order_item_routes, prefix="/api/v1", tags=["order-items"])
