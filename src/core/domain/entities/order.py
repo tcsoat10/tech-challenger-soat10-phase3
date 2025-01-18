@@ -57,6 +57,15 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
 
+    def place_order(self, repository: Optional['OrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
+            raise BadRequestException(message='Pedido não está pendente. Não é possível realizar o pedido.')
+        
+        self.order_status = OrderStatusEnum.ORDER_PLACED
+        
+        if repository:
+            repository.update(self)
+
         if repository:
             repository.update(self)
     
