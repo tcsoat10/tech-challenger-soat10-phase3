@@ -5,4 +5,4 @@ class UpdateOrderStatusDTO(BaseModel):
 
     id: int
     status: str = Field(..., min_length=3, max_length=100)
-    status_description: str = Field(..., min_length=3, max_length=500)
+    description: str = Field(..., min_length=3, max_length=500)
