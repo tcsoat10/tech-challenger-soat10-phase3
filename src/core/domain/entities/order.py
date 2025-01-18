@@ -66,6 +66,15 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
 
+    def cancel_order(self, repository: Optional['OrderRepository']) -> None:
+        # TODO: adicionar validação com status do pagamento. Caso o pagamento já tenha sido realizado, não é possível cancelar o pedido.
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING, OrderStatusEnum.ORDER_PLACED]:
+            raise BadRequestException(message='Pedido não está pendente ou realizado. Não é possível cancelar o pedido.')
+        
+        self.order_status = OrderStatusEnum.ORDER_CANCELLED
+        if repository:
+            repository.update(self)
+    
         if repository:
             repository.update(self)
     
