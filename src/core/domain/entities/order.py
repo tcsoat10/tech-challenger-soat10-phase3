@@ -1,5 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
+from src.core.exceptions.bad_request_exception import BadRequestException
+from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
 
 # tabelas
@@ -8,7 +11,7 @@ class Order(BaseEntity):
 
     id_customer = Column('id_customer', Integer, ForeignKey('customers.id'), nullable=False)
     customer = relationship('Customer')
-    id_order_status = Column('id_order_status', Integer, ForeignKey('order_status.id'), nullable=False)
+    id_order_status = Column('id_order_status', Integer, ForeignKey('order_status.id'), nullable=False, default=1)
     order_status = relationship('OrderStatus')
     id_employee = Column('id_employee', Integer, ForeignKey('employees.id'), nullable=True)
     employee = relationship('Employee')

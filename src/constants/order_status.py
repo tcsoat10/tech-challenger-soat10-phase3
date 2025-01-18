@@ -1,6 +1,7 @@
 from enum import Enum
 
 class OrderStatusEnum(Enum):
+    ORDER_PENDING = ("order_pending", "The order is pending.")
     ORDER_PLACED = ("order_placed", "The customer has placed the order.")
     ORDER_PREPARING = ("order_preparing", "The order is being prepared.")
     ORDER_READY = ("order_ready", "The order is ready for pickup at the counter.")
