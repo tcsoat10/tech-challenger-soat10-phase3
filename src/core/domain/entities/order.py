@@ -75,6 +75,16 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
     
+    def prepare_order(self, repository: Optional['OrderRepository']) -> None:
+        # TODO: adicionar validação com status do pagamento. Se não houver pagamento, não é possível preparar o pedido.
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PLACED]:
+            raise BadRequestException(message='Pedido não está realizado. Não é possível preparar o pedido.')
+        
+        self.order_status = OrderStatusEnum.ORDER_PREPARING
+        
+        if repository:
+            repository.update(self)
+    
         if repository:
             repository.update(self)
     
