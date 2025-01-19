@@ -80,12 +80,6 @@ class Order(BaseEntity):
         if self.order_status.status not in [status.status for status in valid_statuses]:
             raise BadRequestException(f"O pedido não está em um estado válido para {action}.")
 
-    def _validate_new_status(self, new_status: OrderStatus, expected_status: OrderStatusEnum) -> None:
-        if new_status.status != expected_status.status:
-            raise BadRequestException(
-                f"O status {new_status.status} é inválido. Esperado: {expected_status.status}."
-            )
-
     def _record_status_change(self, new_status: OrderStatus, changed_by: str) -> None:
         order_snapshot = {
             "id": self.id,
