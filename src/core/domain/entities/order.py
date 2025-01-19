@@ -85,6 +85,13 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
     
+    def ready_order(self, repository: Optional['OrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PREPARING]:
+            raise BadRequestException(message='Pedido não está sendo preparado. Não é possível finalizar o pedido.')
+        
+        self.order_status = OrderStatusEnum.ORDER_READY
+        repository.update(self)
+
         if repository:
             repository.update(self)
     
