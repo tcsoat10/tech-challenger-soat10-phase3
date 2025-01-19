@@ -32,19 +32,19 @@ persons_table = table(
 
 persons = [
     {
-        'name': 'joao.silva', 
+        'name': 'João Silva', 
         'cpf': '03619966087',
         'email': 'joao.silva@soat.com',
         'birth_date': datetime.strptime("06/10/2001", "%d/%m/%Y")
     },
     {
-        'name': 'carla.pereira',
+        'name': 'Carla Pereira',
         'cpf': '66087134018',
         'email': 'carla.pereira@soat.com',
         'birth_date': datetime.strptime("25/10/2001", "%d/%m/%Y")
     },
     {
-        'name': 'paulo.santos',
+        'name': 'Paulo Santos',
         'cpf': '94352572080',
         'email': 'paulo.santos@soat.com',
         'birth_date': datetime.strptime("22/11/1998", "%d/%m/%Y")
