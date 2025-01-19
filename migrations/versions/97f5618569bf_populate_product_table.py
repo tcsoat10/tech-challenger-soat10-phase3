@@ -1,7 +1,7 @@
 """populate product table
 
-Revision ID: 97e5618569bf
-Revises: 97d5618569bf
+Revision ID: 97f5618569bf
+Revises: 97e5618569bf
 Create Date: 2025-01-18 18:32:12.951580
 
 """
@@ -13,8 +13,8 @@ from sqlalchemy.sql import table, column, select
 from sqlalchemy import String, Integer, Float, MetaData
 
 # Revisão e informações básicas da migração
-revision = '97e5618569bf'
-down_revision: Union[str, None] = '97d5618569bf'
+revision = '97f5618569bf'
+down_revision: Union[str, None] = '97e5618569bf'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
