@@ -2,13 +2,14 @@ from typing import Optional, TYPE_CHECKING
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.core.domain.entities.order_item import OrderItem
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
 
 if TYPE_CHECKING:
-    from src.adapters.driven.repositories.order_repository import OrderRepository
+    from src.core.ports.order.i_order_repository import IOrderRepository
 
 # tabelas
 class Order(BaseEntity):
@@ -39,8 +40,8 @@ class Order(BaseEntity):
     def total(self):
         return sum([item.total for item in self.order_items])
     
-    def add_item(self, item: OrderItem, repository: Optional['OrderRepository']) -> None:
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
+    def add_item(self, item: OrderItem, repository: Optional['IOrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING.status]:
             raise BadRequestException(message='Pedido não está pendente. Não é possível adicionar itens.')
         
         self.order_items.append(item)
@@ -48,8 +49,8 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
 
-    def remove_item(self, item: OrderItem, repository: Optional['OrderRepository']) -> None:
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
+    def remove_item(self, item: OrderItem, repository: Optional['IOrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING.status]:
             raise BadRequestException(message='Pedido não está pendente. Não é possível adicionar itens.')
 
         self.order_items.remove(item)
@@ -57,46 +58,54 @@ class Order(BaseEntity):
         if repository:
             repository.update(self)
 
-    def place_order(self, repository: Optional['OrderRepository']) -> None:
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING]:
+    def place_order(self, order_status_repository: IOrderStatusRepository, repository: Optional['IOrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING.status]:
             raise BadRequestException(message='Pedido não está pendente. Não é possível realizar o pedido.')
         
-        self.order_status = OrderStatusEnum.ORDER_PLACED
+        order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_PLACED.status)
+        self.order_status = order_status
         
         if repository:
             repository.update(self)
 
-    def cancel_order(self, repository: Optional['OrderRepository']) -> None:
+    def cancel_order(self, order_status_repository: IOrderStatusRepository, repository: Optional['IOrderRepository']) -> None:
         # TODO: adicionar validação com status do pagamento. Caso o pagamento já tenha sido realizado, não é possível cancelar o pedido.
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING, OrderStatusEnum.ORDER_PLACED]:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING.status, OrderStatusEnum.ORDER_PLACED.status]:
             raise BadRequestException(message='Pedido não está pendente ou realizado. Não é possível cancelar o pedido.')
         
-        self.order_status = OrderStatusEnum.ORDER_CANCELLED
+        order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_CANCELLED.status)
+        self.order_status = order_status
+        
         if repository:
             repository.update(self)
     
-    def prepare_order(self, repository: Optional['OrderRepository']) -> None:
+    def prepare_order(self, order_status_repository: IOrderStatusRepository, repository: Optional['IOrderRepository']) -> None:
         # TODO: adicionar validação com status do pagamento. Se não houver pagamento, não é possível preparar o pedido.
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PLACED]:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PLACED.status]:
             raise BadRequestException(message='Pedido não está realizado. Não é possível preparar o pedido.')
         
-        self.order_status = OrderStatusEnum.ORDER_PREPARING
+        order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_PREPARING.status)
+        self.order_status = order_status
         
         if repository:
             repository.update(self)
     
-    def ready_order(self, repository: Optional['OrderRepository']) -> None:
-        if self.order_status.status not in [OrderStatusEnum.ORDER_PREPARING]:
+    def ready_order(self, order_status_repository: IOrderStatusRepository, repository: Optional['IOrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PREPARING.status]:
             raise BadRequestException(message='Pedido não está sendo preparado. Não é possível finalizar o pedido.')
         
-        self.order_status = OrderStatusEnum.ORDER_READY
-        repository.update(self)
+        order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        self.order_status = order_status
+        
+        if repository:
+            repository.update(self)
 
-    def complete_order(self, repository: Optional['OrderRepository']) -> None:
-        if self.order_status.status not in [OrderStatusEnum.ORDER_READY]:
+    def complete_order(self, order_status_repository: IOrderStatusRepository, repository: Optional['IOrderRepository']) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_READY.status]:
             raise BadRequestException(message='Pedido não está pronto. Não é possível finalizar o pedido.')
         
-        self.order_status = OrderStatusEnum.ORDER_COMPLETED
+        order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_COMPLETED.status)
+        self.order_status = order_status
         
         if repository:
             repository.update(self)
