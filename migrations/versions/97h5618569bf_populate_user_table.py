@@ -12,8 +12,7 @@ from typing import Sequence, Union
 from alembic import op
 from sqlalchemy.sql import table, column, select
 from sqlalchemy import String, Integer
-from src.core.domain.entities.user import User
-from src.core.domain.dtos.user.user_dto import UserDTO
+
 
 # Revisão e informações básicas da migração
 revision = '97h5618569bf'
