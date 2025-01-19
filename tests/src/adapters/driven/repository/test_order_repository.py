@@ -1,13 +1,15 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
 
+from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.domain.entities.customer import Customer
 from src.core.domain.entities.person import Person
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.core.domain.entities.order import Order
+from src.constants.order_status import OrderStatusEnum
 from tests.factories.customer_factory import CustomerFactory
 from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.order_factory import OrderFactory
+from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
 
@@ -137,3 +139,152 @@ class TestOrderRepository:
 
         db_order = self.db_session.query(Order).join(Customer).join(Person).filter_by(name="JOÃO").first()
         assert db_order is None
+
+    def test_order_next_step_success(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=OrderStatusFactory(status="order_pending"),
+            employee=EmployeeFactory()
+        )
+        
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
+        assert order.status_history[-1].changed_by == 'System'
+
+        order_item1 = OrderItemFactory(order=order)
+        order_item2 = OrderItemFactory(order=order)
+
+        order.add_item(order_item1)
+        order.add_item(order_item2)
+        
+        order.next_step()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        order.next_step()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        employee = EmployeeFactory()
+        order.next_step(employee=employee)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PREPARING.status
+        assert order.status_history[-1].changed_by == order.employee_name
+
+        order.next_step()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_READY.status
+        assert order.status_history[-1].changed_by == order.employee_name
+
+        order.next_step()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+    def test_cancel_order_cancel_when_status_is_order_pending(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=OrderStatusFactory(status="order_pending"),
+            employee=EmployeeFactory()
+        )
+        
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
+        assert order.status_history[-1].changed_by == 'System'
+
+        order.cancel_order()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_CANCELLED.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        with pytest.raises(BadRequestException) as exc:
+            order.next_step()
+
+        assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
+
+    def test_cancel_order_cancel_when_status_is_order_placed(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=OrderStatusFactory(status="order_pending"),
+            employee=EmployeeFactory()
+        )
+        
+        order = self.repository.create(order)
+        order.next_step()
+        order = self.repository.update(order)
+        order.cancel_order()
+        order = self.repository.update(order)
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_CANCELLED.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        with pytest.raises(BadRequestException) as exc:
+            order.next_step()
+
+        assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
+
+    def test_cancel_order_cancel_when_status_is_order_paid(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=OrderStatusFactory(status="order_pending"),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        order.next_step()
+        order = self.repository.update(order)
+
+        order.next_step()
+        order = self.repository.update(order)
+
+        with pytest.raises(BadRequestException) as exc:
+            order.cancel_order()
+
+        assert exc.value.detail['message'] == "O pedido não está em um estado válido para cancelar o pedido."
+
+    def test_order_methods_to_update_status(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=OrderStatusFactory(status="order_pending"),
+            employee=EmployeeFactory()
+        )
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
+        assert order.status_history[-1].changed_by == 'System'
+        
+        order.place_order()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        order.mark_as_paid()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
+        assert order.status_history[-1].changed_by == order.customer_name
+
+        order.prepare_order(employee=EmployeeFactory())
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_PREPARING.status
+        assert order.status_history[-1].changed_by == order.employee_name
+
+        order.mark_as_ready()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_READY.status
+        assert order.status_history[-1].changed_by == order.employee_name
+
+        order.complete_order()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
+        assert order.status_history[-1].changed_by == order.customer_name

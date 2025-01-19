@@ -1,7 +1,11 @@
 from enum import Enum
 
+from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
+
 class OrderStatusEnum(Enum):
+    ORDER_PENDING = ("order_pending", "The order is pending.")
     ORDER_PLACED = ("order_placed", "The customer has placed the order.")
+    ORDER_PAID = ("order_paid", "The customer has paid the order.")
     ORDER_PREPARING = ("order_preparing", "The order is being prepared.")
     ORDER_READY = ("order_ready", "The order is ready for pickup at the counter.")
     ORDER_COMPLETED = ("order_completed", "The customer has received the order.")
@@ -18,3 +22,12 @@ class OrderStatusEnum(Enum):
     @classmethod
     def values_and_descriptions(cls):
         return [{"status": member.status, "description": member.description} for member in cls]
+    
+    @classmethod
+    def from_status(cls, status: str) -> "OrderStatusEnum":
+        for member in cls:
+            print(member.status)
+            if member.status == status:
+                return member
+
+        raise EntityNotFoundException(status)
