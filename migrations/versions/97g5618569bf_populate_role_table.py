@@ -25,12 +25,6 @@ roles_table = table(
     column('description', String)
 )
 
-categories_table = table(
-    'categories',
-    column('id', Integer),
-    column('name', String),
-)
-
 
 roles = [
     {'name': 'manager', 'description': 'store manager with full access'},
