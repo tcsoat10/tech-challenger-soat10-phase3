@@ -20,6 +20,7 @@ from src.constants.permissions import (
     OrderItemPermissions,
     OrderPermissions,
     OrderStatusPermissions,
+    OrderPaymentPermissions,
     PermissionPermissions,
     ProfilePermissions,
     ProfilePermissionPermissions,
@@ -60,6 +61,9 @@ permissions = [
 
     # Order Status
     *OrderStatusPermissions.values_and_descriptions(),
+
+    # Order Payment
+    *OrderPaymentPermissions.values_and_descriptions(),
 
     # Permissions
     *PermissionPermissions.values_and_descriptions(),

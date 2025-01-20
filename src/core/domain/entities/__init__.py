@@ -16,6 +16,7 @@ from .employee import Employee
 from .order_status import OrderStatus
 from .order import Order, OrderStatusMovement
 from .payment import Payment
+from .order_payment import OrderPayment
 
 __all__ = [
     "BaseEntity",
@@ -36,5 +37,6 @@ __all__ = [
     "OrderStatus",
     "Order",
     "OrderStatusMovement",
-    "Payment"
+    "Payment",
+    "OrderPayment"
 ]
