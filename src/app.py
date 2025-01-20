@@ -19,6 +19,7 @@ from src.adapters.driver.api.v1.routes.employee_routes import router as employee
 from src.adapters.driver.api.v1.routes.order_status_routes import router as order_status_routes
 from src.adapters.driver.api.v1.routes.order_routes import router as order_routes
 from src.adapters.driver.api.v1.routes.auth_routes import router as auth_routes
+from src.adapters.driver.api.v1.routes.payment_routes import router as payment_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
@@ -44,3 +45,4 @@ app.include_router(customer_routes, prefix="/api/v1", tags=["customers"])
 app.include_router(employee_routes, prefix="/api/v1", tags=["employees"])
 app.include_router(order_status_routes, prefix="/api/v1", tags=["order-status"])
 app.include_router(order_routes, prefix="/api/v1", tags=["order"])
+app.include_router(payment_routes, prefix="/api/v1", tags=["payment"])
