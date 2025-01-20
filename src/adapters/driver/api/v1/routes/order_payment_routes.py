@@ -111,3 +111,16 @@ def update_order_payment(
     user: dict = Security(get_current_user)
 ):
     return service.update_order_payment(dto)
+
+
+@router.delete(
+    '/order_payments/{order_payment_id}',
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Security(get_current_user, scopes=[OrderPaymentPermissions.CAN_DELETE_ORDER_PAYMENT])]
+)
+def delete_order_payment(
+    order_payment_id: int,
+    service: IOrderPaymentService = Depends(_get_order_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.delete_order_payment(order_payment_id)

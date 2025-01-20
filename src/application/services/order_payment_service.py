@@ -7,6 +7,7 @@ from src.core.domain.dtos.order_payment.order_payment_dto import OrderPaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.order_payment import OrderPayment
 from src.core.domain.dtos.order_payment.update_order_payment_dto import UpdateOrderPaymentDTO
+from config.database import DELETE_MODE
 
 from typing import List
 
@@ -77,3 +78,17 @@ class OrderPaymentService(IOrderPaymentService):
         order_payment = self.repository.update(order_payment)
 
         return OrderPaymentDTO.from_entity(order_payment)
+    
+    def delete_order_payment(self, order_payment_id: int) -> None:
+        order_payment = self.repository.get_by_id(order_payment_id)
+        if not order_payment:
+            raise EntityNotFoundException(entity_name='Order Payment')
+        
+        if DELETE_MODE == 'soft':
+            if order_payment.is_deleted():
+                raise EntityNotFoundException(entity_name='Order Payment')
+            order_payment.soft_delete()
+            self.repository.update(order_payment)
+        else:
+            self.repository.delete(order_payment_id)
+            

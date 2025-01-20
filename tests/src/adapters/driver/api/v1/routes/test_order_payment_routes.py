@@ -99,3 +99,23 @@ def test_update_order_payment_success(client):
     assert data['id'] == order_payment.id
     assert data['order']['id'] == order.id
     assert data['payment']['id'] == payment.id
+
+
+def test_delete_order_payment_success(client):
+    order_payment = OrderPaymentFactory()
+    order_payment_delete = OrderPaymentFactory()
+
+    response = client.delete(
+        f'/api/v1/order_payments/{order_payment_delete.id}',
+        permissions=[OrderPaymentPermissions.CAN_DELETE_ORDER_PAYMENT]
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get('/api/v1/order_payments', permissions=[OrderPaymentPermissions.CAN_VIEW_ORDER_PAYMENTS])
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]['id'] == order_payment.id
+    assert data[0]['order']['id'] == order_payment.order_id
+    assert data[0]['payment']['id'] == order_payment.payment_id

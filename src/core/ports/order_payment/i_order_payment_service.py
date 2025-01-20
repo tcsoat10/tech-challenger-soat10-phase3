@@ -30,3 +30,7 @@ class IOrderPaymentService(ABC):
     @abstractmethod
     def update_order_payment(self, dto: UpdateOrderPaymentDTO) -> OrderPaymentDTO:
         pass
+
+    @abstractmethod
+    def delete_order_payment(self, order_payment_id: int) -> None:
+        pass
