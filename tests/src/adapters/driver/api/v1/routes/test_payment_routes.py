@@ -158,3 +158,62 @@ def test_get_all_payments(client):
             }
         }
     ]
+
+
+def test_update_payment_success(client):
+    payment = PaymentFactory()
+    method = PaymentMethodFactory()
+    payment_status = PaymentStatusFactory()
+    
+    payload = {'id': payment.id, 'payment_method_id': method.id, 'payment_status_id': payment_status.id}
+
+    response = client.put(
+        f'/api/v1/payments/{payment.id}', json=payload, permissions=[PaymentPermissions.CAN_UPDATE_PAYMENT]
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+
+    data = response.json()
+    assert data == {
+        'id': payment.id,
+            'payment_method': {
+                'id': method.id,
+                'name': method.name,
+                'description': method.description
+            },
+            'payment_status': {
+                'id': payment_status.id,
+                'name': payment_status.name,
+                'description': payment_status.description
+            }
+    }
+        
+
+def test_delete_payment_success(client):
+    payment = PaymentFactory()
+    payment_delete = PaymentFactory()
+
+    response = client.delete(
+        f'/api/v1/payments/{payment_delete.id}',
+        permissions=[PaymentPermissions.CAN_DELETE_PAYMENT]
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get('/api/v1/payments', permissions=[PaymentPermissions.CAN_VIEW_PAYMENTS])
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data == [{
+        'id': payment.id,
+            'payment_method': {
+                'id': payment.payment_method.id,
+                'name': payment.payment_method.name,
+                'description': payment.payment_method.description
+            },
+            'payment_status': {
+                'id': payment.payment_status.id,
+                'name': payment.payment_status.name,
+                'description': payment.payment_status.description
+            }
+    }]
+    
