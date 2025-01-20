@@ -7,3 +7,15 @@ class IOrderPaymentRepository(ABC):
     @abstractmethod
     def create(self, order_payment: OrderPayment) -> OrderPayment:
         pass
+
+    @abstractmethod
+    def get_by_id(self, order_payment_id: int) -> OrderPayment:
+        pass
+
+    @abstractmethod
+    def get_by_order_id(self, order_id: int) -> OrderPayment:
+        pass
+
+    @abstractmethod
+    def get_by_payment_id(self, payment_id: int) -> OrderPayment:
+        pass
