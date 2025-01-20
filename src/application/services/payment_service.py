@@ -7,6 +7,8 @@ from src.core.domain.dtos.payment.payment_dto import PaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.payment import Payment
 
+from typing import List
+
 
 class PaymentService(IPaymentService):
     def __init__(
@@ -38,3 +40,7 @@ class PaymentService(IPaymentService):
         if not payment:
             raise EntityNotFoundException(entity_name='Payment')
         return PaymentDTO.from_entity(payment)
+    
+    def get_payments_by_method_id(self, method_id: int) -> List[PaymentDTO]:
+        payments = self.repository.get_by_method_id(method_id)
+        return [PaymentDTO.from_entity(payment) for payment in payments]

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
+from typing import List
 
 from config.database import get_db
 from src.core.ports.payment.i_payment_service import IPaymentService
@@ -53,3 +54,17 @@ def get_payment_by_id(
     user: dict = Security(get_current_user)
 ):
     return service.get_payment_by_id(payment_id)
+
+
+@router.get(
+    '/payments/{method_id}/method_id',
+    response_model=List[PaymentDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_VIEW_PAYMENTS])]
+)
+def get_payments_by_method_id(
+    method_id: int,
+    service: IPaymentService = Depends(_get_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_payments_by_method_id(method_id)
