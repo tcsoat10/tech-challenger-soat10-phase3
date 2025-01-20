@@ -12,6 +12,8 @@ from alembic import op
 from sqlalchemy.sql import table, column
 from sqlalchemy import String, Integer
 
+from src.constants.product_category import ProductCategoryEnum
+
 # Revisão e informações básicas da migração
 revision = '97e5618569bf'
 down_revision: Union[str, None] = '97c5618569bf'
@@ -25,12 +27,7 @@ categories_table = table(
     column('description', String)
 )
 
-categories = [
-    {"name": "burgers", "description": "meat, chicken and fish burgers"},
-    {"name": "drinks", "description": "soda, juice, water and beers"},
-    {"name": "side dishes", "description": "fries, onions, chicken nuggets"},
-    {"name": "desserts", "description": "ice cream and smoothies"},
-]
+categories = [*ProductCategoryEnum.values_and_descriptions()]
 
 def upgrade():
     if os.getenv("ENVIRONMENT") == "testing":
@@ -39,6 +36,5 @@ def upgrade():
     op.bulk_insert(categories_table, categories)
 
 def downgrade():
-    op.execute(
-        "DELETE FROM categories WHERE name IN ('burgers', 'drinks', 'side dishes', 'desserts')"
-    )
+    delete_query = f"DELETE FROM categories WHERE name IN ({', '.join([f'\'{product_category.name}\'' for product_category in ProductCategoryEnum])})"
+    op.execute(delete_query)
