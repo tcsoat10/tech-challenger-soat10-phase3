@@ -36,3 +36,9 @@ class PaymentRepository(IPaymentRepository):
         self.db_session.merge(payment)
         self.db_session.commit()
         return payment
+    
+    def delete(self, payment_id: int) -> None:
+        payment = self.get_by_id(payment_id)
+        if payment:
+            self.db_session.delete(payment)
+            self.db_session.commit()
