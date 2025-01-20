@@ -16,6 +16,10 @@ class IOrderService(ABC):
     @abstractmethod
     def list_products_by_order_status(self, order_id: int, current_user: dict) -> List[ProductDTO]:
         pass
+    
+    @abstractmethod
+    def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
+        pass
 
     @abstractmethod
     def add_item(self, order_id: int, item_dto: CreateOrderDTO, current_user: dict) -> None:

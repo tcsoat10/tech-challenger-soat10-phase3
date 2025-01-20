@@ -36,6 +36,16 @@ class BasePermissionEnum(str, Enum):
         return cls.values()
     
     @classmethod
+    def list_except_values(cls, except_: Optional[List[str]] = None):
+        if except_:
+            return [
+                member.value
+                for name, member in cls.__members__.items()
+                if all(filter_value.upper() not in name for filter_value in except_)
+            ]
+        return cls.values()
+    
+    @classmethod
     def permission_and_description_as_dict(cls) -> Dict[str, str]:
         return {member.value: member.description for member in cls}
 
@@ -70,6 +80,7 @@ class OrderItemPermissions(BasePermissionEnum):
 class OrderPermissions(BasePermissionEnum):
     CAN_CREATE_ORDER = ("can_create_order", "Permission to create an order")
     CAN_LIST_PRODUCTS_BY_ORDER_STATUS = ("can_list_products_by_order_status", "Permission to list products by order status")
+    CAN_VIEW_ORDER = ("can_view_order", "Permission to view an order")
     CAN_ADD_ITEM = ("can_add_item", "Permission to add an item to an order")
     CAN_REMOVE_ITEM = ("can_remove_item", "Permission to remove an item from an order")
     CAN_CHANGE_ITEM_QUANTITY = ("can_change_item_quantity", "Permission to change the quantity of an item in an order")

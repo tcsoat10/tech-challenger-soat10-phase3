@@ -34,7 +34,6 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
     employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
     product_repository: IProductRepository = ProductRepository(db_session)
     repository: IOrderRepository = OrderRepository(db_session)
-
     return OrderService(repository, order_status_repository, customer_repository, employee_repository, product_repository)
 
 router = APIRouter()
@@ -51,9 +50,6 @@ async def create_order(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'anonymous']:
-        raise ForbiddenException("Você não tem permissão para criar pedidos.")
-    
     return service.create_order(dto, current_user)
 
 # Listar produtos com base no status do pedido
@@ -68,10 +64,20 @@ async def list_products_by_order_status(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'employee', 'manager']:
-        raise ForbiddenException("Você não tem permissão para visualizar produtos.")
-
     return service.list_products_by_order_status(order_id, current_user)
+
+@router.get(
+    "/orders/{order_id}",
+    response_model=OrderDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDER])],
+)
+async def get_order_by_id(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    return service.get_order_by_id(order_id, current_user)
 
 # Adicionar item ao pedido
 @router.post(
@@ -85,8 +91,6 @@ async def add_item(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer']:
-        raise ForbiddenException("Você não tem permissão para adicionar itens.")
     service.add_item(order_id, dto, current_user)
     return {"detail": "Item adicionado com sucesso."}
 
@@ -102,9 +106,6 @@ async def remove_item(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer']:
-        raise ForbiddenException("Você não tem permissão para remover itens.")
-    
     service.remove_item(order_id, item_id, current_user)
     return {"detail": "Item removido com sucesso."}
 
@@ -121,9 +122,6 @@ async def change_item_quantity(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer']:
-        raise ForbiddenException("Você não tem permissão para atualizar a quantidade de itens.")
-
     service.change_item_quantity(order_id, order_item_id, new_quantity, current_user)
     return {"detail": "Quantidade atualizada com sucesso."}
 
@@ -140,9 +138,6 @@ async def change_item_observation(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer']:
-        raise ForbiddenException("Você não tem permissão para atualizar a observação de itens.")
-
     service.change_item_observation(order_id, item_id, new_observation, current_user)
     return {"detail": "Observação atualizada com sucesso."}
 
@@ -158,9 +153,6 @@ async def list_order_items(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'employee', 'manager']:
-        raise ForbiddenException("Você não tem permissão para visualizar itens.")
-
     return service.list_order_items(order_id, current_user)
 
 # Cancelar pedido
@@ -174,9 +166,6 @@ async def cancel_order(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'manager']:
-        raise ForbiddenException("Você não tem permissão para cancelar pedidos.")
-
     service.cancel_order(order_id, current_user)
     return {"detail": "Pedido cancelado com sucesso."}
 
@@ -188,9 +177,6 @@ async def next_step(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'employee', 'manager']:
-        raise ForbiddenException("Você não tem permissão para avançar o pedido para o próximo passo.")
-
     service.next_step(order_id, current_user, employee_id)
     return {"detail": "Pedido avançado com sucesso."}
 
@@ -205,9 +191,6 @@ async def go_back(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer']:
-        raise ForbiddenException("Você não tem permissão para retornar o pedido ao passo anterior.")
-
     service.go_back(order_id, current_user)
     return {"detail": "Pedido retornado ao passo anterior com sucesso."}
 
@@ -226,7 +209,4 @@ async def list_orders(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    if current_user['profile']['name'] not in ['customer', 'employee', 'manager']:
-        raise ForbiddenException("Você não tem permissão para listar pedidos.")
-
     return service.list_orders(current_user, status)

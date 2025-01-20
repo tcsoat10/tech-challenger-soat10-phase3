@@ -60,13 +60,7 @@ class OrderService(IOrderService):
 
         customer = self.customer_repository.get_by_id(dto.id_customer)
         if not customer:
-            customer = Customer(
-                person=Person(
-                    name=f"{current_user['person']['name']} - {current_user['person']['id']}"
-                )
-            )
-
-            customer = self.customer_repository.create(customer)
+            raise EntityNotFoundException(entity_name="Customer")
 
         order = Order(
             customer=customer,
@@ -90,6 +84,10 @@ class OrderService(IOrderService):
 
         products = self.product_repository.get_all(categories=[order_status_to_category[order.order_status.status]])
         return [ProductDTO.from_entity(product) for product in products]
+
+    def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
+        order = self._get_order(order_id, current_user)
+        return OrderDTO.from_entity(order)
 
     def add_item(self, order_id: int, order_item_dto: CreateOrderItemDTO, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)

@@ -76,7 +76,7 @@ profile_permissions = {
     "2": [  # Manager: todas as permissões
         *CategoryPermissions.values(),
         *ProductPermissions.values(),
-        *OrderPermissions.values(),
+        *OrderPermissions.list_except_values(except_=['CAN_CREATE', 'CAN_ADD', 'CAN_REMOVE', 'CAN_CHANGE', 'CAN_CLEAR', 'CAN_NEXT', 'CAN_GO']),
         *OrderItemPermissions.values(),
         *OrderStatusPermissions.values(),
         *PermissionPermissions.values(),
@@ -96,7 +96,7 @@ profile_permissions = {
         *CategoryPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *ProductPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *OrderItemPermissions.values(),
-        *OrderPermissions.values(),
+        *OrderPermissions.list_except_values(except_=['CAN_CREATE', 'CAN_ADD', 'CAN_REMOVE', 'CAN_CHANGE', 'CAN_CLEAR', 'CAN_NEXT', 'CAN_GO']),
         *OrderStatusPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *PermissionPermissions.list_only_values(only=["CAN_VIEW"]),
         *ProfilePermissions.list_only_values(only=["CAN_VIEW"]),
