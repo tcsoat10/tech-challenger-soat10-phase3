@@ -1,4 +1,5 @@
 import uuid
+from src.core.domain.entities.person import Person
 from src.core.domain.entities.employee import Employee
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.domain.entities.customer import Customer
@@ -49,11 +50,15 @@ class AuthService(IAuthService):
         customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
             raise EntityNotFoundException(entity_name="Customer profile")
+        
+        anonymous_person = Person(name=f"Anonymous User - {uuid.uuid4().hex}")
+        customer = Customer(person=anonymous_person)
+        self.customer_repository.create(customer)
 
         token_payload = {
             "person": {
-                "id": str(uuid.uuid4().hex),
-                "name": "Anonymous User",
+                "id": customer.id,
+                "name": customer.person.name,
             },
             "profile": {
                 "name": customer_profile.name,
@@ -68,8 +73,12 @@ class AuthService(IAuthService):
         employee: Employee = self.employee_repository.get_by_username(login_dto.username)
         if not employee or not employee.user.verify_password(login_dto.password):
             raise InvalidCredentialsException()
+        
+        profile_name = 'employee'
+        if employee.role.name == 'manager':
+            profile_name = 'manager'
 
-        employee_profile = self.profile_repository.get_by_name("employee")
+        employee_profile = self.profile_repository.get_by_name(profile_name)
         if not employee_profile:
             raise EntityNotFoundException(entity_name="Employee profile")
  

@@ -50,7 +50,7 @@ class TestPersonRepository:
     def test_try_create_person_duplicated_with_repository_and_raise_error(self):
         person1 = PersonFactory()
 
-        person2 = Person(name=person1.name, email="joao@gmail.com")
+        person2 = Person(cpf=person1.cpf, name=person1.name, email="joao@gmail.com")
         with pytest.raises(IntegrityError):
             self.repository.create(person2)
 

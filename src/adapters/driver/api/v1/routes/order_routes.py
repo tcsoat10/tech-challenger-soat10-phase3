@@ -1,7 +1,13 @@
-from typing import List
-from fastapi import APIRouter, Depends, status, Security
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 
+from src.constants.permissions import OrderPermissions
+from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
+from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
+from src.core.domain.dtos.product.product_dto import ProductDTO
+from src.adapters.driven.repositories.product_repository import ProductRepository
+from src.core.ports.product.i_product_repository import IProductRepository
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
@@ -9,15 +15,12 @@ from src.core.ports.order_status.i_order_status_repository import IOrderStatusRe
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
 from config.database import get_db
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.core.domain.dtos.order.update_order_dto import UpdateOrderDTO
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.application.services.order_service import OrderService
 from src.core.domain.dtos.order.order_dto import OrderDTO
-from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
 from src.core.auth.dependencies import get_current_user
-from src.constants.permissions import OrderPermissions
 
 
 router = APIRouter()
@@ -27,92 +30,180 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
     customer_repository: ICustomerRepository = CustomerRepository(db_session)
     order_status_repository: IOrderStatusRepository = OrderStatusRepository(db_session)
     employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
+    product_repository: IProductRepository = ProductRepository(db_session)
     repository: IOrderRepository = OrderRepository(db_session)
-    return OrderService(repository, customer_repository, order_status_repository, employee_repository)
+    return OrderService(repository, order_status_repository, customer_repository, employee_repository, product_repository)
 
+router = APIRouter()
+
+# Criar um pedido
 @router.post(
-        "/order",
-        response_model=OrderDTO,
-        status_code=status.HTTP_201_CREATED,
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CREATE_ORDER])]
+    "/orders",
+    response_model=OrderDTO,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CREATE_ORDER])],
 )
-def create_order(
-    dto: CreateOrderDTO,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
+async def create_order(
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
 ):
-    return service.create_order(dto)
+    return service.create_order(current_user)
 
+# Listar produtos com base no status do pedido
 @router.get(
-        "/orders/{id_customer}/id_customer",
-        response_model=List[OrderDTO],
-        status_code=status.HTTP_200_OK,
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDERS])]
+    "/orders/{order_id}/products",
+    response_model=List[ProductDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_PRODUCTS_BY_ORDER_STATUS])],
 )
-def get_order_by_customer_id(
-    id_customer: int,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
-):
-    return service.get_order_by_customer_id(id_customer=id_customer)
-
-@router.get(
-        "/orders/{id_employee}/id_employee",
-        response_model=List[OrderDTO],
-        status_code=status.HTTP_200_OK,
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDERS])]
-)
-def get_order_by_employee_id(
-    id_employee: int,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
-):
-    return service.get_order_by_employee_id(id_employee=id_employee)
-
-@router.get(
-        "/order/{order_id}/id",
-        response_model=OrderDTO,
-        status_code=status.HTTP_200_OK,
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDERS])]
-)
-def get_order_by_id(
+async def list_products_by_order_status(
     order_id: int,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
 ):
-    return service.get_order_by_id(order_id=order_id)
+    return service.list_products_by_order_status(order_id, current_user)
 
 @router.get(
-        "/orders",
-        response_model=List[OrderDTO],
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDERS])]
+    "/orders/{order_id}",
+    response_model=OrderDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDER])],
 )
-def get_all_orders(
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
-):
-    return service.get_all_orders()
-
-@router.put(
-        "/order/{order_id}",
-        response_model=OrderDTO,
-        dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_UPDATE_ORDER])]
-)
-def update_order(
+async def get_order_by_id(
     order_id: int,
-    dto: UpdateOrderDTO,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
 ):
-    return service.update_order(order_id, dto)
+    return service.get_order_by_id(order_id, current_user)
 
+# Adicionar item ao pedido
+@router.post(
+    "/orders/{order_id}/items",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_ADD_ITEM])],
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_item(
+    order_id: int,
+    dto: CreateOrderItemDTO,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.add_item(order_id, dto, current_user)
+    return {"detail": "Item adicionado com sucesso."}
+
+# Remover item do pedido
 @router.delete(
-        "/order/{order_id}",
-        status_code=status.HTTP_204_NO_CONTENT
+    "/orders/{order_id}/items/{item_id}",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_REMOVE_ITEM])],
+    status_code=status.HTTP_200_OK,
 )
-def delete_order(
+async def remove_item(
     order_id: int,
-    service: IOrderService = Depends(_get_order_service),
-    user: dict = Security(get_current_user)
+    item_id: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
 ):
-    service.delete_order(order_id)
+    service.remove_item(order_id, item_id, current_user)
+    return {"detail": "Item removido com sucesso."}
+
+# Atualizar quantidade de item do pedido
+@router.put(
+    "/orders/{order_id}/items/{item_id}/quantity",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CHANGE_ITEM_QUANTITY])],
+    status_code=status.HTTP_200_OK,
+)
+async def change_item_quantity(
+    order_id: int,
+    order_item_id: int,
+    new_quantity: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.change_item_quantity(order_id, order_item_id, new_quantity, current_user)
+    return {"detail": "Quantidade atualizada com sucesso."}
+
+# Atualizar observação de item do pedido
+@router.put(
+    "/orders/{order_id}/items/{item_id}/observation",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CHANGE_ITEM_OBSERVATION])],
+    status_code=status.HTTP_200_OK,
+)
+async def change_item_observation(
+    order_id: int,
+    item_id: int,
+    new_observation: str,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.change_item_observation(order_id, item_id, new_observation, current_user)
+    return {"detail": "Observação atualizada com sucesso."}
+
+# Listar itens do pedido
+@router.get(
+    "/orders/{order_id}/items",
+    response_model=List[OrderItemDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_ORDER_ITEMS])],
+)
+async def list_order_items(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    return service.list_order_items(order_id, current_user)
+
+# Cancelar pedido
+@router.post(
+    "/orders/{order_id}/cancel",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CANCEL_ORDER])],
+    status_code=status.HTTP_200_OK,
+)
+async def cancel_order(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.cancel_order(order_id, current_user)
+    return {"detail": "Pedido cancelado com sucesso."}
+
+# Avançar para o próximo passo no pedido
+@router.post("/orders/{order_id}/next-step")
+async def next_step(
+    order_id: int,
+    employee_id: Optional[int] = None,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.next_step(order_id, current_user, employee_id)
+    return {"detail": "Pedido avançado com sucesso."}
+
+# Retornar ao passo anterior
+@router.post(
+    "/orders/{order_id}/go-back",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_GO_BACK])],
+    status_code=status.HTTP_200_OK,
+)
+async def go_back(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    service.go_back(order_id, current_user)
+    return {"detail": "Pedido retornado ao passo anterior com sucesso."}
+
+# Listar todos os pedidos
+@router.get(
+    "/orders",
+    response_model=List[OrderDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_ORDERS])],
+)
+async def list_orders(
+    status: Optional[List[str]] = Query(
+        default=[],
+        description="Lista de status dos pedidos para filtrar, por exemplo: ?status=order_pending&status=order_paid"
+    ),
+    current_user: dict = Depends(get_current_user),
+    service: OrderService = Depends(_get_order_service),
+):
+    return service.list_orders(current_user, status)

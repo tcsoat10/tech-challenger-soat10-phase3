@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from src.core.domain.entities.order import Order
 
@@ -23,7 +23,7 @@ class IOrderRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self, include_deleted: bool = False) -> List[Order]:
+    def get_all(self, status: Optional[List[str]], customer_id: Optional[int], include_deleted: Optional[bool]) -> List[Order]:
         pass
 
     @abstractmethod

@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
+from src.core.domain.entities.category import Category
 from src.core.domain.entities.product import Product
 from src.core.ports.product.i_product_repository import IProductRepository
 
@@ -24,10 +25,15 @@ class ProductRepository(IProductRepository):
     def get_by_id(self, product_id: int) -> Product:
         return self.db_session.query(Product).filter(Product.id == product_id).first()
 
-    def get_all(self, include_deleted: bool = False) -> List[Product]:
+    def get_all(self, categories: Optional[List[str]] = None, include_deleted: Optional[bool] = False) -> List[Product]:
         query = self.db_session.query(Product)
+
         if not include_deleted:
             query = query.filter(Product.inactivated_at.is_(None))
+
+        if categories:
+            query = query.filter(Product.category.has(Category.name.in_(categories)))
+
         return query.all()
 
     def update(self, product: Product) -> Product:

@@ -5,13 +5,13 @@ import pytest
 from src.constants.permissions import PersonPermissions
 from src.core.exceptions.utils import ErrorCode
 from tests.factories.person_factory import PersonFactory
+from pycpfcnpj import gen
 
 
 @pytest.mark.parametrize("payload", [
-    {"cpf": "12345678901", "name": "JOÃO", "email": "joao@gmail.com", "birth_date": "1999-01-01"},
-    {"cpf": "12345678902", "name": "PAULO", "email": "paulo@outlook.com", "birth_date": "1999-02-02"}
+    {"cpf": gen.cpf(), "name": "JOÃO", "email": "joao@gmail.com", "birth_date": "1999-01-01"},
+    {"cpf": gen.cpf(), "name": "PAULO", "email": "paulo@outlook.com", "birth_date": "1999-02-02"}
 ])
-
 def test_create_person_success(client, payload):
     response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
@@ -129,9 +129,10 @@ def test_get_all_person_return_success(client):
 def test_update_person_and_return_success(client):
     person = PersonFactory()
     
+    cpf = gen.cpf()
     payload = {
         'id': person.id,
-        "cpf": "12345678903",
+        "cpf": cpf,
         "name": "JOÃO - UPDATED",
         "email": "joao@gmail.com",
         "birth_date": "1999-01-01"
@@ -143,7 +144,7 @@ def test_update_person_and_return_success(client):
     data = response.json()
     assert data == {
         "id": person.id,
-        "cpf": "12345678903",
+        "cpf": cpf,
         "name": "JOÃO - UPDATED",
         "email": "joao@gmail.com",
         "birth_date": "1999-01-01"

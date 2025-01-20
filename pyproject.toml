@@ -10,7 +10,7 @@ fastapi = "^0.115.6"
 injector = "^0.22.0"
 uvicorn = "^0.32.1"
 sqlalchemy = "^2.0.36"
-pydantic = "^2.10.5"
+pydantic = {extras = ["email"], version = "^2.10.5"}
 load-dotenv = "^0.1.0"
 httpx = "^0.28.1"
 psycopg2-binary = "^2.9.10"
@@ -20,6 +20,7 @@ alembic = "^1.14.0"
 bcrypt = "^4.2.1"
 python-jose = {version = "^3.3.0", extras = ["cryptography"]}
 python-multipart = "^0.0.20"
+pycpfcnpj = "^1.8"
 
 [tool.poetry.group.test]
 optional = true

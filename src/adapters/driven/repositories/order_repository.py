@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from src.core.domain.entities.order_status import OrderStatus
 from src.core.domain.entities.employee import Employee
 from src.core.domain.entities.customer import Customer
 from src.core.domain.entities.order import Order
@@ -25,8 +26,18 @@ class OrderRepository(IOrderRepository):
     def get_by_id(self, order_id: int) -> Order:
         return self.db_session.query(Order).filter(Order.id == order_id).first()
 
-    def get_all(self) -> List[Order]:
-        return self.db_session.query(Order).filter(Order.inactivated_at.is_(None)).all()
+    def get_all(self, status: Optional[List[str]] = None, customer_id: Optional[int] = None, include_deleted: Optional[bool] = False) -> List[Order]:
+        query = self.db_session.query(Order).filter(Order.inactivated_at.is_(None))
+        if status:
+            query = query.filter(Order.order_status.has(OrderStatus.status.in_(status)))
+
+        if customer_id:
+            query = query.filter(Order.id_customer == customer_id)
+
+        if not include_deleted:
+            query = query.filter(Order.inactivated_at.is_(None))
+        
+        return query.all()
 
     def update(self, order: Order) -> Order:
         self.db_session.merge(order)

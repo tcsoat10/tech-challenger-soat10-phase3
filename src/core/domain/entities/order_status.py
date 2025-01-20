@@ -8,7 +8,7 @@ Base = declarative_base()
 class OrderStatus(BaseEntity):
     __tablename__ = 'order_status'
 
-    status = Column('status', String(100), unique=True, nullable=False)
-    description = Column('description', String(500), nullable=True)
+    status = Column(String(100), unique=True, nullable=False)
+    description = Column(String(500), nullable=True)
 
     __all__ = ['OrderStatus']

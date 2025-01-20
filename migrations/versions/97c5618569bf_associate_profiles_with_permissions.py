@@ -78,7 +78,7 @@ profile_permissions = {
     "2": [  # Manager: todas as permissões
         *CategoryPermissions.values(),
         *ProductPermissions.values(),
-        *OrderPermissions.values(),
+        *OrderPermissions.list_except_values(except_=['CAN_CREATE', 'CAN_ADD', 'CAN_REMOVE', 'CAN_CHANGE', 'CAN_CLEAR', 'CAN_NEXT', 'CAN_GO']),
         *OrderItemPermissions.values(),
         *OrderStatusPermissions.values(),
         *OrderPaymentPermissions.values(),
@@ -98,8 +98,8 @@ profile_permissions = {
     "3": [  # Employee: acesso limitado
         *CategoryPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *ProductPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
-        *OrderItemPermissions.values(),  # Gerencia itens de pedidos
-        *OrderPermissions.list_only_values(only=["CAN_VIEW"]),
+        *OrderItemPermissions.values(),
+        *OrderPermissions.list_except_values(except_=['CAN_CREATE', 'CAN_ADD', 'CAN_REMOVE', 'CAN_CHANGE', 'CAN_CLEAR', 'CAN_NEXT', 'CAN_GO']),
         *OrderStatusPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *OrderPaymentPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *PermissionPermissions.list_only_values(only=["CAN_VIEW"]),
@@ -115,15 +115,18 @@ profile_permissions = {
         *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
     ],
     "4": [  # Customer: acesso mínimo
-        *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
-        *OrderItemPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
-        *CategoryPermissions.list_only_values(only=["CAN_VIEW"]),
-        *ProductPermissions.list_only_values(only=["CAN_VIEW"]),
-        *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
-        *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
-        *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
+        # *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
+        # *OrderItemPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
+        # *CategoryPermissions.list_only_values(only=["CAN_VIEW"]),
+        # *ProductPermissions.list_only_values(only=["CAN_VIEW"]),
+        # *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
+        # *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
+        # *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
+        # *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        # *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *OrderPermissions.values(),
         *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
-        *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
+        *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
     ]
 }
 
