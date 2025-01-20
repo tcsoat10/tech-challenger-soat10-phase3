@@ -6,7 +6,6 @@ from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.core.exceptions.forbidden_exception import ForbiddenException
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
@@ -19,7 +18,6 @@ from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.application.services.order_service import OrderService
 from src.core.domain.dtos.order.order_dto import OrderDTO
-from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
 from src.core.auth.dependencies import get_current_user
@@ -46,11 +44,10 @@ router = APIRouter()
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CREATE_ORDER])],
 )
 async def create_order(
-    dto: CreateOrderDTO,
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    return service.create_order(dto, current_user)
+    return service.create_order(current_user)
 
 # Listar produtos com base no status do pedido
 @router.get(

@@ -10,7 +10,7 @@ from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 class IOrderService(ABC):
 
     @abstractmethod
-    def create_order(self, dto: CreateOrderDTO) -> OrderDTO:
+    def create_order(self) -> OrderDTO:
         pass
 
     @abstractmethod

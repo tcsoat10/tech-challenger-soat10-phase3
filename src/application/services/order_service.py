@@ -1,7 +1,4 @@
 from typing import List, Optional
-from src.core.domain.entities.person import Person
-from src.core.domain.entities.order_status import OrderStatus
-from src.core.domain.entities.customer import Customer
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.product.i_product_repository import IProductRepository
@@ -15,7 +12,6 @@ from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.dtos.order.order_dto import OrderDTO
-from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 from src.core.domain.entities.order import Order
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
@@ -37,7 +33,7 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def create_order(self, dto: CreateOrderDTO, current_user: dict) -> OrderDTO:
+    def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [
             OrderStatusEnum.ORDER_PENDING.status,
             OrderStatusEnum.ORDER_WAITING_BURGERS.status,
@@ -50,7 +46,7 @@ class OrderService(IOrderService):
             OrderStatusEnum.ORDER_READY.status
         ]
 
-        open_orders = self.order_repository.get_all(status=open_statuses, customer_id=dto.id_customer)
+        open_orders = self.order_repository.get_all(status=open_statuses, customer_id=current_user['person']['id'])
         if open_orders:
             raise BadRequestException("Já existe um pedido em aberto para este cliente")
 
@@ -58,7 +54,7 @@ class OrderService(IOrderService):
         if not order_status:
             raise EntityNotFoundException(entity_name="OrderStatus")
 
-        customer = self.customer_repository.get_by_id(dto.id_customer)
+        customer = self.customer_repository.get_by_id(current_user['person']['id'])
         if not customer:
             raise EntityNotFoundException(entity_name="Customer")
 
@@ -150,6 +146,7 @@ class OrderService(IOrderService):
     def cancel_order(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
         order.cancel_order(self.order_status_repository)
+        order.soft_delete()
         self.order_repository.update(order)
 
     def next_step(self, order_id: int, current_user: dict, employee_id: Optional[int] = None) -> None:
