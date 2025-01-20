@@ -80,3 +80,18 @@ class TestOrderPaymentRepository:
         order_payment_response = self.repository.get_by_payment_id(order_payment.order_id + 1)
 
         assert order_payment_response is None
+
+    def test_get_all_order_payments_return_sucess(self):
+        order_payment1 = OrderPaymentFactory()
+        order_payment2 = OrderPaymentFactory()
+
+        order_payments = self.repository.get_all()
+
+        assert len(order_payments) == 2
+        assert order_payments == [order_payment1, order_payment2]
+
+    def test_get_all_order_payments_empty_db(self):
+        order_payments = self.repository.get_all()
+
+        assert len(order_payments) == 0
+        assert order_payments == []

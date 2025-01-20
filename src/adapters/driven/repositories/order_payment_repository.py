@@ -4,6 +4,7 @@ from src.core.domain.entities.order import Order
 from src.core.domain.entities.payment import Payment
 
 from sqlalchemy.orm import Session
+from typing import List
 
 
 class OrderPaymentRepository(IOrderPaymentRepository):
@@ -24,3 +25,9 @@ class OrderPaymentRepository(IOrderPaymentRepository):
     
     def get_by_payment_id(self, payment_id: int) -> OrderPayment:
         return self.db_session.query(OrderPayment).join(OrderPayment.payment).filter(Payment.id == payment_id).first()
+    
+    def get_all(self, include_deleted: bool = False) -> List[OrderPayment]:
+        query = self.db_session.query(OrderPayment)
+        if not include_deleted:
+            query = query.filter(OrderPayment.inactivated_at.is_(None))
+        return query.all()

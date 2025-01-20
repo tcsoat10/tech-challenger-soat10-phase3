@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from src.core.domain.entities.order_payment import OrderPayment
 
@@ -18,4 +19,8 @@ class IOrderPaymentRepository(ABC):
 
     @abstractmethod
     def get_by_payment_id(self, payment_id: int) -> OrderPayment:
+        pass
+
+    @abstractmethod
+    def get_all(self) -> List[OrderPayment]:
         pass
