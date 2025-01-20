@@ -109,3 +109,23 @@ class TestOrderPaymentRepository:
         assert data.id == order_payment.id
         assert data.order_id == order.id
         assert data.payment_id == payment.id
+
+    def test_delete_order_payment_success(self):
+        order_payment = OrderPaymentFactory()
+
+        self.repository.delete(order_payment.id)
+
+        data = self.repository.get_all()
+
+        assert len(data) == 0
+        assert data == []
+
+    def test_delete_order_payment_unregistered_id(self):
+        order_payment = OrderPaymentFactory()
+
+        self.repository.delete(order_payment.id + 1)
+
+        data = self.repository.get_all()
+
+        assert len(data) == 1
+        assert data == [order_payment]

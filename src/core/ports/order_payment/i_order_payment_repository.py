@@ -28,3 +28,7 @@ class IOrderPaymentRepository(ABC):
     @abstractmethod
     def update(self, order_payment: OrderPayment) -> OrderPayment:
         pass
+
+    @abstractmethod
+    def delete(self, order_payment_id: int) -> None:
+        pass

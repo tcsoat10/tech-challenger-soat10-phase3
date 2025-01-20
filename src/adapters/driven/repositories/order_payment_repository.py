@@ -36,3 +36,9 @@ class OrderPaymentRepository(IOrderPaymentRepository):
         self.db_session.merge(order_payment)
         self.db_session.commit()
         return order_payment
+
+    def delete(self, order_payment_id: int) -> None:
+        order_payment = self.get_by_id(order_payment_id)
+        if order_payment:
+            self.db_session.delete(order_payment)
+            self.db_session.commit()
