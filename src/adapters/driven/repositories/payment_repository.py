@@ -13,3 +13,6 @@ class PaymentRepository(IPaymentRepository):
         self.db_session.commit()
         self.db_session.refresh(payment)
         return payment
+
+    def get_by_id(self, payment_id: int) -> Payment:
+        return self.db_session.query(Payment).filter(Payment.id == payment_id).first()
