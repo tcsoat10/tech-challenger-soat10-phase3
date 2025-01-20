@@ -25,3 +25,9 @@ class PaymentRepository(IPaymentRepository):
     
     def get_by_status_id(self, status_id: int) -> List[Payment]:
         return self.db_session.query(Payment).join(Payment.payment_status).filter(PaymentStatus.id == status_id).all()
+    
+    def get_all(self, include_deleted: bool = False) -> List[Payment]:
+        query = self.db_session.query(Payment)
+        if not include_deleted:
+            query = query.filter(Payment.inactivated_at.is_(None))
+        return query.all()

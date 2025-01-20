@@ -20,3 +20,7 @@ class IPaymentRepository(ABC):
     @abstractmethod
     def get_by_status_id(self, status_id: int) -> List[Payment]:
         pass
+
+    @abstractmethod
+    def get_all(self) -> List[Payment]:
+        pass
