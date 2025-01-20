@@ -32,3 +32,9 @@ class PaymentService(IPaymentService):
         payment = self.repository.create(payment)
 
         return PaymentDTO.from_entity(payment)
+    
+    def get_payment_by_id(self, payment_id: int) -> PaymentDTO:
+        payment = self.repository.get_by_id(payment_id)
+        if not payment:
+            raise EntityNotFoundException(entity_name='Payment')
+        return PaymentDTO.from_entity(payment)

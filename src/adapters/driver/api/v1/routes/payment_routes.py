@@ -39,3 +39,17 @@ def create_payment(
     user: dict = Security(get_current_user)
 ):
     return service.create_payment(dto)
+
+
+@router.get(
+    '/payments/{payment_id}/id',
+    response_model=PaymentDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_VIEW_PAYMENTS])]
+)
+def get_payment_by_id(
+    payment_id: int,
+    service: IPaymentService = Depends(_get_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_payment_by_id(payment_id)
