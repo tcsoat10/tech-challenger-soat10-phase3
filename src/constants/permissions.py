@@ -81,7 +81,7 @@ class OrderStatusPermissions(BasePermissionEnum):
     CAN_DELETE_ORDER_STATUS = ("can_delete_order_status", "Permission to delete an order status")
 
 class OrderPaymentPermissions(BasePermissionEnum):
-    CAN_CREATE_ORDER_ = ("can_create_order_payment", "Permission to create an order payment")
+    CAN_CREATE_ORDER_PAYMENT = ("can_create_order_payment", "Permission to create an order payment")
     CAN_VIEW_ORDER_PAYMENTS = ("can_view_order_payments", "Permission to view all order payments")
     CAN_UPDATE_ORDER_PAYMENT = ("can_update_order_payment", "Permission to update an order payment")
     CAN_DELETE_ORDER_PAYMENT = ("can_delete_order_payment", "Permission to delete an order payment")
