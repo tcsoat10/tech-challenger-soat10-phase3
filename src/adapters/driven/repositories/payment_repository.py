@@ -1,6 +1,7 @@
 from src.core.ports.payment.i_payment_repository import IPaymentRepository
 from src.core.domain.entities.payment import Payment
 from src.core.domain.entities.payment_method import PaymentMethod
+from src.core.domain.entities.payment_status import PaymentStatus
 
 from sqlalchemy.orm import Session
 from typing import List
@@ -21,3 +22,6 @@ class PaymentRepository(IPaymentRepository):
     
     def get_by_method_id(self, method_id: int) -> List[Payment]:
         return self.db_session.query(Payment).join(Payment.payment_method).filter(PaymentMethod.id == method_id).all()
+    
+    def get_by_status_id(self, status_id: int) -> List[Payment]:
+        return self.db_session.query(Payment).join(Payment.payment_status).filter(PaymentStatus.id == status_id).all()
