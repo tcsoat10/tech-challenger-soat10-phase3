@@ -95,3 +95,17 @@ class TestOrderPaymentRepository:
 
         assert len(order_payments) == 0
         assert order_payments == []
+
+    def test_update_order_payment_success(self):
+        order_payment = OrderPaymentFactory()
+        order = OrderFactory()
+        payment = PaymentFactory()
+
+        order_payment.order_id = order.id
+        order_payment.payment_id = payment.id
+
+        data = self.repository.update(order_payment)
+
+        assert data.id == order_payment.id
+        assert data.order_id == order.id
+        assert data.payment_id == payment.id

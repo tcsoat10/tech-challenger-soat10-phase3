@@ -31,3 +31,8 @@ class OrderPaymentRepository(IOrderPaymentRepository):
         if not include_deleted:
             query = query.filter(OrderPayment.inactivated_at.is_(None))
         return query.all()
+    
+    def update(self, order_payment: OrderPayment) -> OrderPayment:
+        self.db_session.merge(order_payment)
+        self.db_session.commit()
+        return order_payment
