@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
+from typing import List, Optional
 
 from config.database import get_db
 from src.core.ports.order_payment.i_order_payment_service import IOrderPaymentService
@@ -80,3 +81,17 @@ def get_order_payment_by_payment_id(
     user: dict = Security(get_current_user)
 ):
     return service.get_order_payment_by_payment_id(payment_id)
+
+
+@router.get(
+    '/order_payments',
+    response_model=List[OrderPaymentDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPaymentPermissions.CAN_VIEW_ORDER_PAYMENTS])]
+)
+def get_all_order_payments(
+    include_deleted: Optional[bool] = False,
+    service: IOrderPaymentService = Depends(_get_order_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_all_order_payments(include_deleted=include_deleted)

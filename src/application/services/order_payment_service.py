@@ -7,6 +7,8 @@ from src.core.domain.dtos.order_payment.order_payment_dto import OrderPaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.order_payment import OrderPayment
 
+from typing import List
+
 
 class OrderPaymentService(IOrderPaymentService):
     def __init__(
@@ -50,3 +52,7 @@ class OrderPaymentService(IOrderPaymentService):
         if not order_payment:
             raise EntityNotFoundException(entity_name='Order Payment')
         return OrderPaymentDTO.from_entity(order_payment)
+    
+    def get_all_order_payments(self, include_deleted: bool = False) -> List[OrderPaymentDTO]:
+        order_payments = self.repository.get_all(include_deleted=include_deleted)
+        return [OrderPaymentDTO.from_entity(order_payment) for order_payment in order_payments]
