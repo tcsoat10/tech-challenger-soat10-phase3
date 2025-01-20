@@ -1,0 +1,34 @@
+from src.core.ports.payment.i_payment_service import IPaymentService
+from src.core.ports.payment.i_payment_repository import IPaymentRepository
+from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
+from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
+from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
+from src.core.domain.dtos.payment.payment_dto import PaymentDTO
+from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
+from src.core.domain.entities.payment import Payment
+
+
+class PaymentService(IPaymentService):
+    def __init__(
+            self,
+            repository: IPaymentRepository,
+            payment_method_repository: IPaymentMethodRepository,
+            payment_status_repository: IPaymentStatusRepository
+    ):
+        self.repository = repository
+        self.method_repository = payment_method_repository
+        self.status_repository = payment_status_repository
+    
+    def create_payment(self, dto: CreatePaymentDTO) -> PaymentDTO:
+        payment_method = self.method_repository.get_by_id(dto.payment_method_id)
+        if not payment_method:
+            raise EntityNotFoundException(entity_name='Payment Method')
+        
+        payment_status = self.status_repository.get_by_id(dto.payment_status_id)
+        if not payment_status:
+            raise EntityNotFoundException(entity_name='Payment Status')
+        
+        payment = Payment(payment_method=payment_method, payment_status=payment_status)
+        payment = self.repository.create(payment)
+
+        return PaymentDTO.from_entity(payment)
