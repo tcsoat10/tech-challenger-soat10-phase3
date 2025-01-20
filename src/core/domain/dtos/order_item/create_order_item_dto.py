@@ -7,5 +7,5 @@ class CreateOrderItemDTO(BaseModel):
     order_id: int = Field(..., gt=0)
     product_id: int = Field(..., gt=0)
     quantity: float = Field(..., ge=0.0)
-    observation: str = Field(..., min_length=3, max_length=300)
+    observation: str = Field(..., min_length=0, max_length=300)
 

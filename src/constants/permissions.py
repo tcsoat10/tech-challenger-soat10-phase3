@@ -69,9 +69,17 @@ class OrderItemPermissions(BasePermissionEnum):
 
 class OrderPermissions(BasePermissionEnum):
     CAN_CREATE_ORDER = ("can_create_order", "Permission to create an order")
-    CAN_VIEW_ORDERS = ("can_view_orders", "Permission to view all orders")
-    CAN_UPDATE_ORDER = ("can_update_order", "Permission to update an order")
-    CAN_DELETE_ORDER = ("can_delete_order", "Permission to delete an order")
+    CAN_LIST_PRODUCTS_BY_ORDER_STATUS = ("can_list_products_by_order_status", "Permission to list products by order status")
+    CAN_ADD_ITEM = ("can_add_item", "Permission to add an item to an order")
+    CAN_REMOVE_ITEM = ("can_remove_item", "Permission to remove an item from an order")
+    CAN_CHANGE_ITEM_QUANTITY = ("can_change_item_quantity", "Permission to change the quantity of an item in an order")
+    CAN_CHANGE_ITEM_OBSERVATION = ("can_change_item_observation", "Permission to change the observation of an item in an order")
+    CAN_CLEAR_ORDER = ("can_clear_order", "Permission to clear an order")
+    CAN_LIST_ORDER_ITEMS = ("can_list_order_items", "Permission to list all items in an order")
+    CAN_CANCEL_ORDER = ("can_cancel_order", "Permission to cancel an order")
+    CAN_NEXT_STEP = ("can_next_step", "Permission to go to the next step in an order")
+    CAN_GO_BACK = ("can_go_back", "Permission to go back in an order")
+    CAN_LIST_ORDERS = ("can_list_orders", "Permission to list all orders")
 
 
 class OrderStatusPermissions(BasePermissionEnum):

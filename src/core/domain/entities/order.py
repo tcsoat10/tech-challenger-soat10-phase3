@@ -3,6 +3,8 @@ from typing import List, Optional
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
+from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.entities.employee import Employee
 from src.core.domain.entities.order_status import OrderStatus
 from src.core.domain.entities.order_item import OrderItem
@@ -11,11 +13,16 @@ from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
 
 STATUS_TRANSITIONS = {
-    OrderStatusEnum.ORDER_PENDING: OrderStatusEnum.ORDER_PLACED,
-    OrderStatusEnum.ORDER_PLACED: OrderStatusEnum.ORDER_PAID,
-    OrderStatusEnum.ORDER_PAID: OrderStatusEnum.ORDER_PREPARING,
-    OrderStatusEnum.ORDER_PREPARING: OrderStatusEnum.ORDER_READY,
-    OrderStatusEnum.ORDER_READY: OrderStatusEnum.ORDER_COMPLETED,
+    OrderStatusEnum.ORDER_PENDING: OrderStatusEnum.ORDER_WAITING_BURGERS, # Add burger
+    OrderStatusEnum.ORDER_WAITING_BURGERS: OrderStatusEnum.ORDER_WAITING_SIDES, # Add side dish
+    OrderStatusEnum.ORDER_WAITING_SIDES: OrderStatusEnum.ORDER_WAITING_DRINKS, # Add drink
+    OrderStatusEnum.ORDER_WAITING_DRINKS: OrderStatusEnum.ORDER_WAITING_DESSERTS, # Add dessert
+    OrderStatusEnum.ORDER_WAITING_DESSERTS: OrderStatusEnum.ORDER_READY_TO_PLACE, # Confirm order
+    OrderStatusEnum.ORDER_READY_TO_PLACE: OrderStatusEnum.ORDER_PLACED, # Place order
+    OrderStatusEnum.ORDER_PLACED: OrderStatusEnum.ORDER_PAID, # Pay order
+    OrderStatusEnum.ORDER_PAID: OrderStatusEnum.ORDER_PREPARING, # Prepare order
+    OrderStatusEnum.ORDER_PREPARING: OrderStatusEnum.ORDER_READY, # Order ready
+    OrderStatusEnum.ORDER_READY: OrderStatusEnum.ORDER_COMPLETED, # Complete order
 }
 
 class Order(BaseEntity):
@@ -36,6 +43,27 @@ class Order(BaseEntity):
         order_by='OrderStatusMovement.changed_at',
     )
 
+    CATEGORY_TO_STATUS = {
+        ProductCategoryEnum.BURGERS.name: OrderStatusEnum.ORDER_WAITING_BURGERS,
+        ProductCategoryEnum.SIDES.name: OrderStatusEnum.ORDER_WAITING_SIDES,
+        ProductCategoryEnum.DRINKS.name: OrderStatusEnum.ORDER_WAITING_DRINKS,
+        ProductCategoryEnum.DESSERTS.name: OrderStatusEnum.ORDER_WAITING_DESSERTS,
+    }
+
+    REVERSIBLE_STATUSES = [
+        OrderStatusEnum.ORDER_WAITING_SIDES,
+        OrderStatusEnum.ORDER_WAITING_DRINKS,
+        OrderStatusEnum.ORDER_WAITING_DESSERTS,
+        OrderStatusEnum.ORDER_READY_TO_PLACE,
+    ]
+
+    SELECT_ITEMS_STATUSES_NAMES = [
+        OrderStatusEnum.ORDER_WAITING_BURGERS.status,
+        OrderStatusEnum.ORDER_WAITING_SIDES.status,
+        OrderStatusEnum.ORDER_WAITING_DRINKS.status,
+        OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
+    ]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         initial_status = OrderStatusMovement(
@@ -46,10 +74,6 @@ class Order(BaseEntity):
             changed_by="System",
         )
         self.status_history.append(initial_status)
-
-    @property
-    def order_status_name(self) -> str:
-        return self.order_status.status
 
     @property
     def customer_name(self) -> Optional[str]:
@@ -77,10 +101,72 @@ class Order(BaseEntity):
         return True
 
     def _validate_status(self, valid_statuses: List[OrderStatusEnum], action: str) -> None:
-        if self.order_status.status not in [status.status for status in valid_statuses]:
+        '''
+        Validates if the current status of the order is in the list of valid statuses.
+
+        :param valid_statuses: List of valid statuses.
+        '''
+        if self.order_status.status not in [order_status.status for order_status in valid_statuses]:
             raise BadRequestException(f"O pedido não está em um estado válido para {action}.")
 
+    def _validate_category_for_status(self, category_name: str) -> None:
+        '''
+        Validates if the category of the item is valid for the current status of the order.
+
+        The correct order is:
+        - Burgers
+        - Sides
+        - Drinks
+        - Desserts
+
+        :param category: The category of the item.
+        '''
+        expected_status = self.CATEGORY_TO_STATUS.get(category_name)
+        if not expected_status:
+            raise BadRequestException(f"Categoria inválida: {category_name}.")
+
+        if self.order_status.status != expected_status.status:
+            raise BadRequestException(
+                f"Não é possível adicionar itens da categoria '{category_name}' no status atual "
+                f"'{self.order_status.status}'."
+            )
+        
+    def _sort_order_items(self) -> None:
+        '''
+        Sorts the order items based on the category sequence.
+
+        The category sequence is defined in the `category_sequence`.
+        '''
+        category_sequence = [
+            ProductCategoryEnum.BURGERS.name,
+            ProductCategoryEnum.SIDES.name,
+            ProductCategoryEnum.DRINKS.name,
+            ProductCategoryEnum.DESSERTS.name,
+        ]
+        
+        categorized_items = {category: [] for category in category_sequence}
+
+        for item in self.order_items:
+            category = item.product.category
+            if category.name in categorized_items:
+                categorized_items[category.name].append(item)
+            else:
+                raise BadRequestException(f"Item com categoria inválida: {item.product.name}")
+
+        sorted_items = []
+        for name in category_sequence:
+            sorted_items.extend(categorized_items[name])
+
+        self.order_items = sorted_items
+
     def _record_status_change(self, new_status: OrderStatus, changed_by: str) -> None:
+        '''
+        Records a status change in the status history.
+
+        :param new_status: The new status of the order.
+        :param changed_by: The name of the user who changed the status.
+        '''
+
         order_snapshot = {
             "id": self.id,
             "id_customer": self.id_customer,
@@ -114,77 +200,65 @@ class Order(BaseEntity):
         self.status_history.append(movement)
 
     def add_item(self, item: OrderItem) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PENDING], "adicionar itens")
+        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "adicionar itens")
+        self._validate_category_for_status(item.product.category.name)
+
         self.order_items.append(item)
+        self._sort_order_items()
 
     def remove_item(self, item: OrderItem) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PENDING], "remover itens")
+        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "remover itens")
         self.order_items.remove(item)
 
-    def place_order(self, movement_owner: Optional[str] = None) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PENDING], "realizar o pedido")
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_PLACED.status, description=OrderStatusEnum.ORDER_PLACED.description)
+    def change_item_quantity(self, item: OrderItem, new_quantity: int) -> None:
+        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "alterar a quantidade de itens")
 
-        owner = movement_owner or self.customer_name or "Cliente Anônimo"
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
+        if new_quantity <= 0:
+            raise BadRequestException("A quantidade do item deve ser maior que zero.")
 
-    def cancel_order(self, movement_owner: Optional[str] = None) -> None:
+        item.quantity = new_quantity
+
+    def change_item_observation(self, item: OrderItem, new_observation: str) -> None:
+        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "alterar a observação do item")
+        item.observation = new_observation
+
+    def clear_order(self, order_status_repository: IOrderStatusRepository) -> None:
+        self._validate_status([*self.CATEGORY_TO_STATUS.values(), OrderStatusEnum.ORDER_READY_TO_PLACE], "limpar o pedido")
+        self.order_items = []
+
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status)
+
+    def list_order_items(self) -> List[OrderItem]:
+        return self.order_items
+
+    def cancel_order(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
         self._validate_status(
-            [OrderStatusEnum.ORDER_PENDING, OrderStatusEnum.ORDER_PLACED], "cancelar o pedido"
+            [
+                OrderStatusEnum.ORDER_PENDING,
+                *self.CATEGORY_TO_STATUS.values(),
+                OrderStatusEnum.ORDER_READY_TO_PLACE,
+                OrderStatusEnum.ORDER_PLACED
+            ], "cancelar o pedido"
         )
 
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_CANCELLED.status, description=OrderStatusEnum.ORDER_CANCELLED.description)
-        owner = movement_owner or self.customer_name or "Cliente Anônimo"
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
-
-    def mark_as_paid(self, movement_owner: Optional[str] = None) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PLACED], "marcar o pedido como pago")
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_PAID.status, description=OrderStatusEnum.ORDER_PAID.description)
-
-        owner = movement_owner or self.customer_name or "Cliente Anônimo"
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
-
-    def prepare_order(self, employee: Employee, movement_owner: Optional[str] = None) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PAID], "preparar o pedido")
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_PREPARING.status, description=OrderStatusEnum.ORDER_PREPARING.description)
-
-        if not self.is_paid:
-            raise BadRequestException("O pedido ainda não foi pago. Não é possível preparar o pedido.")
-
-        if not employee:
-            raise BadRequestException("É necessário um funcionário para preparar o pedido.")
-
-        self.id_employee = employee.id
-        self.employee = employee
-
-        owner = movement_owner or self.employee_name
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
-
-    def mark_as_ready(self, movement_owner: Optional[str] = None) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_PREPARING], "finalizar o pedido")
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_READY.status, description=OrderStatusEnum.ORDER_READY.description)
-
-        owner = movement_owner or self.employee_name
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
-
-    def complete_order(self, movement_owner: Optional[str] = None) -> None:
-        self._validate_status([OrderStatusEnum.ORDER_READY], "completar o pedido")
-        new_status = OrderStatus(status=OrderStatusEnum.ORDER_COMPLETED.status, description=OrderStatusEnum.ORDER_COMPLETED.description)
-
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_CANCELLED.status)
         owner = movement_owner or self.customer_name or "Cliente Anônimo"
         self._record_status_change(new_status, owner)
         self.order_status = new_status
 
     def next_step(
         self,
+        order_status_repository: IOrderStatusRepository,
         movement_owner: Optional[str] = None,
         employee: Optional[Employee] = None,
     ) -> None:
+        '''
+        Advances the order to the next step based on the current status.
+
+        :param movement_owner: The name of the user who is advancing the order.
+        :param employee: The employee responsible for preparing the order. this parameter is required when the order is being prepared.
+        '''
+
         current_status = OrderStatusEnum.from_status(self.order_status.status)
 
         if current_status not in STATUS_TRANSITIONS:
@@ -192,19 +266,21 @@ class Order(BaseEntity):
 
         expected_next_status = STATUS_TRANSITIONS[current_status]
 
+        if expected_next_status == OrderStatusEnum.ORDER_PLACED:
+            if not self.order_items:
+                self.cancel_order()
+                return
+
         if expected_next_status == OrderStatusEnum.ORDER_PAID:
             if not self.is_paid:
                 raise BadRequestException("O pedido ainda não foi pago. Não é possível avançar o status.")
 
         if expected_next_status == OrderStatusEnum.ORDER_PREPARING:
-            
             if not employee:
                 raise BadRequestException("É necessário um funcionário para preparar o pedido.")
 
             self.id_employee = employee.id
             self.employee = employee
-
-        new_status = OrderStatus(status=expected_next_status.status, description=expected_next_status.description)
 
         if expected_next_status in [OrderStatusEnum.ORDER_PLACED, OrderStatusEnum.ORDER_PAID, OrderStatusEnum.ORDER_COMPLETED]:
             owner = movement_owner or self.customer_name or "Cliente Anônimo"
@@ -213,8 +289,44 @@ class Order(BaseEntity):
         else:
             owner = movement_owner or "System"
 
-        self._record_status_change(new_status, owner)
-        self.order_status = new_status
+        self.order_status = order_status_repository.get_by_status(expected_next_status.status)
+        if not self.order_status:
+            raise BadRequestException(f"Não foi possível encontrar o status '{expected_next_status.status}'.")
+
+        if self.order_status.status not in [*self.SELECT_ITEMS_STATUSES_NAMES, OrderStatusEnum.ORDER_READY_TO_PLACE.status]:
+            self._record_status_change(self.order_status, owner)
+
+    def go_back(self, order_status_repository: IOrderStatusRepository) -> None:
+        '''
+        Reverts the order to the previous status.
+        
+        This operation is only allowed for statuses:
+        - ORDER_WAITING_SIDES
+        - ORDER_WAITING_DRINKS
+        - ORDER_WAITING_DESSERTS
+        - ORDER_READY_TO_PLACE
+
+        Raises:
+        - BadRequestException: If the current status does not allow going back.
+        - BadRequestException: If the previous status cannot be determined.
+        '''
+
+        current_status = OrderStatusEnum.from_status(self.order_status.status)
+        if current_status not in self.REVERSIBLE_STATUSES:
+            raise BadRequestException(
+                f"O status atual '{current_status.status}' não permite voltar."
+            )
+
+        previous_status = None
+        for status, next_status in STATUS_TRANSITIONS.items():
+            if next_status == current_status:
+                previous_status = status
+                break
+
+        if not previous_status:
+            raise BadRequestException("Não foi possível determinar o status anterior.")
+
+        self.order_status = order_status_repository.get_by_status(previous_status.status)
 
 class OrderStatusMovement(BaseEntity):
     __tablename__ = 'order_status_movements'

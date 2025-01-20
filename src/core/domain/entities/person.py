@@ -6,7 +6,7 @@ class Person(BaseEntity):
     __tablename__ = "persons"
 
     name = Column(String(100))
-    cpf = Column(String(11), unique=True, nullable=False)
+    cpf = Column(String(11), unique=True)
     email = Column(String(150), unique=True)
     birth_date = Column(Date)
     

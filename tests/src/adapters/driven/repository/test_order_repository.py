@@ -1,17 +1,21 @@
 import pytest
 
+from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
+from src.constants.product_category import ProductCategoryEnum
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.domain.entities.customer import Customer
 from src.core.domain.entities.person import Person
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.core.domain.entities.order import Order
 from src.constants.order_status import OrderStatusEnum
+from tests.factories.category_factory import CategoryFactory
 from tests.factories.customer_factory import CustomerFactory
 from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.order_factory import OrderFactory
 from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
+from tests.factories.product_factory import ProductFactory
 
 
 class TestOrderRepository:
@@ -19,8 +23,24 @@ class TestOrderRepository:
     @pytest.fixture(autouse=True)
     def setup(self, db_session):
         self.repository = OrderRepository(db_session)
+        self.order_status_repository = OrderStatusRepository(db_session)
         self.db_session = db_session
+        self._populate_status_order()
         self.clean_database()
+
+    def _populate_status_order(self):
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_PENDING.status, description=OrderStatusEnum.ORDER_PENDING.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_SIDES.status, description=OrderStatusEnum.ORDER_WAITING_SIDES.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DRINKS.status, description=OrderStatusEnum.ORDER_WAITING_DRINKS.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DESSERTS.status, description=OrderStatusEnum.ORDER_WAITING_DESSERTS.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_READY_TO_PLACE.status, description=OrderStatusEnum.ORDER_READY_TO_PLACE.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_PLACED.status, description=OrderStatusEnum.ORDER_PLACED.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_PAID.status, description=OrderStatusEnum.ORDER_PAID.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_PREPARING.status, description=OrderStatusEnum.ORDER_PREPARING.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_READY.status, description=OrderStatusEnum.ORDER_READY.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_COMPLETED.status, description=OrderStatusEnum.ORDER_COMPLETED.description)
+        OrderStatusFactory(status=OrderStatusEnum.ORDER_CANCELLED.status, description=OrderStatusEnum.ORDER_CANCELLED.description)
 
     def clean_database(self):
         self.db_session.query(Order).delete()
@@ -28,7 +48,7 @@ class TestOrderRepository:
 
     def test_create_order_success(self):
         customer = CustomerFactory()
-        order_status = OrderStatusFactory()
+        order_status = self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PENDING.status)
         employee = EmployeeFactory()
         order = Order(customer=customer, order_status=order_status, employee=employee)
         created_order = self.repository.create(order)
@@ -145,7 +165,7 @@ class TestOrderRepository:
         customer = CustomerFactory(person=person)
         order = Order(
             customer=customer,
-            order_status=OrderStatusFactory(status="order_pending"),
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PENDING.status),
             employee=EmployeeFactory()
         )
         
@@ -153,34 +173,74 @@ class TestOrderRepository:
         assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
         assert order.status_history[-1].changed_by == 'System'
 
-        order_item1 = OrderItemFactory(order=order)
-        order_item2 = OrderItemFactory(order=order)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
 
+        burger_category = CategoryFactory(name=ProductCategoryEnum.BURGERS.name, description=ProductCategoryEnum.BURGERS.description)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
+
+        order_item1 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=burger_category)
+        )
         order.add_item(order_item1)
-        order.add_item(order_item2)
+        order.next_step(self.order_status_repository)
         
-        order.next_step()
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
+
+        side_category = CategoryFactory(name=ProductCategoryEnum.SIDES.name, description=ProductCategoryEnum.SIDES.description)
+        order_item2 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=side_category)
+        )
+        order.add_item(order_item2)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
+        
+        drink_category = CategoryFactory(name=ProductCategoryEnum.DRINKS.name, description=ProductCategoryEnum.DRINKS.description)
+        order_item3 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=drink_category)
+        )
+        order.add_item(order_item3)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
+
+        dessert_category = CategoryFactory(name=ProductCategoryEnum.DESSERTS.name, description=ProductCategoryEnum.DESSERTS.description)
+        order_item4 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=dessert_category)
+        )
+        order.add_item(order_item4)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
+
+        order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
         assert order.status_history[-1].changed_by == order.customer_name
 
-        order.next_step()
+        order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
         assert order.status_history[-1].changed_by == order.customer_name
 
         employee = EmployeeFactory()
-        order.next_step(employee=employee)
+        order.next_step(self.order_status_repository, employee=employee)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PREPARING.status
         assert order.status_history[-1].changed_by == order.employee_name
 
-        order.next_step()
+        order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY.status
         assert order.status_history[-1].changed_by == order.employee_name
 
-        order.next_step()
+        order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
         assert order.status_history[-1].changed_by == order.customer_name
@@ -190,7 +250,7 @@ class TestOrderRepository:
         customer = CustomerFactory(person=person)
         order = Order(
             customer=customer,
-            order_status=OrderStatusFactory(status="order_pending"),
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PENDING.status),
             employee=EmployeeFactory()
         )
         
@@ -198,13 +258,13 @@ class TestOrderRepository:
         assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
         assert order.status_history[-1].changed_by == 'System'
 
-        order.cancel_order()
+        order.cancel_order(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_CANCELLED.status
         assert order.status_history[-1].changed_by == order.customer_name
 
         with pytest.raises(BadRequestException) as exc:
-            order.next_step()
+            order.next_step(self.order_status_repository)
 
         assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
 
@@ -213,21 +273,21 @@ class TestOrderRepository:
         customer = CustomerFactory(person=person)
         order = Order(
             customer=customer,
-            order_status=OrderStatusFactory(status="order_pending"),
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PLACED.status),
             employee=EmployeeFactory()
         )
         
         order = self.repository.create(order)
-        order.next_step()
-        order = self.repository.update(order)
-        order.cancel_order()
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
+        order.cancel_order(self.order_status_repository)
         order = self.repository.update(order)
 
         assert order.order_status.status == OrderStatusEnum.ORDER_CANCELLED.status
         assert order.status_history[-1].changed_by == order.customer_name
 
         with pytest.raises(BadRequestException) as exc:
-            order.next_step()
+            order.next_step(self.order_status_repository)
 
         assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
 
@@ -236,55 +296,189 @@ class TestOrderRepository:
         customer = CustomerFactory(person=person)
         order = Order(
             customer=customer,
-            order_status=OrderStatusFactory(status="order_pending"),
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PAID.status),
             employee=EmployeeFactory()
         )
 
         order = self.repository.create(order)
-        order.next_step()
-        order = self.repository.update(order)
-
-        order.next_step()
-        order = self.repository.update(order)
-
         with pytest.raises(BadRequestException) as exc:
-            order.cancel_order()
+            order.cancel_order(self.order_status_repository)
 
         assert exc.value.detail['message'] == "O pedido não está em um estado válido para cancelar o pedido."
 
-    def test_order_methods_to_update_status(self):
+    def test_go_back_order_when_status_is_order_ready_to_place(self):
         person = PersonFactory()
         customer = CustomerFactory(person=person)
         order = Order(
             customer=customer,
-            order_status=OrderStatusFactory(status="order_pending"),
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_READY_TO_PLACE.status),
             employee=EmployeeFactory()
         )
+
         order = self.repository.create(order)
-        assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
-        assert order.status_history[-1].changed_by == 'System'
+        assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
         
-        order.place_order()
+        order.go_back(self.order_status_repository)
         order = self.repository.update(order)
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
+
+    def test_go_back_order_when_status_is_order_placed(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PLACED.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
-        assert order.status_history[-1].changed_by == order.customer_name
 
-        order.mark_as_paid()
-        order = self.repository.update(order)
-        assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
-        assert order.status_history[-1].changed_by == order.customer_name
+        with pytest.raises(BadRequestException) as exc:
+            order.go_back(self.order_status_repository)
+        
+        assert exc.value.detail['message'] == "O status atual 'order_placed' não permite voltar."
 
-        order.prepare_order(employee=EmployeeFactory())
-        order = self.repository.update(order)
-        assert order.order_status.status == OrderStatusEnum.ORDER_PREPARING.status
-        assert order.status_history[-1].changed_by == order.employee_name
+    def test_go_back_order_when_status_is_order_waiting_burgers(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status),
+            employee=EmployeeFactory()
+        )
 
-        order.mark_as_ready()
-        order = self.repository.update(order)
-        assert order.order_status.status == OrderStatusEnum.ORDER_READY.status
-        assert order.status_history[-1].changed_by == order.employee_name
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
 
-        order.complete_order()
+        with pytest.raises(BadRequestException) as exc:
+            order.go_back(self.order_status_repository)
+        
+        assert exc.value.detail['message'] == "O status atual 'order_waiting_burgers' não permite voltar."
+
+    def test_go_back_order_when_status_is_order_waiting_sides(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_SIDES.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
+
+        order.go_back(self.order_status_repository)
         order = self.repository.update(order)
-        assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
-        assert order.status_history[-1].changed_by == order.customer_name
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
+
+    def test_go_back_order_when_status_is_order_waiting_drinks(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_DRINKS.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
+
+        order.go_back(self.order_status_repository)
+        order = self.repository.update(order)
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
+    
+    def test_go_back_order_when_status_is_order_waiting_desserts(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_DESSERTS.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
+
+        order.go_back(self.order_status_repository)
+        order = self.repository.update(order)
+
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
+
+    def test_order_send_item_with_the_incorrect_category(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
+
+        with pytest.raises(BadRequestException) as exc:
+            order_item = OrderItemFactory(
+                order=order,
+                product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.SIDES.name, description=ProductCategoryEnum.SIDES.description))
+            )
+            order.add_item(order_item)
+        
+        assert exc.value.detail['message'] == "Não é possível adicionar itens da categoria 'side dishes' no status atual 'order_waiting_burgers'."
+
+    def test_clear_order_items_success(self):
+        person = PersonFactory()
+        customer = CustomerFactory(person=person)        
+        order = Order(
+            customer=customer,
+            order_status=self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status),
+            employee=EmployeeFactory()
+        )
+
+        order = self.repository.create(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
+
+        order_item1 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.BURGERS.name, description=ProductCategoryEnum.BURGERS.description))
+        )
+        order.add_item(order_item1)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
+
+        order_item2 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.SIDES.name, description=ProductCategoryEnum.SIDES.description))
+        )
+        order.add_item(order_item2)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
+
+        order_item3 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.DRINKS.name, description=ProductCategoryEnum.DRINKS.description))
+        )
+        order.add_item(order_item3)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
+
+        order_item4 = OrderItemFactory(
+            order=order,
+            product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.DESSERTS.name, description=ProductCategoryEnum.DESSERTS.description))
+        )
+        order.add_item(order_item4)
+        order.next_step(self.order_status_repository)
+        order = self.repository.update(order)
+        assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
+
+        order.clear_order(self.order_status_repository)
+
+        order = self.repository.update(order)
+        assert len(order.order_items) == 0
+        assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status

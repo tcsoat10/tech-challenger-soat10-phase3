@@ -1,9 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 class CreateOrderDTO(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra='forbid')
 
-    id_customer: int = Field(..., gt=0)
-    id_order_status: int = Field(..., gt=0)
-    id_employee: int = Field(..., gt=0)
-
+    id_customer: Optional[int] = Field(..., gt=0)
