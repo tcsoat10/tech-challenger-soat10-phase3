@@ -15,6 +15,7 @@ from src.core.domain.dtos.order_payment.order_payment_dto import OrderPaymentDTO
 from src.constants.permissions import OrderPaymentPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.order_payment.create_order_payment_dto import CreateOrderPaymentDTO
+from src.core.domain.dtos.order_payment.update_order_payment_dto import UpdateOrderPaymentDTO
 
 
 router = APIRouter()
@@ -95,3 +96,18 @@ def get_all_order_payments(
     user: dict = Security(get_current_user)
 ):
     return service.get_all_order_payments(include_deleted=include_deleted)
+
+
+@router.put(
+    '/order_payments/{order_payment_id}',
+    response_model=OrderPaymentDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPaymentPermissions.CAN_UPDATE_ORDER_PAYMENT])]
+)
+def update_order_payment(
+    order_payment_id: int,
+    dto: UpdateOrderPaymentDTO,
+    service: IOrderPaymentService = Depends(_get_order_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.update_order_payment(dto)

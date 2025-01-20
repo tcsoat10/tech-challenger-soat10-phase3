@@ -79,3 +79,23 @@ def test_get_all_order_payments_success(client):
     assert data[1]['id'] == order_payment2.id
     assert data[1]['order']['id'] == order_payment2.order_id
     assert data[1]['payment']['id'] == order_payment2.payment_id
+
+
+def test_update_order_payment_success(client):
+    order_payment = OrderPaymentFactory()
+    order = OrderFactory()
+    payment = PaymentFactory()
+
+    payload = {'id': order_payment.id, 'order_id': order.id, 'payment_id': payment.id}
+
+    response = client.put(
+        f'/api/v1/order_payments/{order_payment.id}',
+        json=payload,
+        permissions=[OrderPaymentPermissions.CAN_UPDATE_ORDER_PAYMENT]
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data['id'] == order_payment.id
+    assert data['order']['id'] == order.id
+    assert data['payment']['id'] == payment.id

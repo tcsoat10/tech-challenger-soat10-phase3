@@ -6,6 +6,7 @@ from src.core.domain.dtos.order_payment.create_order_payment_dto import CreateOr
 from src.core.domain.dtos.order_payment.order_payment_dto import OrderPaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.order_payment import OrderPayment
+from src.core.domain.dtos.order_payment.update_order_payment_dto import UpdateOrderPaymentDTO
 
 from typing import List
 
@@ -56,3 +57,23 @@ class OrderPaymentService(IOrderPaymentService):
     def get_all_order_payments(self, include_deleted: bool = False) -> List[OrderPaymentDTO]:
         order_payments = self.repository.get_all(include_deleted=include_deleted)
         return [OrderPaymentDTO.from_entity(order_payment) for order_payment in order_payments]
+    
+    def update_order_payment(self, dto: UpdateOrderPaymentDTO) -> OrderPaymentDTO:
+        order_payment = self.repository.get_by_id(dto.id)
+        if not order_payment:
+            raise EntityNotFoundException(entity_name='Order Payment')
+        
+        order = self.order_repository.get_by_id(dto.order_id)
+        if not order:
+            raise EntityNotFoundException(entity_name='Order')
+        
+        payment = self.payment_repository.get_by_id(dto.payment_id)
+        if not payment:
+            raise EntityNotFoundException(entity_name='Payment')
+        
+        order_payment.order = order
+        order_payment.payment = payment
+
+        order_payment = self.repository.update(order_payment)
+
+        return OrderPaymentDTO.from_entity(order_payment)
