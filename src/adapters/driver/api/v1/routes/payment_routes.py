@@ -112,3 +112,16 @@ def update_payment(
     user: dict = Security(get_current_user)
 ):
     return service.update_payment(payment_id, dto)
+
+
+@router.delete(
+    '/payments/{payment_id}',
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_DELETE_PAYMENT])]
+)
+def delete_payment(
+    payment_id: int,
+    service: IPaymentService = Depends(_get_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.delete_payment(payment_id)

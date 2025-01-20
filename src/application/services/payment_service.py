@@ -7,6 +7,7 @@ from src.core.domain.dtos.payment.payment_dto import PaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.payment import Payment
 from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
+from config.database import DELETE_MODE
 
 from typing import List
 
@@ -73,3 +74,15 @@ class PaymentService(IPaymentService):
         payment = self.repository.update(payment)
 
         return PaymentDTO.from_entity(payment)
+    
+    def delete_payment(self, payment_id: int) -> None:
+        payment = self.repository.get_by_id(payment_id)
+        if not payment:
+            raise EntityNotFoundException(entity_name='Payment')
+        
+        if DELETE_MODE == 'soft':
+            if payment.is_deleted():
+                raise EntityNotFoundException(entity_name='Payment')
+            payment.soft_delete()
+        else:
+            self.repository.delete(payment_id)
