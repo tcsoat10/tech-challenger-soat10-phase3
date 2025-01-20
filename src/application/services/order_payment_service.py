@@ -32,4 +32,10 @@ class OrderPaymentService(IOrderPaymentService):
         order_payment = self.repository.create(order_payment)
 
         return OrderPaymentDTO.from_entity(order_payment)
+    
+    def get_order_payment_by_id(self, order_payment_id: int) -> OrderPaymentDTO:
+        order_payment = self.repository.get_by_id(order_payment_id)
+        if not order_payment:
+            raise EntityNotFoundException(entity_name='Order Payment')
+        return OrderPaymentDTO.from_entity(order_payment)
         

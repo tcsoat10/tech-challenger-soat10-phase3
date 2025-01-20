@@ -38,3 +38,17 @@ def create_employee(
     user: dict = Security(get_current_user)
 ):
     return service.create_order_payment(dto)
+
+
+@router.get(
+    '/order_payments/{order_payment_id}/id',
+    response_model=OrderPaymentDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPaymentPermissions.CAN_VIEW_ORDER_PAYMENTS])]
+)
+def get_order_payment_by_id(
+    order_payment_id: int,
+    service: IOrderPaymentService = Depends(_get_order_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_order_payment_by_id(order_payment_id)

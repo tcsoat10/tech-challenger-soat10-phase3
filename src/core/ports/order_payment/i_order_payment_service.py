@@ -8,3 +8,7 @@ class IOrderPaymentService(ABC):
     @abstractmethod
     def create_order_payment(self, dto: CreateOrderPaymentDTO) -> OrderPaymentDTO:
         pass
+
+    @abstractmethod
+    def get_order_payment_by_id(self, order_payment_id: int) -> OrderPaymentDTO:
+        pass
