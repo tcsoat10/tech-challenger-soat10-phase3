@@ -270,6 +270,9 @@ class Order(BaseEntity):
             if not self.order_items:
                 self.cancel_order()
                 return
+            
+            if not self.is_paid:
+                raise BadRequestException("O pedido ainda não foi pago. Não é possível avançar o status.")
 
         if expected_next_status == OrderStatusEnum.ORDER_PAID:
             if not self.is_paid:
