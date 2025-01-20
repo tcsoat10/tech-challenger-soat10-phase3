@@ -3,6 +3,7 @@ from typing import List
 
 from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
 from src.core.domain.dtos.payment.payment_dto import PaymentDTO
+from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
 
 
 class IPaymentService(ABC):
@@ -26,3 +27,6 @@ class IPaymentService(ABC):
     def get_all_payments(self, include_deleted: bool = False) -> List[PaymentDTO]:
         pass
     
+    @abstractmethod
+    def update_payment(self, payment_id: int, dto: UpdatePaymentDTO) -> PaymentDTO:
+        pass

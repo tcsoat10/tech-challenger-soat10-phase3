@@ -15,6 +15,7 @@ from src.core.domain.dtos.payment.payment_dto import PaymentDTO
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import PaymentPermissions
 from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
+from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
 
 
 
@@ -96,3 +97,18 @@ def get_all_payments(
     user: dict = Security(get_current_user)
 ):
     return service.get_all_payments(include_deleted=include_deleted)
+
+
+@router.put(
+    '/payments/{payment_id}',
+    response_model=PaymentDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_UPDATE_PAYMENT])]
+)
+def update_payment(
+    payment_id: int,
+    dto: UpdatePaymentDTO,
+    service: IPaymentService = Depends(_get_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.update_payment(payment_id, dto)

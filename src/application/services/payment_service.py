@@ -6,6 +6,7 @@ from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
 from src.core.domain.dtos.payment.payment_dto import PaymentDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.payment import Payment
+from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
 
 from typing import List
 
@@ -52,3 +53,23 @@ class PaymentService(IPaymentService):
     def get_all_payments(self, include_deleted: bool = False) -> List[PaymentDTO]:
         payments = self.repository.get_all(include_deleted=include_deleted)
         return [PaymentDTO.from_entity(payment) for payment in payments]
+    
+    def update_payment(self, payment_id: int, dto: UpdatePaymentDTO) -> PaymentDTO:
+        payment = self.repository.get_by_id(payment_id)
+        if not payment:
+            raise EntityNotFoundException(entity_name='Payment')
+        
+        method = self.method_repository.get_by_id(dto.payment_method_id)
+        if not method:
+            raise EntityNotFoundException(entity_name='Payment Method')
+        
+        status = self.status_repository.get_by_id(dto.payment_status_id)
+        if not status:
+            raise EntityNotFoundException(entity_name='Payment Status')
+        
+        payment.payment_method = method
+        payment.payment_status = status
+
+        payment = self.repository.update(payment)
+
+        return PaymentDTO.from_entity(payment)
