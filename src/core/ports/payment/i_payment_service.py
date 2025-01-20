@@ -17,5 +17,8 @@ class IPaymentService(ABC):
     @abstractmethod
     def get_payments_by_method_id(self, method_id: int) -> List[PaymentDTO]:
         pass
-
+    
+    @abstractmethod
+    def get_payments_by_status_id(self, status_id: int) -> List[PaymentDTO]:
+        pass
     

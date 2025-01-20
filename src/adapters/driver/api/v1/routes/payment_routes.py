@@ -68,3 +68,17 @@ def get_payments_by_method_id(
     user: dict = Security(get_current_user)
 ):
     return service.get_payments_by_method_id(method_id)
+
+
+@router.get(
+    '/payments/{status_id}/status_id',
+    response_model=List[PaymentDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_VIEW_PAYMENTS])]
+)
+def get_payments_by_status_id(
+    status_id: int,
+    service: IPaymentService = Depends(_get_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_payments_by_status_id(status_id)

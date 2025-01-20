@@ -44,3 +44,7 @@ class PaymentService(IPaymentService):
     def get_payments_by_method_id(self, method_id: int) -> List[PaymentDTO]:
         payments = self.repository.get_by_method_id(method_id)
         return [PaymentDTO.from_entity(payment) for payment in payments]
+    
+    def get_payments_by_status_id(self, status_id: int) -> List[PaymentDTO]:
+        payments = self.repository.get_by_status_id(status_id)
+        return [PaymentDTO.from_entity(payment) for payment in payments]
