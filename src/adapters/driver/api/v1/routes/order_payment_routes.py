@@ -52,3 +52,17 @@ def get_order_payment_by_id(
     user: dict = Security(get_current_user)
 ):
     return service.get_order_payment_by_id(order_payment_id)
+
+
+@router.get(
+    '/order_payments/{order_id}/order_id',
+    response_model=OrderPaymentDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPaymentPermissions.CAN_VIEW_ORDER_PAYMENTS])]
+)
+def get_order_payment_by_order_id(
+    order_id: int,
+    service: IOrderPaymentService = Depends(_get_order_payment_service),
+    user: dict = Security(get_current_user)
+):
+    return service.get_order_payment_by_order_id(order_id)

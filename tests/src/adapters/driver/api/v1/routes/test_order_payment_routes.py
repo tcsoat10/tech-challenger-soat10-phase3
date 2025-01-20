@@ -32,4 +32,17 @@ def test_get_order_payment_by_id_success(client):
     assert data['id'] == order_payment.id
     assert data['order']['id'] == order_payment.order_id
     assert data['payment']['id'] == order_payment.payment_id
-    
+
+
+def test_get_order_payment_by_order_id_success(client):
+    order_payment = OrderPaymentFactory()
+
+    response = client.get(
+        f'/api/v1/order_payments/{order_payment.order_id}/order_id', permissions=[OrderPaymentPermissions.CAN_VIEW_ORDER_PAYMENTS]
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data['id'] == order_payment.id
+    assert data['order']['id'] == order_payment.order_id
+    assert data['payment']['id'] == order_payment.payment_id
