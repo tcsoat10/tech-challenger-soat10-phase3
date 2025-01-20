@@ -12,7 +12,7 @@ fake = Faker()
 
 class OrderPaymentFactory(SQLAlchemyModelFactory):
     class Meta:
-        model: OrderPayment
+        model = OrderPayment
         sqlalchemy_session_persistence = 'commit'
 
     id = factory.Sequence(lambda n: n + 1)
