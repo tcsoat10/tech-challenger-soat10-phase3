@@ -31,3 +31,8 @@ class PaymentRepository(IPaymentRepository):
         if not include_deleted:
             query = query.filter(Payment.inactivated_at.is_(None))
         return query.all()
+    
+    def update(self, payment: Payment) -> Payment:
+        self.db_session.merge(payment)
+        self.db_session.commit()
+        return payment

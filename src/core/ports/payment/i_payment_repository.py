@@ -24,3 +24,7 @@ class IPaymentRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[Payment]:
         pass
+
+    @abstractmethod
+    def update(self, payment: Payment) -> Payment:
+        pass
