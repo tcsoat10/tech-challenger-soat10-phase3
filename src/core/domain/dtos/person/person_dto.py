@@ -1,8 +1,8 @@
 from datetime import date
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
-from simple_cpf.simple_cpf import CPF
 from src.core.domain.entities.person import Person
+from pycpfcnpj import cpfcnpj
 
 
 class PersonDTO(BaseModel):
@@ -35,7 +35,7 @@ class PersonDTO(BaseModel):
 
     @field_validator("cpf")
     def validate_cpf(cls, cpf: Optional[str]) -> Optional[str]:
-        if cpf and not CPF.is_valid(cpf):
+        if cpf and not cpfcnpj.cpf.validate(cpf):
             raise ValueError("CPF inválido.")
         return cpf
 

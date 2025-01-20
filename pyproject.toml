@@ -20,7 +20,7 @@ alembic = "^1.14.0"
 bcrypt = "^4.2.1"
 python-jose = {version = "^3.3.0", extras = ["cryptography"]}
 python-multipart = "^0.0.20"
-simple-cpf = "^0.1.4"
+pycpfcnpj = "^1.8"
 
 [tool.poetry.group.test]
 optional = true

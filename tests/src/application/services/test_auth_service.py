@@ -7,6 +7,7 @@ from src.core.domain.dtos.auth.auth_dto import AuthByCpfDTO, LoginDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
 from src.application.services.auth_service import AuthService
+from tests.factories.role_factory import RoleFactory
 
 @pytest.fixture
 def mock_customer_repository(mocker):
@@ -62,10 +63,12 @@ def test_login_anonymous(auth_service, mock_profile_repository):
     assert token_dto.token_type == "bearer"
 
 def test_login_employee(auth_service, mock_employee_repository, mock_profile_repository):
+    role = RoleFactory(name="employee")
     employee = Employee(
         id=1,
         person=type('Person', (), {"name": "Jane Doe", "cpf": "12345678900", "email": "jane@example.com"}),
-        user=type('User', (), {"verify_password": lambda password: password == "password123"})
+        user=type('User', (), {"verify_password": lambda password: password == "password123"}),
+        role=role
     )
     profile = Profile(name="Employee", permissions=[Permission(name="manage_orders")])
 

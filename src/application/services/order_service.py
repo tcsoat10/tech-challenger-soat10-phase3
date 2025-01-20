@@ -192,17 +192,17 @@ class OrderService(IOrderService):
     def _get_order(self, order_id: int, current_user: dict) -> Order:
         order = self.order_repository.get_by_id(order_id)
         if not order:
-            raise BadRequestException(f"O pedido com ID '{order_id}' não foi encontrado.")
+            raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
 
         if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != current_user['person']['id']:
-            raise BadRequestException(f"O pedido com ID '{order_id}' não foi encontrado.")
+            raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
         return order
 
     def _get_item_from_order(self, order: Order, item_id: int) -> OrderItem:
         order_item = next((order_item for order_item in order.order_items if order_item.id == item_id), None)
         if not order_item:
-            raise BadRequestException(f"O item com ID '{item_id}' não foi encontrado no pedido.")
+            raise EntityNotFoundException(message=f"O item com ID '{item_id}' não foi encontrado no pedido.")
         return order_item
 
 __all__ = ["OrderService"]

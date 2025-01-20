@@ -2,13 +2,13 @@
 
 [[package]]
 name = "alembic"
-version = "1.14.0"
+version = "1.14.1"
 description = "A database migration tool for SQLAlchemy."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "alembic-1.14.0-py3-none-any.whl", hash = "sha256:99bd884ca390466db5e27ffccff1d179ec5c05c965cfefc0607e69f9e411cb25"},
-    {file = "alembic-1.14.0.tar.gz", hash = "sha256:b00892b53b3642d0b8dbedba234dbf1924b69be83a9a769d5a624b01094e304b"},
+    {file = "alembic-1.14.1-py3-none-any.whl", hash = "sha256:1acdd7a3a478e208b0503cd73614d5e4c6efafa4e73518bb60e4f2846a37b1c5"},
+    {file = "alembic-1.14.1.tar.gz", hash = "sha256:496e888245a53adf1498fcab31713a469c65836f8de76e01399aa1c3e90dd213"},
 ]
 
 [package.dependencies]
@@ -17,7 +17,7 @@ SQLAlchemy = ">=1.3.0"
 typing-extensions = ">=4"
 
 [package.extras]
-tz = ["backports.zoneinfo"]
+tz = ["backports.zoneinfo", "tzdata"]
 
 [[package]]
 name = "annotated-types"
@@ -907,13 +907,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "prompt-toolkit"
-version = "3.0.48"
+version = "3.0.50"
 description = "Library for building powerful interactive command lines in Python"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.8.0"
 files = [
-    {file = "prompt_toolkit-3.0.48-py3-none-any.whl", hash = "sha256:f49a827f90062e411f1ce1f854f2aedb3c23353244f8108b89283587397ac10e"},
-    {file = "prompt_toolkit-3.0.48.tar.gz", hash = "sha256:d6623ab0477a80df74e646bdbc93621143f5caf104206aa29294d53de1a03d90"},
+    {file = "prompt_toolkit-3.0.50-py3-none-any.whl", hash = "sha256:9b6427eb19e479d98acff65196a307c555eb567989e6d88ebbb1b509d9779198"},
+    {file = "prompt_toolkit-3.0.50.tar.gz", hash = "sha256:544748f3860a2623ca5cd6d2795e7a14f3d0e1c3c9728359013f79877fc89bab"},
 ]
 
 [package.dependencies]
@@ -1040,6 +1040,17 @@ python-versions = ">=3.8"
 files = [
     {file = "pycparser-2.22-py3-none-any.whl", hash = "sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc"},
     {file = "pycparser-2.22.tar.gz", hash = "sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6"},
+]
+
+[[package]]
+name = "pycpfcnpj"
+version = "1.8"
+description = "Python module for brazilian register numbers for persons (CPF) and companies (CNPJ)."
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "pycpfcnpj-1.8-py3-none-any.whl", hash = "sha256:771d2ff00511f70453f2df8a20f529bad8deb8e35315a15ba0350d3b5360ef91"},
+    {file = "pycpfcnpj-1.8.tar.gz", hash = "sha256:c9e95d2790d582aa7a7deb4b87da252364c670bd1d78f69f3d8f8f82479ed969"},
 ]
 
 [[package]]
@@ -1371,17 +1382,6 @@ files = [
 pyasn1 = ">=0.1.3"
 
 [[package]]
-name = "simple-cpf"
-version = "0.1.4"
-description = "A simple script to manipulate and validate CPF"
-optional = false
-python-versions = ">=3.10,<4.0"
-files = [
-    {file = "simple_cpf-0.1.4-py3-none-any.whl", hash = "sha256:d3610c1c3a5df106093454c193e65e42f162007975176c3fe81366ab6705ae7a"},
-    {file = "simple_cpf-0.1.4.tar.gz", hash = "sha256:13ff757b662edd0133278c21f61c18bc4d4d7a39d39be09884eb783d05eddbad"},
-]
-
-[[package]]
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1634,4 +1634,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "553904e989b28b250b8141b3598e31b37c93a80a03e86b2fb805917c66daeb34"
+content-hash = "01261bcd6021229a4ffc143eb4c9cfaf0bced34047c53b06fd0804f678fb9cd9"

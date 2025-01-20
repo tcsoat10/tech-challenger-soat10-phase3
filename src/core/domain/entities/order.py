@@ -327,6 +327,9 @@ class Order(BaseEntity):
             raise BadRequestException("Não foi possível determinar o status anterior.")
 
         self.order_status = order_status_repository.get_by_status(previous_status.status)
+        if not self.order_status:
+            raise BadRequestException(f"Não foi possível encontrar o status '{previous_status.status}'.")
+        
 
 class OrderStatusMovement(BaseEntity):
     __tablename__ = 'order_status_movements'

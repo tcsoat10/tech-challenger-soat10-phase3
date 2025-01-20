@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect, text
 from alembic.config import Config
 from alembic import command
+from src.constants.order_status import OrderStatusEnum
 from src.app import app
 from config.database import DATABASE, get_db
 from src.core.utils.jwt_util import JWTUtil
@@ -160,14 +161,14 @@ def client(db_session) -> Generator[TestClient, None, None]:
     Cria um cliente de teste para a aplicação.
     Permissões devem ser informadas manualmente para cada requisição, caso contrário, serão vazias.
     """
-    def create_mock_token(permissions: List[str], profile_name: Optional[str]) -> str:
+    def create_mock_token(permissions: List[str], profile_name: Optional[str], person: Optional[dict]) -> str:
         fake = Faker("pt_BR")
         mock_payload = {
             "profile": {
                 "name": profile_name,
                 "permissions": permissions,
             },
-            "person": {
+            "person": person or {
                 "id": "1",
                 "name": "Test User",
                 "cpf": fake.ssn(),
@@ -176,17 +177,17 @@ def client(db_session) -> Generator[TestClient, None, None]:
         }
         return JWTUtil.create_token(mock_payload)
 
-    def override_headers(headers: Dict[str, str] = None, permissions: List[str] = None, profile_name: Optional[str] = "administrator"):
+    def override_headers(headers: Dict[str, str] = None, permissions: List[str] = None, profile_name: Optional[str] = "administrator", person: Optional[dict] = None) -> Dict[str, str]:
         if headers is None:
             headers = {}
-        token = create_mock_token(permissions or [], profile_name)
+        token = create_mock_token(permissions or [], profile_name, person)
         headers.update({"Authorization": f"Bearer {token}"})
         return headers
 
     with TestClient(app) as test_client:
-        def with_permissions(method, url, permissions=None, profile_name: Optional[str] = "administrator", **kwargs):
+        def with_permissions(method, url, person: Optional[dict] = None, permissions=None, profile_name: Optional[str] = "administrator", **kwargs):
             headers = kwargs.pop("headers", {})
-            kwargs["headers"] = override_headers(headers, permissions=permissions, profile_name=profile_name)
+            kwargs["headers"] = override_headers(headers, permissions=permissions, profile_name=profile_name, person=person)
             return method(url, **kwargs)
 
         test_client._original_get = test_client.get
@@ -237,3 +238,19 @@ def setup_factories(db_session):
     for factory in factories:
         factory._meta.sqlalchemy_session = db_session
         factory.reset_sequence()
+
+
+@pytest.fixture(scope="function")
+def populate_order_status(db_session):
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_PENDING.status, description=OrderStatusEnum.ORDER_PENDING.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_SIDES.status, description=OrderStatusEnum.ORDER_WAITING_SIDES.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DRINKS.status, description=OrderStatusEnum.ORDER_WAITING_DRINKS.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DESSERTS.status, description=OrderStatusEnum.ORDER_WAITING_DESSERTS.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_READY_TO_PLACE.status, description=OrderStatusEnum.ORDER_READY_TO_PLACE.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_PLACED.status, description=OrderStatusEnum.ORDER_PLACED.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_PAID.status, description=OrderStatusEnum.ORDER_PAID.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_PREPARING.status, description=OrderStatusEnum.ORDER_PREPARING.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_READY.status, description=OrderStatusEnum.ORDER_READY.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_COMPLETED.status, description=OrderStatusEnum.ORDER_COMPLETED.description)
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_CANCELLED.status, description=OrderStatusEnum.ORDER_CANCELLED.description)
