@@ -13,21 +13,21 @@ class ICustomerService(ABC):
         pass
     
     @abstractmethod
-    def get_customer_by_id(self, customer_id: int) -> CustomerDTO:
+    def get_customer_by_id(self, customer_id: int, current_user: dict) -> CustomerDTO:
         pass
 
     @abstractmethod
-    def get_customer_by_person_id(self, customer_id: int) -> CustomerDTO:
+    def get_customer_by_person_id(self, customer_id: int, current_user: dict) -> CustomerDTO:
         pass
 
     @abstractmethod
-    def get_all_customers(self, include_deleted: bool = False) -> List[CustomerDTO]:
+    def get_all_customers(self, current_user: dict, include_deleted: bool = False) -> List[CustomerDTO]:
         pass
 
     @abstractmethod
-    def update_customer(self, customer_id: int, dto: UpdateCustomerDTO) -> CustomerDTO:
+    def update_customer(self, customer_id: int, dto: UpdateCustomerDTO, current_user: dict) -> CustomerDTO:
         pass
 
     @abstractmethod
-    def delete_customer(self, customer_id: int) -> None:
+    def delete_customer(self, customer_id: int, current_user: dict) -> None:
         pass

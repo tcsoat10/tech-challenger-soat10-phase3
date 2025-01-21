@@ -1,28 +1,156 @@
+from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.person_factory import PersonFactory
 from tests.factories.customer_factory import CustomerFactory
 from src.core.exceptions.utils import ErrorCode
 from src.constants.permissions import CustomerPermissions
+from pycpfcnpj import gen
 
 from fastapi import status
 from datetime import datetime
 
 def test_create_customer_success(client):
-    person = PersonFactory()
-    payload = {'person_id': person.id}
+    payload = {
+        'person': {
+            'name': 'John Doe',
+            'cpf': gen.cpf(),
+            'email': 'jonhdoe@example.com',
+            'birth_date': '1990-01-01'
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
     assert 'id' in data
-    assert data['person']['id'] == person.id
+    assert data['person']['name'] == payload['person']['name']
+    assert data['person']['cpf'] == payload['person']['cpf']
+    assert data['person']['email'] == payload['person']['email']
+
+
+def test_create_customer_with_existing_cpf_return_error(client):
+    existing_customer = CustomerFactory()
+    payload = {
+        'person': {
+            'name': 'Different Name',
+            'cpf': existing_customer.person.cpf,
+            'email': 'different@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Customer already exists.',
+            'details': None,
+        }
+    }
+
+def test_create_customer_with_person_linked_to_active_employee_success(client):
+    employee = EmployeeFactory()
+    payload = {
+        'person': {
+            'name': employee.person.name,
+            'cpf': employee.person.cpf,
+            'email': employee.person.email,
+            'birth_date': employee.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+    assert 'id' in data
+    assert data['person']['cpf'] == employee.person.cpf
+    assert data['person']['email'] == employee.person.email
+
+def test_create_customer_with_existing_email_return_error(client):
+    existing_customer = CustomerFactory()
+    payload = {
+        'person': {
+            'name': 'Different Name',
+            'cpf': gen.cpf(),
+            'email': existing_customer.person.email,
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Customer already exists.',
+            'details': None,
+        }
+    }
+
+def test_create_inactive_customer_success(client):
+    inactive_customer = CustomerFactory(inactivated_at=datetime.now())
+    payload = {
+        'person': {
+            'name': 'New Name',
+            'cpf': inactive_customer.person.cpf,
+            'email': 'newemail@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+    assert 'id' in data
+    assert data['person']['cpf'] == inactive_customer.person.cpf
+    assert data['person']['email'] == payload['person']['email']
+
+def test_update_inactive_customer_return_error(client):
+    inactive_customer = CustomerFactory(inactivated_at=datetime.now())
+    payload = {
+        'id': inactive_customer.id,
+        'person': {
+            'cpf': inactive_customer.person.cpf,
+            'name': 'New Name',
+            'email': 'newemail@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.put(f'/api/v1/customers/{inactive_customer.id}', json=payload, permissions=[CustomerPermissions.CAN_UPDATE_CUSTOMER])
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Customer not found.',
+            'details': None,
+        }
+    }
+
+
 
 
 def test_create_duplicate_customer_return_error(client):
     customer = CustomerFactory()
-    payload = {'person_id': customer.person_id}
+    payload = {
+        'person': {
+            'name': customer.person.name,
+            'cpf': customer.person.cpf,
+            'email': customer.person.email,
+            'birth_date': customer.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
@@ -38,9 +166,16 @@ def test_create_duplicate_customer_return_error(client):
 
 def test_reactivate_customer_return_success(client):
     customer = CustomerFactory(inactivated_at=datetime.now())
-    payload = {'person_id': customer.person_id}
+    payload = {
+        'person': {
+            'name': customer.person.name,
+            'cpf': customer.person.cpf,
+            'email': customer.person.email,
+            'birth_date': customer.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
@@ -106,12 +241,16 @@ def test_get_all_customers_success(client):
 
 
 def test_update_customer_success(client):
-    person = PersonFactory()
     customer = CustomerFactory()
 
     payload = {
         'id': customer.id,
-        'person_id': person.id
+        'person': {
+            'cpf': customer.person.cpf,
+            'name': 'John Doe',
+            'email': 'johndoe@example.com',
+            'birth_date': '1990-01-01'
+        }
     }
 
     response = client.put(f'/api/v1/customers/{customer.id}', json=payload, permissions=[CustomerPermissions.CAN_UPDATE_CUSTOMER])
@@ -120,13 +259,13 @@ def test_update_customer_success(client):
     data = response.json()
     assert data == {
         'id': customer.id,
-            'person': {
-                'id': person.id,
-                'name': person.name,
-                'cpf': person.cpf,
-                'email': person.email,
-                'birth_date': person.birth_date.strftime('%Y-%m-%d')
-            }
+        'person': {
+            'id': customer.person.id,
+            'cpf': customer.person.cpf,
+            'name': 'John Doe',
+            'email': 'johndoe@example.com',
+            'birth_date': '1990-01-01'
+        }
     }
 
 

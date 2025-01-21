@@ -46,7 +46,7 @@ class OrderService(IOrderService):
             OrderStatusEnum.ORDER_READY.status
         ]
 
-        open_orders = self.order_repository.get_all(status=open_statuses, customer_id=current_user['person']['id'])
+        open_orders = self.order_repository.get_all(status=open_statuses, customer_id=int(current_user['person']['id']))
         if open_orders:
             raise BadRequestException("Já existe um pedido em aberto para este cliente")
 
@@ -54,7 +54,7 @@ class OrderService(IOrderService):
         if not order_status:
             raise EntityNotFoundException(entity_name="OrderStatus")
 
-        customer = self.customer_repository.get_by_id(current_user['person']['id'])
+        customer = self.customer_repository.get_by_id(int(current_user['person']['id']))
         if not customer:
             raise EntityNotFoundException(entity_name="Customer")
 
@@ -149,7 +149,7 @@ class OrderService(IOrderService):
         order.soft_delete()
         self.order_repository.update(order)
 
-    def next_step(self, order_id: int, current_user: dict, employee_id: Optional[int] = None) -> None:
+    def next_step(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
 
         if order.order_status.status in [
@@ -167,11 +167,11 @@ class OrderService(IOrderService):
             OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
             OrderStatusEnum.ORDER_READY_TO_PLACE.status,
             OrderStatusEnum.ORDER_PLACED.status,
-            OrderStatusEnum.ORDER_READY.status,
         ] and current_user['profile']['name'] not in ['customer', 'anonymous']:
             raise BadRequestException("Você não tem permissão para avançar o pedido para o próximo passo.")
 
-        employee = self.employee_repository.get_by_id(employee_id) if employee_id else None
+        employee_id = int(current_user['person']['id']) if current_user['profile']['name'] in ['employee', 'manager'] else None
+        employee = self.employee_repository.get_by_id(employee_id)
         order.next_step(self.order_status_repository, employee=employee)
         self.order_repository.update(order)
 
@@ -182,7 +182,7 @@ class OrderService(IOrderService):
 
     def list_orders(self, current_user: dict, status: Optional[List[str]] = None) -> List[OrderDTO]:
         if current_user['profile']['name'] == 'customer':
-            customer_id = current_user['person']['id']
+            customer_id = int(current_user['person']['id'])
             orders = self.order_repository.get_all(status=status, customer_id=customer_id)
         else:
             orders = self.order_repository.get_all(status=status)
@@ -194,7 +194,7 @@ class OrderService(IOrderService):
         if not order:
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
 
-        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != current_user['person']['id']:
+        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != int(current_user['person']['id']):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
         return order

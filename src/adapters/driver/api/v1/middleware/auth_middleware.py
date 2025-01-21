@@ -13,11 +13,21 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs/oauth2-redirect",
             "/redoc",
             "/api/v1/auth/token",
-            "/api/v1/health"
+            "/api/v1/health",
         ]
-
         if any(request.url.path.startswith(route) for route in open_routes):
             return await call_next(request)
+
+        for route in request.app.router.routes:
+            if (
+                hasattr(route, "path")
+                and hasattr(route, "methods")
+                and route.path == request.url.path
+                and request.method in route.methods
+            ):
+                if getattr(route.endpoint, "bypass_auth", False):
+                    return await call_next(request)
+
 
         token = request.headers.get("Authorization")
         if not token:

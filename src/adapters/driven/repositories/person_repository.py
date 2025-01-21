@@ -18,6 +18,9 @@ class PersonRepository(IPersonRepository):
 
     def exists_by_cpf(self, cpf: str) -> bool:
         return self.db_session.query(exists().where(Person.cpf == cpf)).scalar()
+    
+    def exists_by_email(self, email: str) -> bool:
+        return self.db_session.query(exists().where(Person.email == email)).scalar()
 
     def get_by_cpf(self, cpf: str) -> Person:
         return self.db_session.query(Person).filter(Person.cpf == cpf).first()

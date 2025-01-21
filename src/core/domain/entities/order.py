@@ -206,9 +206,12 @@ class Order(BaseEntity):
         self.order_items.append(item)
         self._sort_order_items()
 
-    def remove_item(self, item: OrderItem) -> None:
+    def remove_item(self, order_item: OrderItem) -> None:
         self._validate_status([*self.CATEGORY_TO_STATUS.values()], "remover itens")
-        self.order_items.remove(item)
+        if order_item.quantity > 1:
+            order_item.quantity -= 1
+        else:    
+            self.order_items.remove(order_item)
 
     def change_item_quantity(self, item: OrderItem, new_quantity: int) -> None:
         self._validate_status([*self.CATEGORY_TO_STATUS.values()], "alterar a quantidade de itens")
@@ -304,7 +307,7 @@ class Order(BaseEntity):
     def set_status_preparing(self, order_status_repository: IOrderStatusRepository, employee: Employee, movement_owner: Optional[str] = None) -> None:
         if self.order_status.status != OrderStatusEnum.ORDER_PAID.status:
             raise BadRequestException("Não é possível preparar o pedido neste momento.")
-        
+
         if not employee:
             raise BadRequestException("É necessário um funcionário para preparar o pedido.")
         
