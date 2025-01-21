@@ -50,6 +50,10 @@ class IOrderService(ABC):
         pass
 
     @abstractmethod
+    def process_payment(self, order_id: int, current_user: dict) -> None:
+        pass
+
+    @abstractmethod
     def next_step(self, order_id: int, current_user: dict) -> None:
         pass
 

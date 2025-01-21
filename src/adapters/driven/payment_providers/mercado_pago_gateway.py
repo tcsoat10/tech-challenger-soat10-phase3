@@ -44,8 +44,17 @@ class MercadoPagoGateway(IPaymentGateway):
             "description": "Compra en tienda" 
         }
         '''
+        payload = {
+            "external_reference": payment_data.get("external_reference", ""),
+            "notification_url": payment_data.get("notification_url", ""),
+            "total_amount": payment_data.get("total_amount", 0.0),
+            "items": payment_data.get("items", []),
+            "title": payment_data.get("title", ""),
+            "description": payment_data.get("description", "")
+        }
+
         url = f"{self.base_url}/instore/orders/qr/seller/collectors/{MERCADO_PAGO_USER_ID}/pos/{MERCADO_PAGO_POS_ID}/qrs"
-        response = requests.post(url, json=payment_data, headers=self.headers)
+        response = requests.post(url, json=payload, headers=self.headers)
         response.raise_for_status()
         return response.json()
 

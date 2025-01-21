@@ -21,6 +21,7 @@ from src.adapters.driver.api.v1.routes.order_routes import router as order_route
 from src.adapters.driver.api.v1.routes.auth_routes import router as auth_routes
 from src.adapters.driver.api.v1.routes.payment_routes import router as payment_routes
 from src.adapters.driver.api.v1.routes.order_payment_routes import router as order_payment_routes
+from src.adapters.driver.api.v1.routes.webhook_routes import router as webhook_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
 
@@ -48,3 +49,4 @@ app.include_router(order_status_routes, prefix="/api/v1", tags=["order-status"])
 app.include_router(order_routes, prefix="/api/v1", tags=["order"])
 app.include_router(payment_routes, prefix="/api/v1", tags=["payment"])
 app.include_router(order_payment_routes, prefix="/api/v1", tags=["order-payment"])
+app.include_router(webhook_routes, prefix="/api/v1", tags=["webhooks"])

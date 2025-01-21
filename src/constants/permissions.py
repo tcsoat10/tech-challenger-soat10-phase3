@@ -87,6 +87,7 @@ class OrderPermissions(BasePermissionEnum):
     CAN_CHANGE_ITEM_OBSERVATION = ("can_change_item_observation", "Permission to change the observation of an item in an order")
     CAN_CLEAR_ORDER = ("can_clear_order", "Permission to clear an order")
     CAN_LIST_ORDER_ITEMS = ("can_list_order_items", "Permission to list all items in an order")
+    CAN_CREATE_PAYMENT = ("can_create_payment", "Permission to create a payment for an order")
     CAN_CANCEL_ORDER = ("can_cancel_order", "Permission to cancel an order")
     CAN_NEXT_STEP = ("can_next_step", "Permission to go to the next step in an order")
     CAN_GO_BACK = ("can_go_back", "Permission to go back in an order")

@@ -1,4 +1,5 @@
 from typing import List, Optional
+from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.product.i_product_repository import IProductRepository
@@ -25,7 +26,8 @@ class OrderService(IOrderService):
         order_status_repository: IOrderStatusRepository,
         customer_repository: ICustomerRepository,
         employee_repository:IEmployeeRepository,
-        product_repository: IProductRepository
+        product_repository: IProductRepository,
+        payment_method_repository: IPaymentMethodRepository
     ):
         self.order_repository = repository
         self.order_status_repository = order_status_repository
@@ -148,6 +150,17 @@ class OrderService(IOrderService):
         order.cancel_order(self.order_status_repository)
         order.soft_delete()
         self.order_repository.update(order)
+
+    
+    def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> None:
+        order = self._get_order(order_id, current_user)
+        
+        payment_method = self.payment_method_repository.get_by_name(method_payment)
+        if not payment_method:
+            raise EntityNotFoundException(message="Não foi possível encontrar o método de pagamento informado.")
+
+        order.process_payment(self.order_status_repository, payment_method.id)
+        self.order_repository
 
     def next_step(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)

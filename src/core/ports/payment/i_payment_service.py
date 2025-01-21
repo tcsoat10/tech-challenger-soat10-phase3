@@ -1,36 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import List
-
-from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
-from src.core.domain.dtos.payment.payment_dto import PaymentDTO
-from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
-
+from typing import Any, Dict, List
 
 class IPaymentService(ABC):
+
     @abstractmethod
-    def create_payment(self, dto: CreatePaymentDTO) -> PaymentDTO:
+    def process_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Processa o pagamento e retorna os detalhes relevantes, como o QR Code ou links de pagamento.
+        
+        :param payment_data: Dados necessários para processar o pagamento.
+        :return: Um dicionário contendo os detalhes do pagamento.
+        """
         pass
 
     @abstractmethod
-    def get_payment_by_id(self, payment_id: int) -> PaymentDTO:
-        pass
-
-    @abstractmethod
-    def get_payments_by_method_id(self, method_id: int) -> List[PaymentDTO]:
-        pass
-    
-    @abstractmethod
-    def get_payments_by_status_id(self, status_id: int) -> List[PaymentDTO]:
-        pass
-
-    @abstractmethod
-    def get_all_payments(self, include_deleted: bool = False) -> List[PaymentDTO]:
-        pass
-    
-    @abstractmethod
-    def update_payment(self, payment_id: int, dto: UpdatePaymentDTO) -> PaymentDTO:
-        pass
-
-    @abstractmethod
-    def delete_payment(self, payment_id: int) -> None:
+    def handle_webhook(self, payload: Dict[str, Any]) -> None:
+        """
+        Processa eventos de webhook enviados pelo gateway de pagamento.
+        
+        :param payload: Dados enviados pelo gateway no evento de webhook.
+        """
         pass

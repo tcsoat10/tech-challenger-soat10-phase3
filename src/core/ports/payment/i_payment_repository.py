@@ -1,34 +1,50 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Dict, Any
 
 from src.core.domain.entities.payment import Payment
 
 
 class IPaymentRepository(ABC):
+    """
+    Interface para o repositório de pagamentos, responsável pela interação com a tabela `payments`.
+    """
+
     @abstractmethod
-    def create(self, payment: Payment) -> Payment:
+    def create_payment(self, payment: Payment) -> int:
+        """
+        Cria um novo pagamento na tabela `payments`.
+        
+        :param payment: Instância do pagamento a ser criado.
+        :return: ID do pagamento criado.
+        """
         pass
 
     @abstractmethod
-    def get_by_id(self, payment_id: int) -> Payment:
+    def update_payment_status(self, payment: Payment, status_id: int) -> None:
+        """
+        Atualiza o status de um pagamento na tabela `payments`.
+        
+        :param payment: Instância do pagamento a ser atualizado.
+        :param status_id: Novo ID do status do pagamento.
+        """
         pass
 
     @abstractmethod
-    def get_by_method_id(self, method_id: int) -> List[Payment]:
+    def get_payment_by_id(self, payment_id: int) -> Dict[str, Any]:
+        """
+        Recupera os detalhes de um pagamento pelo ID.
+        
+        :param payment_id: ID do pagamento.
+        :return: Dicionário contendo os detalhes do pagamento.
+        """
         pass
 
     @abstractmethod
-    def get_by_status_id(self, status_id: int) -> List[Payment]:
-        pass
-
-    @abstractmethod
-    def get_all(self) -> List[Payment]:
-        pass
-
-    @abstractmethod
-    def update(self, payment: Payment) -> Payment:
-        pass
-
-    @abstractmethod
-    def delete(self, payment_id: int) -> None:
+    def get_payment_by_reference(self, external_reference: str) -> Dict[str, Any]:
+        """
+        Recupera os detalhes de um pagamento pela referência externa.
+        
+        :param external_reference: Referência externa do pagamento.
+        :return: Dicionário contendo os detalhes do pagamento.
+        """
         pass
