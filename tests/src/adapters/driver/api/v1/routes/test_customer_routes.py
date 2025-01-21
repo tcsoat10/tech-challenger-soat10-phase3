@@ -27,6 +27,98 @@ def test_create_customer_success(client):
     assert data['person']['email'] == payload['person']['email']
 
 
+def test_create_customer_with_existing_cpf_return_error(client):
+    existing_customer = CustomerFactory()
+    payload = {
+        'person': {
+            'name': 'Different Name',
+            'cpf': existing_customer.person.cpf,
+            'email': 'different@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Customer already exists.',
+            'details': None,
+        }
+    }
+
+def test_create_customer_with_existing_email_return_error(client):
+    existing_customer = CustomerFactory()
+    payload = {
+        'person': {
+            'name': 'Different Name',
+            'cpf': gen.cpf(),
+            'email': existing_customer.person.email,
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Customer already exists.',
+            'details': None,
+        }
+    }
+
+def test_create_inactive_customer_success(client):
+    inactive_customer = CustomerFactory(inactivated_at=datetime.now())
+    payload = {
+        'person': {
+            'name': 'New Name',
+            'cpf': inactive_customer.person.cpf,
+            'email': 'newemail@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+    assert 'id' in data
+    assert data['person']['cpf'] == inactive_customer.person.cpf
+    assert data['person']['email'] == payload['person']['email']
+
+def test_update_inactive_customer_return_error(client):
+    inactive_customer = CustomerFactory(inactivated_at=datetime.now())
+    payload = {
+        'id': inactive_customer.id,
+        'person': {
+            'cpf': inactive_customer.person.cpf,
+            'name': 'New Name',
+            'email': 'newemail@example.com',
+            'birth_date': '1995-02-02'
+        }
+    }
+
+    response = client.put(f'/api/v1/customers/{inactive_customer.id}', json=payload, permissions=[CustomerPermissions.CAN_UPDATE_CUSTOMER])
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    data = response.json()
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.ENTITY_NOT_FOUND),
+            'message': 'Customer not found.',
+            'details': None,
+        }
+    }
+
+
+
+
 def test_create_duplicate_customer_return_error(client):
     customer = CustomerFactory()
     payload = {

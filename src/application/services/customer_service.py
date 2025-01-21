@@ -25,7 +25,7 @@ class CustomerService(ICustomerService):
         person = self.person_repository.get_by_cpf(dto.person.cpf)
         if not person:
             if self.person_repository.exists_by_email(dto.person.email):
-                raise EntityDuplicatedException(entity_name='Person')
+                raise EntityDuplicatedException(entity_name='Customer')
 
             person = Person(
                 name=dto.person.name,
@@ -90,6 +90,9 @@ class CustomerService(ICustomerService):
         if not customer:
             raise EntityNotFoundException(entity_name='Customer')
         
+        if customer.is_deleted():
+            raise EntityNotFoundException(entity_name='Customer')
+        
         if customer.person.cpf != dto.person.cpf:
             raise EntityNotFoundException(entity_name='Person')
 
@@ -116,7 +119,8 @@ class CustomerService(ICustomerService):
         customer = self.repository.get_by_id(customer_id)
         if not customer:
             raise EntityNotFoundException(entity_name='Customer')
-        
+        if customer.is_deleted():
+                raise EntityNotFoundException(entity_name='Customer')
         if DELETE_MODE == 'soft':
             if customer.is_deleted():
                 raise EntityNotFoundException(entity_name='Customer')
