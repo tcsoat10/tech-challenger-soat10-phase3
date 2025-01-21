@@ -10,7 +10,9 @@ from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
 from src.constants.permissions import OrderPermissions
+from src.constants.permissions import PaymentPermissions
 from tests.factories.product_factory import ProductFactory
+from tests.factories.payment_method_factory import PaymentMethodFactory
 
 
 def test_create_order_success(client, populate_order_status):
@@ -579,3 +581,24 @@ def test_try_next_step_order_status_when_order_not_exists_and_return_error(clien
     data = response.json()
     assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
 
+
+def test_process_order_payment_success(client):
+    person = PersonFactory()
+    payment_method = PaymentMethodFactory()
+    order = OrderFactory()
+
+    res = client.post(
+        f'/api/v1/orders/{order.id}/payments', profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        permissions=[PaymentPermissions.CAN_CREATE_PAYMENT],
+        params={"payment_method": payment_method.name}
+    )
+    assert res.status_code == status.HTTP_201_CREATED
+    
+    data = res.json()
+    assert 'qr_data' in data
