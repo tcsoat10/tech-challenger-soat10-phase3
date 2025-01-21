@@ -21,6 +21,9 @@ class AuthService(IAuthService):
         customer: Customer = self.customer_repository.get_by_cpf(dto.cpf)
         if not customer:
             raise EntityNotFoundException(entity_name="Customer")
+        
+        if customer.is_deleted():
+            raise InvalidCredentialsException()
 
         customer_profile = self.profile_repository.get_by_name("customer")
         if not customer_profile:
@@ -72,6 +75,9 @@ class AuthService(IAuthService):
     def login_employee(self, login_dto: LoginDTO) -> TokenDTO:
         employee: Employee = self.employee_repository.get_by_username(login_dto.username)
         if not employee or not employee.user.verify_password(login_dto.password):
+            raise InvalidCredentialsException()
+        
+        if employee.is_deleted():
             raise InvalidCredentialsException()
         
         profile_name = 'employee'

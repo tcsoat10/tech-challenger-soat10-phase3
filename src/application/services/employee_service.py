@@ -1,3 +1,4 @@
+from src.core.domain.entities.person import Person
 from src.core.ports.employee.i_employee_service import IEmployeeService
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.ports.person.i_person_repository import IPersonRepository
@@ -27,32 +28,55 @@ class EmployeeService(IEmployeeService):
         self.user_repository = user_repository
     
     def create_employee(self, dto: CreateEmployeeDTO) -> EmployeeDTO:
-        person = self.person_repository.get_by_id(dto.person_id)
+        person = self.person_repository.get_by_cpf(dto.person.cpf)
         if not person:
-            raise EntityNotFoundException(entity_name='Person')
-        
+            if self.person_repository.exists_by_email(dto.person.email):
+                raise EntityDuplicatedException(entity_name='Person')
+
+            person = Person(
+                name=dto.person.name,
+                cpf=dto.person.cpf,
+                email=dto.person.email,
+                birth_date=dto.person.birth_date
+            )
+            person = self.person_repository.create(person)
+        else:
+            person.name = dto.person.name
+            person.email = dto.person.email
+            person.birth_date = dto.person.birth_date
+            if person.is_deleted():
+                person.reactivate()
+            self.person_repository.update(person)
+
         role = self.role_repository.get_by_id(dto.role_id)
         if not role:
             raise EntityNotFoundException(entity_name='Role')
-        
+
         user = self.user_repository.get_by_id(dto.user_id)
         if not user:
             raise EntityNotFoundException(entity_name='User')
-        
-        employee = self.repository.get_by_person_id(dto.person_id)
-        if employee:
-            if not employee.is_deleted():
+
+        existing_employee_by_user = self.repository.get_by_username(user.name)
+        if existing_employee_by_user:
+            if not existing_employee_by_user.is_deleted():
                 raise EntityDuplicatedException(entity_name='Employee')
-            
+
+        existing_employee_by_person = self.repository.get_by_person_id(person.id)
+        if existing_employee_by_person:
+            if not existing_employee_by_person.is_deleted():
+                raise EntityDuplicatedException(entity_name='Employee')
+
+        if existing_employee_by_user:
+            employee = existing_employee_by_user
             employee.person = person
             employee.role = role
             employee.user = user
-            employee.reactivate
+            employee.reactivate()
             self.repository.update(employee)
         else:
             employee = Employee(person=person, role=role, user=user)
             employee = self.repository.create(employee)
-        
+
         return EmployeeDTO.from_entity(employee)
     
     def get_employee_by_id(self, employee_id: int) -> EmployeeDTO:
@@ -84,6 +108,9 @@ class EmployeeService(IEmployeeService):
     def update_employee(self, employee_id: int, dto: UpdateEmployeeDTO) -> EmployeeDTO:
         employee = self.repository.get_by_id(employee_id)
         if not employee:
+            raise EntityNotFoundException(entity_name='Employee')
+        
+        if employee.is_deleted():
             raise EntityNotFoundException(entity_name='Employee')
         
         person = self.person_repository.get_by_id(dto.person_id)

@@ -1,3 +1,4 @@
+from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.person_factory import PersonFactory
 from tests.factories.customer_factory import CustomerFactory
 from src.core.exceptions.utils import ErrorCode
@@ -49,6 +50,25 @@ def test_create_customer_with_existing_cpf_return_error(client):
             'details': None,
         }
     }
+
+def test_create_customer_with_person_linked_to_active_employee_success(client):
+    employee = EmployeeFactory()
+    payload = {
+        'person': {
+            'name': employee.person.name,
+            'cpf': employee.person.cpf,
+            'email': employee.person.email,
+            'birth_date': employee.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
+
+    response = client.post('/api/v1/customers', json=payload)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+    assert 'id' in data
+    assert data['person']['cpf'] == employee.person.cpf
+    assert data['person']['email'] == employee.person.email
 
 def test_create_customer_with_existing_email_return_error(client):
     existing_customer = CustomerFactory()
