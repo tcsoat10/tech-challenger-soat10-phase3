@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.permissions import OrderPermissions
+from src.constants.permissions import PaymentPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
@@ -144,7 +145,7 @@ async def change_item_observation(
 # Criar pagamento para o pedido
 @router.post(
     "/orders/{order_id}/payments",
-    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CREATE_PAYMENT])],
+    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_CREATE_PAYMENT])],
     status_code=status.HTTP_201_CREATED,
 )
 async def create_payment(
