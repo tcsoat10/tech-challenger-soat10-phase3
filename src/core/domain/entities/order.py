@@ -246,6 +246,94 @@ class Order(BaseEntity):
         self._record_status_change(new_status, owner)
         self.order_status = new_status
 
+    def set_status_waiting_burguer(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_PENDING.status, OrderStatusEnum.ORDER_WAITING_SIDES.status]:
+            raise BadRequestException("Não é possível selecionar sanduíches neste momento.")
+        
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status)
+
+    def set_status_waiting_sides(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_WAITING_BURGERS.status, OrderStatusEnum.ORDER_WAITING_DRINKS.status]:
+            raise BadRequestException("Não é possível selecionar acompanhamentos neste momento.")
+        
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_SIDES.status)
+
+    def set_status_waiting_drinks(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_WAITING_SIDES.status, OrderStatusEnum.ORDER_WAITING_DESSERTS.status]:
+            raise BadRequestException("Não é possível selecionar bebidas neste momento.")
+        
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_DRINKS.status)
+    
+    def set_status_waiting_desserts(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status not in [OrderStatusEnum.ORDER_WAITING_DRINKS.status, OrderStatusEnum.ORDER_READY_TO_PLACE.status]:
+            raise BadRequestException("Não é possível selecionar sobremesas neste momento.")
+        
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_DESSERTS.status)
+    
+    def set_status_ready_to_place(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_WAITING_DESSERTS.status:
+            raise BadRequestException("Não é possível confirmar o pedido neste momento.")
+        
+        self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_READY_TO_PLACE.status)
+
+    def set_status_placed(
+            self,
+            order_status_repository: IOrderStatusRepository,
+            movement_owner: Optional[str] = None,
+        ) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_READY_TO_PLACE.status:
+            raise BadRequestException("Não é possível finalizar o pedido neste momento.")
+
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_PLACED.status)
+        owner = movement_owner or self.customer_name or "Cliente Anônimo"
+        self._record_status_change(new_status, owner)
+        self.order_status = new_status
+
+    def set_status_paid(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_PLACED.status:
+            raise BadRequestException("Não é possível confirmar o pagamento neste momento.")
+        
+        if not self.is_paid:
+            raise BadRequestException("O pedido ainda não foi pago. Não é possível avançar o status do pedido.")
+        
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        owner = "System"
+        self._record_status_change(new_status, owner)
+        self.order_status = new_status
+
+    def set_status_preparing(self, order_status_repository: IOrderStatusRepository, employee: Employee, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_PAID.status:
+            raise BadRequestException("Não é possível preparar o pedido neste momento.")
+        
+        if not employee:
+            raise BadRequestException("É necessário um funcionário para preparar o pedido.")
+        
+        self.id_employee = employee.id
+        self.employee = employee
+
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_PREPARING.status)
+        owner = movement_owner or self.employee_name or "Funcionário Anônimo"
+        self._record_status_change(new_status, owner)
+        self.order_status = new_status
+
+    def set_status_ready(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_PREPARING.status:
+            raise BadRequestException("Não é possível finalizar o pedido neste momento.")
+        
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        owner = movement_owner or self.employee_name or "Funcionário Anônimo"
+        self._record_status_change(new_status, owner)
+        self.order_status = new_status
+
+    def set_status_completed(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+        if self.order_status.status != OrderStatusEnum.ORDER_READY.status:
+            raise BadRequestException("Não é possível completar o pedido neste momento.")
+        
+        new_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_COMPLETED.status)
+        owner = movement_owner or self.employee_name or "Funcionário Anônimo"
+        self._record_status_change(new_status, owner)
+        self.order_status = new_status
+    
     def next_step(
         self,
         order_status_repository: IOrderStatusRepository,
@@ -266,40 +354,30 @@ class Order(BaseEntity):
 
         expected_next_status = STATUS_TRANSITIONS[current_status]
 
-        if expected_next_status == OrderStatusEnum.ORDER_PLACED:
-            if not self.order_items:
-                self.cancel_order()
-                return
-            
-            if not self.is_paid:
-                raise BadRequestException("O pedido ainda não foi pago. Não é possível avançar o status.")
-
-        if expected_next_status == OrderStatusEnum.ORDER_PAID:
-            if not self.is_paid:
-                raise BadRequestException("O pedido ainda não foi pago. Não é possível avançar o status.")
-
-        if expected_next_status == OrderStatusEnum.ORDER_PREPARING:
-            if not employee:
-                raise BadRequestException("É necessário um funcionário para preparar o pedido.")
-
-            self.id_employee = employee.id
-            self.employee = employee
-
-        if expected_next_status in [OrderStatusEnum.ORDER_PLACED, OrderStatusEnum.ORDER_PAID, OrderStatusEnum.ORDER_COMPLETED]:
-            owner = movement_owner or self.customer_name or "Cliente Anônimo"
-        elif expected_next_status in [OrderStatusEnum.ORDER_PREPARING, OrderStatusEnum.ORDER_READY]:
-            owner = movement_owner or self.employee_name or "Funcionário Anônimo"
+        if expected_next_status == OrderStatusEnum.ORDER_WAITING_BURGERS:
+            self.set_status_waiting_burguer(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_WAITING_SIDES:
+            self.set_status_waiting_sides(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_WAITING_DRINKS:
+            self.set_status_waiting_drinks(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_WAITING_DESSERTS:
+            self.set_status_waiting_desserts(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_READY_TO_PLACE:
+            self.set_status_ready_to_place(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_PLACED:
+            self.set_status_placed(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_PAID:
+            self.set_status_paid(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_PREPARING:
+            self.set_status_preparing(order_status_repository, employee, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_READY:
+            self.set_status_ready(order_status_repository, movement_owner)
+        elif expected_next_status == OrderStatusEnum.ORDER_COMPLETED:
+            self.set_status_completed(order_status_repository, movement_owner)
         else:
-            owner = movement_owner or "System"
+            raise BadRequestException(f"Status não suportado: {expected_next_status.status}")
 
-        self.order_status = order_status_repository.get_by_status(expected_next_status.status)
-        if not self.order_status:
-            raise BadRequestException(f"Não foi possível encontrar o status '{expected_next_status.status}'.")
-
-        if self.order_status.status not in [*self.SELECT_ITEMS_STATUSES_NAMES, OrderStatusEnum.ORDER_READY_TO_PLACE.status]:
-            self._record_status_change(self.order_status, owner)
-
-    def go_back(self, order_status_repository: IOrderStatusRepository) -> None:
+    def go_back(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
         '''
         Reverts the order to the previous status.
         
@@ -329,9 +407,18 @@ class Order(BaseEntity):
         if not previous_status:
             raise BadRequestException("Não foi possível determinar o status anterior.")
 
-        self.order_status = order_status_repository.get_by_status(previous_status.status)
-        if not self.order_status:
-            raise BadRequestException(f"Não foi possível encontrar o status '{previous_status.status}'.")
+        if previous_status == OrderStatusEnum.ORDER_WAITING_BURGERS:
+            self.set_status_waiting_burguer(order_status_repository, movement_owner)
+        elif previous_status == OrderStatusEnum.ORDER_WAITING_SIDES:
+            self.set_status_waiting_sides(order_status_repository, movement_owner)
+        elif previous_status == OrderStatusEnum.ORDER_WAITING_DRINKS:
+            self.set_status_waiting_drinks(order_status_repository, movement_owner)
+        elif previous_status == OrderStatusEnum.ORDER_WAITING_DESSERTS:
+            self.set_status_waiting_desserts(order_status_repository, movement_owner)
+        elif previous_status == OrderStatusEnum.ORDER_READY_TO_PLACE:
+            self.set_status_ready_to_place(order_status_repository, movement_owner)
+        else:
+            raise BadRequestException(f"Transição de status não suportada: {previous_status.status}")
         
 
 class OrderStatusMovement(BaseEntity):
