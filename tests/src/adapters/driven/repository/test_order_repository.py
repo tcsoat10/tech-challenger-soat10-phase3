@@ -1,5 +1,7 @@
 import pytest
 
+from src.adapters.driven.repositories.payment_repository import PaymentRepository
+from src.application.services.payment_service import PaymentService
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.exceptions.bad_request_exception import BadRequestException
@@ -16,6 +18,7 @@ from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
 from tests.factories.product_factory import ProductFactory
+from unittest.mock import PropertyMock, patch
 
 
 class TestOrderRepository:
@@ -24,6 +27,7 @@ class TestOrderRepository:
     def setup(self, db_session):
         self.repository = OrderRepository(db_session)
         self.order_status_repository = OrderStatusRepository(db_session)
+        self.payment_method_repository = PaymentRepository(db_session)
         self.db_session = db_session
         self._populate_status_order()
         self.clean_database()
@@ -160,7 +164,10 @@ class TestOrderRepository:
         db_order = self.db_session.query(Order).join(Customer).join(Person).filter_by(name="JOÃO").first()
         assert db_order is None
 
-    def test_order_next_step_success(self):
+    @patch('src.core.domain.entities.order.Order.is_paid', new_callable=PropertyMock)
+    def test_order_next_step_success(self, mock_is_paid):
+        mock_is_paid.return_value = True
+
         person = PersonFactory()
         customer = CustomerFactory(person=person)
         order = Order(
@@ -218,7 +225,7 @@ class TestOrderRepository:
         order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
-
+    
         order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
@@ -227,7 +234,7 @@ class TestOrderRepository:
         order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
-        assert order.status_history[-1].changed_by == order.customer_name
+        assert order.status_history[-1].changed_by == 'System'
 
         employee = EmployeeFactory()
         order.next_step(self.order_status_repository, employee=employee)
@@ -243,7 +250,7 @@ class TestOrderRepository:
         order.next_step(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
-        assert order.status_history[-1].changed_by == order.customer_name
+        assert order.status_history[-1].changed_by == order.employee_name
 
     def test_cancel_order_cancel_when_status_is_order_pending(self):
         person = PersonFactory()
