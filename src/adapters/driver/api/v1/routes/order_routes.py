@@ -170,11 +170,10 @@ async def cancel_order(
 @router.post("/orders/{order_id}/next-step")
 async def next_step(
     order_id: int,
-    employee_id: Optional[int] = None,
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    service.next_step(order_id, current_user, employee_id)
+    service.next_step(order_id, current_user)
     return {"detail": "Pedido avançado com sucesso."}
 
 # Retornar ao passo anterior

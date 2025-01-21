@@ -56,7 +56,7 @@ class CustomerService(ICustomerService):
         return CustomerDTO.from_entity(customer)
     
     def get_customer_by_id(self, customer_id: int, current_user: dict) -> CustomerDTO:
-        if self._is_customer(current_user) and current_user['person']['id'] != customer_id:
+        if self._is_customer(current_user) and int(current_user['person']['id']) != customer_id:
             raise EntityNotFoundException(entity_name='Customer')
 
         customer = self.repository.get_by_id(customer_id)
@@ -69,7 +69,7 @@ class CustomerService(ICustomerService):
         if not customer:
             raise EntityNotFoundException(entity_name='Customer')
         
-        if self._is_customer(current_user) and current_user['person']['id'] != customer.id:
+        if self._is_customer(current_user) and int(current_user['person']['id']) != customer.id:
             raise EntityNotFoundException(entity_name='Customer')
         
         return CustomerDTO.from_entity(customer)
@@ -78,12 +78,12 @@ class CustomerService(ICustomerService):
         customers = self.repository.get_all(include_deleted=include_deleted)
         
         if self._is_customer(current_user):
-            customers = [customer for customer in customers if customer.id == current_user['person']['id']]
+            customers = [customer for customer in customers if customer.id == int(current_user['person']['id'])]
 
         return [CustomerDTO.from_entity(customer) for customer in customers]
     
     def update_customer(self, customer_id: int, dto: UpdateCustomerDTO, current_user: dict) -> CustomerDTO:
-        if self._is_customer(current_user) and current_user['person']['id'] != customer_id:
+        if self._is_customer(current_user) and int(current_user['person']['id']) != customer_id:
             raise EntityNotFoundException(entity_name='Customer')
 
         customer = self.repository.get_by_id(customer_id)
@@ -113,7 +113,7 @@ class CustomerService(ICustomerService):
         return CustomerDTO.from_entity(customer)
     
     def delete_customer(self, customer_id: int, current_user: dict) -> None:
-        if self._is_customer(current_user) and current_user['person']['id'] != customer_id:
+        if self._is_customer(current_user) and int(current_user['person']['id']) != customer_id:
             raise EntityNotFoundException(entity_name='Customer')
 
         customer = self.repository.get_by_id(customer_id)
