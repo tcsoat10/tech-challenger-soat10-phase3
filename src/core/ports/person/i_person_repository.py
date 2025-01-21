@@ -15,6 +15,10 @@ class IPersonRepository(ABC):
         pass
 
     @abstractmethod
+    def exists_by_email(self, cpf: str) -> bool:
+        pass
+
+    @abstractmethod
     def get_by_cpf(self, cpf: str) -> Person:
         pass
 

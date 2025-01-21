@@ -2,27 +2,43 @@ from tests.factories.person_factory import PersonFactory
 from tests.factories.customer_factory import CustomerFactory
 from src.core.exceptions.utils import ErrorCode
 from src.constants.permissions import CustomerPermissions
+from pycpfcnpj import gen
 
 from fastapi import status
 from datetime import datetime
 
 def test_create_customer_success(client):
-    person = PersonFactory()
-    payload = {'person_id': person.id}
+    payload = {
+        'person': {
+            'name': 'John Doe',
+            'cpf': gen.cpf(),
+            'email': 'jonhdoe@example.com',
+            'birth_date': '1990-01-01'
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
     assert 'id' in data
-    assert data['person']['id'] == person.id
+    assert data['person']['name'] == payload['person']['name']
+    assert data['person']['cpf'] == payload['person']['cpf']
+    assert data['person']['email'] == payload['person']['email']
 
 
 def test_create_duplicate_customer_return_error(client):
     customer = CustomerFactory()
-    payload = {'person_id': customer.person_id}
+    payload = {
+        'person': {
+            'name': customer.person.name,
+            'cpf': customer.person.cpf,
+            'email': customer.person.email,
+            'birth_date': customer.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_409_CONFLICT
 
     data = response.json()
@@ -38,9 +54,16 @@ def test_create_duplicate_customer_return_error(client):
 
 def test_reactivate_customer_return_success(client):
     customer = CustomerFactory(inactivated_at=datetime.now())
-    payload = {'person_id': customer.person_id}
+    payload = {
+        'person': {
+            'name': customer.person.name,
+            'cpf': customer.person.cpf,
+            'email': customer.person.email,
+            'birth_date': customer.person.birth_date.strftime('%Y-%m-%d')
+        }
+    }
 
-    response = client.post('/api/v1/customers', json=payload, permissions=[CustomerPermissions.CAN_CREATE_CUSTOMER])
+    response = client.post('/api/v1/customers', json=payload)
     assert response.status_code == status.HTTP_201_CREATED
 
     data = response.json()
@@ -106,12 +129,16 @@ def test_get_all_customers_success(client):
 
 
 def test_update_customer_success(client):
-    person = PersonFactory()
     customer = CustomerFactory()
 
     payload = {
         'id': customer.id,
-        'person_id': person.id
+        'person': {
+            'cpf': customer.person.cpf,
+            'name': 'John Doe',
+            'email': 'johndoe@example.com',
+            'birth_date': '1990-01-01'
+        }
     }
 
     response = client.put(f'/api/v1/customers/{customer.id}', json=payload, permissions=[CustomerPermissions.CAN_UPDATE_CUSTOMER])
@@ -120,13 +147,13 @@ def test_update_customer_success(client):
     data = response.json()
     assert data == {
         'id': customer.id,
-            'person': {
-                'id': person.id,
-                'name': person.name,
-                'cpf': person.cpf,
-                'email': person.email,
-                'birth_date': person.birth_date.strftime('%Y-%m-%d')
-            }
+        'person': {
+            'id': customer.person.id,
+            'cpf': customer.person.cpf,
+            'name': 'John Doe',
+            'email': 'johndoe@example.com',
+            'birth_date': '1990-01-01'
+        }
     }
 
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driver.api.v1.decorators.bypass_auth import bypass_auth
 from config.database import get_db
 from src.core.ports.customer.i_customer_service import ICustomerService
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
@@ -25,15 +26,14 @@ def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerSer
     return CustomerService(customer_repository, person_repository)
 
 @router.post(
-        '/customers',
-        response_model=CustomerDTO,
-        status_code=status.HTTP_201_CREATED,
-        dependencies=[Security(get_current_user, scopes=[CustomerPermissions.CAN_CREATE_CUSTOMER])]
+    '/customers',
+    response_model=CustomerDTO,
+    status_code=status.HTTP_201_CREATED
 )
+@bypass_auth()
 def create_customer(
     dto: CreateCustomerDTO,
-    service: ICustomerService = Depends(_get_customer_service),
-    user: dict = Security(get_current_user)
+    service: ICustomerService = Depends(_get_customer_service)
 ):
     return service.create_customer(dto)
 
@@ -49,7 +49,7 @@ def get_customer_by_id(
     service: ICustomerService = Depends(_get_customer_service),
     user: dict = Security(get_current_user)
 ):
-    return service.get_customer_by_id(customer_id)
+    return service.get_customer_by_id(customer_id, user)
 
 
 @router.get(
@@ -63,7 +63,7 @@ def get_customer_by_person_id(
     service: ICustomerService = Depends(_get_customer_service),
     user: dict = Security(get_current_user)
 ):
-    return service.get_customer_by_person_id(person_id)
+    return service.get_customer_by_person_id(person_id, user)
 
 
 @router.get(
@@ -77,7 +77,7 @@ def get_all_customers(
     service: ICustomerService = Depends(_get_customer_service),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_customers(include_deleted=include_deleted)
+    return service.get_all_customers(user, include_deleted=include_deleted)
 
 
 @router.put(
@@ -92,7 +92,7 @@ def update_customer(
     service: ICustomerService = Depends(_get_customer_service),
     user: dict = Security(get_current_user)
 ):
-    return service.update_customer(customer_id, dto)
+    return service.update_customer(customer_id, dto, user)
 
 
 @router.delete(
@@ -105,4 +105,4 @@ def delete_customer(
     service: ICustomerService = Depends(_get_customer_service),
     user: dict = Security(get_current_user)
 ):
-    service.delete_customer(customer_id)
+    service.delete_customer(customer_id, user)
