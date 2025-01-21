@@ -34,6 +34,7 @@ class OrderService(IOrderService):
         self.customer_repository = customer_repository
         self.employee_repository = employee_repository
         self.product_repository = product_repository
+        self.payment_method_repository = payment_method_repository
 
     def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [
