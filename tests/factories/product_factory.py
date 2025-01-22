@@ -19,5 +19,5 @@ class ProductFactory(SQLAlchemyModelFactory):
     description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=15))
     category = factory.SubFactory(CategoryFactory)
     category_id = factory.SelfAttribute("category.id")
-    price = FuzzyFloat(10.0, 100.0)
+    price = FuzzyFloat(10.0, 100.0, precision=2)
     sla_product = factory.LazyAttribute(lambda _: fake.word())
