@@ -43,6 +43,42 @@ No diretório definido para armazenar os arquivos do projeto, executar o comando
 
 O arquivo .env contém valores necessários para a execução do projeto, como senhas e variáveis de ambiente. Ele não deve ser salvo no repositório remoto, e é necessário que seja alocado no diretório raiz do projeto.
 
+### Envs necessárias
+```
+
+# Configuração do Banco de Dados
+MYSQL_VERSION=""
+MYSQL_CONTAINER_NAME=""
+MYSQL_ROOT_PASSWORD=""
+MYSQL_DATABASE=""
+MYSQL_USER=""
+MYSQL_PASSWORD=""
+MYSQL_HOST=""
+MYSQL_PORT=""
+
+# Configurações de ambiente
+DEBUG=true
+ENVIRONMENT=development
+
+# Configurações de servidor
+APP_NAME=soat10
+APP_PORT=8000
+
+# Configuração de logs
+LOG_LEVEL=INFO
+
+# JWT
+SECRET_KEY=
+
+# Mercado Pago
+MERCADO_PAGO_ACCESS_TOKEN=
+MERCADO_PAGO_USER_ID=
+MERCADO_PAGO_POS_ID=
+
+# Webhook
+WEBHOOK_URL="http://localhost:8000"
+```
+
 ## 3.1. Docker Compose (produção)
 
 Após verificar que a Docker Engine está ativa, executar o comando **`docker compose up -d --build`** no diretório raiz do projeto. Este comando sobe a aplicação e o banco de dados seguindo as instruções definidas no arquivo **`docker-compose.yml`**.
@@ -54,11 +90,11 @@ Os dados da aplicação são persistidos em um volume, também criado a partir d
 ## 4. Testes
 
 Alternativamente, o comando **`make dev`** cria uma versão de testes da aplicação.
-
+Obs.: Se for a primeira execução, ainda será necessário executar **`docker compose up -d --build`**.
 
 # Documentação
 
-A API possui duas opções de documentação, Swagger UI, disponível em **http://127.0.0.1:8000/docs**, e Redoc, disponível em **http://127.0.0.1:8000/redoc**
+A API possui duas opções de documentação, Swagger UI, disponível em **http://127.0.0.1:8000/docs**, e Redoc, disponível em **http://127.0.0.1:8000/redoc**. O openapi.json está disponível em **http://127.0.0.1:8000/openapi.json** e pode ser importado no **`postman`**.
 
 
 # Endpoints
