@@ -156,16 +156,6 @@ class OrderService(IOrderService):
         order.soft_delete()
         self.order_repository.update(order)
 
-    
-    def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-        payment_method = self.payment_method_repository.get_by_name(method_payment)
-        if not payment_method:
-            raise EntityNotFoundException(message="Não foi possível encontrar o método de pagamento informado.")
-
-        order.process_payment(self.payment_service, payment_method.id)
-        self.order_repository
-
     def next_step(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
 
