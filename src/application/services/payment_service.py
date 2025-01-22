@@ -11,6 +11,7 @@ from src.core.ports.payment.i_payment_repository import IPaymentRepository
 from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.core.ports.order.i_order_repository import IOrderRepository
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.constants.payment_status import PaymentStatusEnum
 
 
@@ -25,13 +26,15 @@ class PaymentService(IPaymentService):
         repository: IPaymentRepository,
         payment_status_repository: IPaymentStatusRepository,
         payment_method_repository: IPaymentMethodRepository,
-        order_repository: IOrderRepository
+        order_repository: IOrderRepository,
+        order_status_repository: IOrderStatusRepository
     ):
         self.gateway = gateway
         self.repository = repository
         self.payment_status_repository = payment_status_repository
         self.payment_method_repository = payment_method_repository
         self.order_repository = order_repository
+        self.order_status_repository = order_status_repository
 
     #def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> None:
         
@@ -97,7 +100,7 @@ class PaymentService(IPaymentService):
             payment_method_id=payment_method.id,
             payment_status_id=payment_status.id,
             amount=payment_data['total_amount'],
-            external_reference=payment_data["external_reference"]
+            external_reference=gateway_response["in_store_order_id"]
         )
 
         payment = self.repository.create_payment(payment)
@@ -131,17 +134,20 @@ class PaymentService(IPaymentService):
         res = requests.get(f'https://api.mercadopago.com/merchant_orders/{merchan_order_id}', headers=headers)
         res = res.json()
         transaction_id = res.get("id")
-        new_status_name = res.get("status") # Status do pagamento recebido no webhook
+        new_status_name = res.get("status")
+        external_reference = res.get("external_reference")
+        # Status do pagamento recebido no webhook
         # Recupera o status do pagamento pelo nome
         new_status = self.payment_status_repository.get_by_name(status_reference[new_status_name])
+        #payment.payment_status_id = new_status.id
 
         # Recupera o pagamento pela referência externa
-        payment = self.repository.get_payment_by_reference(transaction_id)
-
-        payment.payment_status_id = new_status.id
-
+        payment = self.repository.get_payment_by_reference(external_reference)
         if not payment:
             raise ValueError(f"Pagamento com referência {transaction_id} não encontrado.")
 
-        # Atualiza o status do pagamento no banco de dados
-        self.repository.update_payment_status(payment_id=payment["id"], status_id=new_status.id)
+        if new_status_name == 'closed' or new_status_name == 'expired':
+            self.repository.update_payment_status(new_status.id)
+        
+        if new_status_name == 'closed':
+            payment.order.next_step(self.order_status_repository)
