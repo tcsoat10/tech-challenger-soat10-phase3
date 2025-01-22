@@ -40,10 +40,7 @@ class OrderService(IOrderService):
             OrderStatusEnum.ORDER_WAITING_SIDES.status,
             OrderStatusEnum.ORDER_WAITING_DRINKS.status,
             OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-            OrderStatusEnum.ORDER_PLACED.status,
-            OrderStatusEnum.ORDER_PAID.status,
-            OrderStatusEnum.ORDER_PREPARING.status,
-            OrderStatusEnum.ORDER_READY.status
+            OrderStatusEnum.ORDER_READY_TO_PLACE.status
         ]
 
         open_orders = self.order_repository.get_all(status=open_statuses, customer_id=int(current_user['person']['id']))
