@@ -12,8 +12,8 @@ class Payment(BaseEntity):
 
     payment_status_id = Column(ForeignKey('payment_status.id'), nullable=False)
     payment_status = relationship('PaymentStatus', back_populates='payments')
-
-    orders = relationship('OrderPayment', back_populates='payment')
+    
+    order = relationship('Order', back_populates='payment')
 
     amount = Column(Float, nullable=False)
     external_reference = Column(String(500), nullable=False)

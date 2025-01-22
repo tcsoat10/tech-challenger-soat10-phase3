@@ -40,6 +40,9 @@ class Order(BaseEntity):
     id_employee = Column('id_employee', Integer, ForeignKey('employees.id'), nullable=True)
     employee = relationship('Employee')
 
+    id_payment = Column(ForeignKey('payments.id'), nullable=True)
+    payment = relationship('Payment', back_populates='order')
+
     payments = relationship('OrderPayment', back_populates='order', cascade='all, delete-orphan')
 
     order_items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
@@ -104,7 +107,9 @@ class Order(BaseEntity):
 
     @property
     def is_paid(self) -> bool:
-        return any(payment.payment_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status for payment in self.payments)
+        if self.payment:
+            return self.payment.payment_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status
+        return False
 
 
     def _validate_status(self, valid_statuses: List[OrderStatusEnum], action: str) -> None:
