@@ -23,6 +23,9 @@ class OrderItemService(IOrderItemService):
         if not product:
             raise EntityNotFoundException(entity_name="Product")
 
+        if not dto.order_id:
+            raise EntityNotFoundException(entity_name="Order ID")
+
         order = self.order_repository.get_by_id(dto.order_id)
         if not order:
             raise EntityNotFoundException(entity_name="Order")

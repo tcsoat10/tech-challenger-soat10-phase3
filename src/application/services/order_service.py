@@ -1,5 +1,4 @@
 from typing import List, Optional
-from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.product.i_product_repository import IProductRepository
@@ -27,14 +26,12 @@ class OrderService(IOrderService):
         customer_repository: ICustomerRepository,
         employee_repository:IEmployeeRepository,
         product_repository: IProductRepository,
-        payment_method_repository: IPaymentMethodRepository,
     ):
         self.order_repository = repository
         self.order_status_repository = order_status_repository
         self.customer_repository = customer_repository
         self.employee_repository = employee_repository
         self.product_repository = product_repository
-        self.payment_method_repository = payment_method_repository
 
     def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [
@@ -43,10 +40,7 @@ class OrderService(IOrderService):
             OrderStatusEnum.ORDER_WAITING_SIDES.status,
             OrderStatusEnum.ORDER_WAITING_DRINKS.status,
             OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-            OrderStatusEnum.ORDER_PLACED.status,
-            OrderStatusEnum.ORDER_PAID.status,
-            OrderStatusEnum.ORDER_PREPARING.status,
-            OrderStatusEnum.ORDER_READY.status
+            OrderStatusEnum.ORDER_READY_TO_PLACE.status
         ]
 
         open_orders = self.order_repository.get_all(status=open_statuses, customer_id=int(current_user['person']['id']))
@@ -176,7 +170,9 @@ class OrderService(IOrderService):
         employee_id = int(current_user['person']['id']) if current_user['profile']['name'] in ['employee', 'manager'] else None
         employee = self.employee_repository.get_by_id(employee_id)
         order.next_step(self.order_status_repository, employee=employee)
-        self.order_repository.update(order)
+        order = self.order_repository.update(order)
+
+        return {"detail": f"Pedido avançado para o próximo passo: {order.order_status.status}"}
 
     def go_back(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)

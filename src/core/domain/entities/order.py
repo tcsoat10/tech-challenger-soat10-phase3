@@ -3,8 +3,6 @@ from typing import List, Optional
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
-from config.settings import WEBHOOK_URL
-from src.core.ports.payment.i_payment_service import IPaymentService
 from src.constants.payment_status import PaymentStatusEnum
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
@@ -348,48 +346,6 @@ class Order(BaseEntity):
         self._record_status_change(new_status, owner)
         self.order_status = new_status
 
-
-    def process_payment(self, payment_service: IPaymentService, payment_method_id: int) -> None:
-        '''
-        Processes the payment for the order.
-
-        :param payment_service: The payment service to process the payment.
-        :param payment_method_id: The ID of the payment method.
-        :param amount: The amount to be paid.
-        :param movement_owner: The name of the user who is processing the payment.
-        '''
-        if self.order_status.status != OrderStatusEnum.ORDER_PLACED.status:
-            raise BadRequestException("Não é possível processar o pagamento neste momento.")
-
-        payment_data = {
-            "external_reference": f"order-{self.id}",
-            "notification_url": f"{WEBHOOK_URL}/webhook/payment",
-            "total_amount": self.total,
-            "items": [
-                {
-                    "sku_number": None, # SKU is not available
-                    "category": order_item.product.category.name,
-                    "title": order_item.product.name,
-                    "description": order_item.product.description,
-                    "quantity": order_item.quantity,
-                    "unit_measure": "unit",
-                    "unit_price": order_item.product.price,
-                    "total_amount": order_item.total
-                }
-                for order_item in self.order_items
-            ],
-            "title": f"Compra do pedido {self.id}",
-            "description": f"Compra do pedido {self.id}",
-            "payment_method_id": payment_method_id,
-        }
-
-        try:
-            payment_response = payment_service.process_payment(payment_data)
-            self.payments.append(payment_response) # TODO: Verificar se está correto e se é necessário
-
-        except Exception as e:
-            raise BadRequestException(f"Erro ao criar pagamento: {str(e)}")
-    
     
     def next_step(
         self,

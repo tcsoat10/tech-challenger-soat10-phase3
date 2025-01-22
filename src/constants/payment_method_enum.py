@@ -6,9 +6,10 @@ class PaymentMethodEnum(Enum):
     Enumeração para os possíveis métodos de pagamento no sistema.
     """
 
-    CREDIT_CARD = ("credit_card", "Payment via credit card.")
-    DEBIT_CARD = ("debit_card", "Payment via debit card.")
-    PIX = ("pix", "Payment via PIX.")
+    # CREDIT_CARD = ("credit_card", "Payment via credit card.")
+    # DEBIT_CARD = ("debit_card", "Payment via debit card.")
+    # PIX = ("pix", "Payment via PIX.")
+    QR_CODE = ("qr_code", "Payment via QR Code.")
 
     @property
     def name(self):
