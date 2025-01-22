@@ -100,7 +100,7 @@ class PaymentService(IPaymentService):
             payment_status_id=payment_status.id,
             amount=payment_data['total_amount'],
             external_reference=payment_data["external_reference"],
-            qr_code=gateway_response.get("qr_code"),
+            qr_code=gateway_response.get("qr_data"),
             transaction_id=gateway_response.get("in_store_order_id"),
         )
 
