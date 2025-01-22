@@ -1,9 +1,16 @@
-# from tests.factories.payment_method_factory import PaymentMethodFactory
-# from tests.factories.payment_status_factory import PaymentStatusFactory
-# from src.constants.permissions import PaymentPermissions
-# from tests.factories.payment_factory import PaymentFactory
+from src.constants.payment_status import PaymentStatusEnum
+from src.constants.order_status import OrderStatusEnum
+from tests.factories.order_factory import OrderFactory
+from tests.factories.order_status_factory import OrderStatusFactory
+from tests.factories.payment_method_factory import PaymentMethodFactory
+from tests.factories.payment_status_factory import PaymentStatusFactory
+from src.constants.permissions import PaymentPermissions
+from tests.factories.payment_factory import PaymentFactory
+from tests.factories.order_item_factory import OrderItemFactory
 
-# from fastapi import status
+from fastapi import status
+
+from tests.factories.person_factory import PersonFactory
 
 
 # def test_create_payment_success(client):
@@ -217,3 +224,27 @@
 #             }
 #     }]
     
+def test_process_payment_success(client):
+    person = PersonFactory()
+    payment_method = PaymentMethodFactory()
+    PaymentStatusFactory(name=PaymentStatusEnum.PAYMENT_PENDING.status)
+    order_item = OrderItemFactory()
+    order_status = OrderStatusFactory(status=OrderStatusEnum.ORDER_PLACED.status, description=OrderStatusEnum.ORDER_PLACED.description)
+    order = OrderFactory(order_status=order_status)
+    order.order_items.append(order_item)
+
+    res = client.post(
+        f'/api/v1/payments/{order.id}', profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        permissions=[PaymentPermissions.CAN_CREATE_PAYMENT],
+        params={"payment_method": payment_method.name}
+    )
+    assert res.status_code == status.HTTP_201_CREATED
+    
+    data = res.json()
+    assert 'qr_code_link' in data
