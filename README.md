@@ -37,7 +37,7 @@ O banco de dados utilizado foi o MySQL versão 8, executado dentro de um contain
 # Executando o projeto
 ## 1. Clonar o repositório
     
-No diretório definido para armazenar os arquivos do projeto, executar o comando `git clone XXXXXXXX`.
+No diretório definido para armazenar os arquivos do projeto, executar o comando `git clone https://github.com/carlosrjr/tech-challenger-soat10-phase1.git` caso deseje clonar o repositório usando HTTPS. Se for utilizado SSH, o comando deve ser `git clone git@github.com:carlosrjr/tech-challenger-soat10-phase1.git`.
 
 ## 2. Arquivo .env
 
