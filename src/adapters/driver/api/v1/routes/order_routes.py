@@ -23,6 +23,9 @@ from src.application.services.order_service import OrderService
 from src.core.domain.dtos.order.order_dto import OrderDTO
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
+from src.core.ports.payment.i_payment_service import IPaymentService
+from src.application.services.payment_service import PaymentService
+
 from src.core.auth.dependencies import get_current_user
 
 
@@ -36,7 +39,14 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
     product_repository: IProductRepository = ProductRepository(db_session)
     payment_method_repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
     repository: IOrderRepository = OrderRepository(db_session)
-    return OrderService(repository, order_status_repository, customer_repository, employee_repository, product_repository, payment_method_repository)
+    return OrderService(
+        repository,
+        order_status_repository,
+        customer_repository,
+        employee_repository,
+        product_repository,
+        payment_method_repository
+    )
 
 router = APIRouter()
 
@@ -141,19 +151,6 @@ async def change_item_observation(
 ):
     service.change_item_observation(order_id, item_id, new_observation, current_user)
     return {"detail": "Observação atualizada com sucesso."}
-
-# Criar pagamento para o pedido
-@router.post(
-    "/orders/{order_id}/payments",
-    dependencies=[Security(get_current_user, scopes=[PaymentPermissions.CAN_CREATE_PAYMENT])],
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_payment(
-    order_id: int,
-    current_user: dict = Depends(get_current_user),
-    service: IOrderService = Depends(_get_order_service),
-):
-    return service.process_payment(order_id, current_user)
 
 
 # Listar itens do pedido
