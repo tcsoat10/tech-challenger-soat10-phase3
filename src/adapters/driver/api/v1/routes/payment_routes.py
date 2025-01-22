@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from config.database import get_db
+from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.core.ports.payment.i_payment_service import IPaymentService
 from src.core.ports.payment.i_payment_repository import IPaymentRepository
 from src.adapters.driven.repositories.payment_repository import PaymentRepository
@@ -14,7 +16,6 @@ from src.application.services.payment_service import PaymentService
 from src.core.domain.dtos.payment.payment_dto import PaymentDTO
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import PaymentPermissions
-from src.core.domain.dtos.payment.create_payment_dto import CreatePaymentDTO
 from src.core.domain.dtos.payment.update_payment_dto import UpdatePaymentDTO
 from src.core.ports.payment.i_payment_gateway import IPaymentGateway
 from src.adapters.driven.payment_providers.mercado_pago_gateway import MercadoPagoGateway
@@ -32,12 +33,15 @@ def _get_payment_service(db_session: Session = Depends(get_db)) -> IPaymentServi
     payment_status_repository: IPaymentStatusRepository = PaymentStatusRepository(db_session)
     payment_gateway: IPaymentGateway = MercadoPagoGateway()
     order_repository: IOrderRepository = OrderRepository(db_session)
+    order_status_repository: IOrderStatusRepository = OrderStatusRepository(db_session)
+
     return PaymentService(
         payment_gateway,
         payment_repository,
         payment_status_repository,
         payment_method_repository,
-        order_repository
+        order_repository,
+        order_status_repository
     )
 
 

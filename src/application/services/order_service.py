@@ -16,8 +16,6 @@ from src.core.domain.dtos.order.order_dto import OrderDTO
 from src.core.domain.entities.order import Order
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
-from src.core.ports.payment.i_payment_service import IPaymentService
-from src.application.services.payment_service import PaymentService
 
 
 class OrderService(IOrderService):
@@ -30,7 +28,6 @@ class OrderService(IOrderService):
         employee_repository:IEmployeeRepository,
         product_repository: IProductRepository,
         payment_method_repository: IPaymentMethodRepository,
-        payment_service: IPaymentService
     ):
         self.order_repository = repository
         self.order_status_repository = order_status_repository
@@ -38,7 +35,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
         self.payment_method_repository = payment_method_repository
-        self.payment_service = payment_service
 
     def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [
