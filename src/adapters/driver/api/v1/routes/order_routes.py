@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.permissions import OrderPermissions
-from src.constants.permissions import PaymentPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
@@ -23,8 +22,6 @@ from src.application.services.order_service import OrderService
 from src.core.domain.dtos.order.order_dto import OrderDTO
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
-from src.core.ports.payment.i_payment_service import IPaymentService
-from src.application.services.payment_service import PaymentService
 
 from src.core.auth.dependencies import get_current_user
 
@@ -39,6 +36,8 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
     product_repository: IProductRepository = ProductRepository(db_session)
     payment_method_repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
     repository: IOrderRepository = OrderRepository(db_session)
+
+
     return OrderService(
         repository,
         order_status_repository,
