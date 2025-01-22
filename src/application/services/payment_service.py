@@ -1,5 +1,4 @@
 from typing import Dict, Any
-from fastapi import logger
 from config.settings import WEBHOOK_URL
 from src.core.domain.entities.order import Order
 from src.constants.order_status import OrderStatusEnum
@@ -117,50 +116,38 @@ class PaymentService(IPaymentService):
 
     def handle_webhook(self, payload: Dict[str, Any]) -> None:
         """
-        Processa um webhook enviado pelo Mercado Pago.
-        :param payload: Dados do webhook enviados pelo Mercado Pago.
+        Processa um webhook enviado pelo serviço de pagamento.
+        :param payload: Dados do webhook enviados pelo serviço de pagamento.
         """
-        resource = payload.get("resource")
-        if not resource:
-            logger.error("Payload inválido: recurso ausente.")
-            raise BadRequestException("Payload inválido: recurso ausente.")
-
         try:
-            merchant_order_id = resource.split("/")[-1]
-            payment_details = self.gateway.verify_payment(merchant_order_id)
+            payment_details = self.gateway.verify_payment(payload)
 
             external_reference = payment_details.get("external_reference")
-            status_name = payment_details.get("status")
+            status_name = payment_details.get("payment_status")
 
             status_reference = {
-                "opened": PaymentStatusEnum.PAYMENT_PENDING.status,
-                "closed": PaymentStatusEnum.PAYMENT_COMPLETED.status,
-                "expired": PaymentStatusEnum.PAYMENT_CANCELLED.status,
+                self.gateway.status_map[PaymentStatusEnum.PAYMENT_PENDING.status]: PaymentStatusEnum.PAYMENT_PENDING.status,
+                self.gateway.status_map[PaymentStatusEnum.PAYMENT_COMPLETED.status]: PaymentStatusEnum.PAYMENT_COMPLETED.status,
+                self.gateway.status_map[PaymentStatusEnum.PAYMENT_CANCELLED.status]: PaymentStatusEnum.PAYMENT_CANCELLED.status,
             }
 
             if status_name not in status_reference:
-                logger.error(f"Status desconhecido: {status_name}")
                 raise BadRequestException(f"Status desconhecido recebido: {status_name}")
 
             # Buscando o pagamento no banco de dados
             payment = self.repository.get_payment_by_reference(external_reference)
             if not payment:
-                logger.error(f"Pagamento com referência {external_reference} não encontrado.")
-                raise ValueError(f"Pagamento com referência {external_reference} não encontrado.")
+                raise BadRequestException(f"Pagamento com referência {external_reference} não encontrado.")
 
             # Atualizando o status do pagamento
             new_status = self.payment_status_repository.get_by_name(status_reference[status_name])
             if not new_status:
-                logger.error(f"Status de pagamento {status_name} não encontrado.")
-                raise ValueError(f"Status de pagamento não encontrado: {status_name}")
+                raise BadRequestException(f"Status de pagamento não encontrado: {status_name}")
 
             self.repository.update_payment_status(payment, new_status.id)
-            logger.info(f"Status do pagamento {payment.id} atualizado para {new_status.name}.")
 
-            # Atualizando o status do pedido, se necessário
             if status_name == "closed":
                 payment.order.next_step(self.order_status_repository)
-                logger.info(f"Status do pedido associado ao pagamento {payment.id} atualizado.")
+                self.order_repository.update(payment.order)
         except Exception as e:
-            logger.error(f"Erro ao processar webhook: {str(e)}")
             raise BadRequestException(f"Erro ao processar webhook: {str(e)}")

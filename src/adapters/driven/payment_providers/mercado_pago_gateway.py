@@ -1,6 +1,8 @@
 import requests
 from typing import Dict, Any
 from config.settings import MERCADO_PAGO_ACCESS_TOKEN, MERCADO_PAGO_USER_ID, MERCADO_PAGO_POS_ID
+from src.constants.payment_status import PaymentStatusEnum
+from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.ports.payment.i_payment_gateway import IPaymentGateway
 
 
@@ -8,6 +10,12 @@ class MercadoPagoGateway(IPaymentGateway):
     """
     Implementação do gateway de pagamento usando a API oficial do Mercado Pago.
     """
+
+    STATUS_MAP = {
+        PaymentStatusEnum.PAYMENT_PENDING.status: "opened",
+        PaymentStatusEnum.PAYMENT_COMPLETED.status: "closed",
+        PaymentStatusEnum.PAYMENT_CANCELLED.status: "expired",        
+    }
 
     def __init__(self):
         self.base_url = 'https://api.mercadopago.com'
@@ -36,13 +44,42 @@ class MercadoPagoGateway(IPaymentGateway):
         response.raise_for_status()
         return response.json()
 
-    def verify_payment(self, payment_id: str) -> Dict[str, Any]:
+    def verify_payment(self, payload: str) -> Dict[str, Any]:
         """
         Verifica o status de um pagamento.
         :param payment_id: ID único do pagamento.
         :return: Detalhes do status do pagamento.
         """
-        url = f"{self.base_url}/v1/payments/{payment_id}"
+        resource = payload.get("resource")
+        if not resource:
+            raise BadRequestException("Payload inválido: recurso ausente.")
+        
+        merchant_order_id = resource.split("/")[-1]
+
+        url = f"{self.base_url}/v1/payments/{merchant_order_id}"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
-        return response.json()
+        payment_data = response.json()
+
+        return {
+            "external_reference": payment_data.get("external_reference"),
+            "payment_status": payment_data.get("status"),
+            "payment_method": payment_data.get("payment_method_id"),
+            "transaction_amount": payment_data.get("transaction_amount"),
+            "payment_date": payment_data.get("date_created"),
+            "merchant_order_id": payment_data.get("merchant_order_id"),
+            "payer_email": payment_data.get("payer", {}).get("email"),
+            "payment_type": payment_data.get("payment_type_id"),
+            "last_modified": payment_data.get("date_last_updated")
+        }
+
+    def status_map(self, payment_status: PaymentStatusEnum) -> str:
+        """
+        Mapeia os status de pagamento do Mercado Pago para os status internos da aplicação.
+        :param payment_status: Status do pagamento.
+        :return: Status mapeado.
+        """
+        if payment_status.status not in self.STATUS_MAP:
+            raise BadRequestException(f"Status de pagamento não mapeado: {payment_status.status}")
+
+        return self.STATUS_MAP.get(payment_status.status)

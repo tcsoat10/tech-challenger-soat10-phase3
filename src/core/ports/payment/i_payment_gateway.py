@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
+from src.constants.payment_status import PaymentStatusEnum
+
 
 class IPaymentGateway(ABC):
     """
@@ -19,11 +21,20 @@ class IPaymentGateway(ABC):
         pass
 
     @abstractmethod
-    def verify_payment(self, payment_id: str) -> Dict[str, Any]:
+    def verify_payment(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """
         Verifica o status de um pagamento pelo ID fornecido.
 
         :param payment_id: ID único do pagamento no gateway (ex.: external_reference).
         :return: Dicionário contendo o status atualizado do pagamento.
+        """
+        pass
+
+    @abstractmethod
+    def status_map(self, payment_status: PaymentStatusEnum) -> str:
+        """
+        Mapeia os status de pagamento do gateway para os status internos da aplicação.
+        
+        :return: Dicionário contendo o mapeamento dos status.
         """
         pass
