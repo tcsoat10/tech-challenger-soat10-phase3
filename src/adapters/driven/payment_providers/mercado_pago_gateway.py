@@ -73,13 +73,26 @@ class MercadoPagoGateway(IPaymentGateway):
             "last_modified": payment_data.get("date_last_updated")
         }
 
-    def status_map(self, payment_status: PaymentStatusEnum) -> str:
+    def status_map(self, status_name: str) -> str:
         """
         Mapeia os status de pagamento do Mercado Pago para os status internos da aplicação.
-        :param payment_status: Status do pagamento.
+        :param status_name: Status do pagamento.
         :return: Status mapeado.
         """
-        if payment_status.status not in self.STATUS_MAP:
-            raise BadRequestException(f"Status de pagamento não mapeado: {payment_status.status}")
+        STATUS_MAP = {
+            "approved": PaymentStatusEnum.PAYMENT_COMPLETED,
+            "closed": PaymentStatusEnum.PAYMENT_COMPLETED,
+            "opened": PaymentStatusEnum.PAYMENT_PENDING,
+            "pending": PaymentStatusEnum.PAYMENT_PENDING,
+            "cancelled": PaymentStatusEnum.PAYMENT_CANCELLED,
+            "expired": PaymentStatusEnum.PAYMENT_CANCELLED,
+            "refunded": PaymentStatusEnum.PAYMENT_REFUNDED,
+            "partially_refunded": PaymentStatusEnum.PAYMENT_PARTIALLY_REFUNDED,
+        }
 
-        return self.STATUS_MAP.get(payment_status.status)
+        if status_name not in STATUS_MAP:
+            # Log para identificar status desconhecidos
+            print(f"Status desconhecido recebido: {status_name}")
+            raise BadRequestException(f"Status de pagamento não mapeado: {status_name}")
+
+        return STATUS_MAP[status_name]

@@ -31,10 +31,11 @@ class IPaymentGateway(ABC):
         pass
 
     @abstractmethod
-    def status_map(self, payment_status: PaymentStatusEnum) -> str:
+    def status_map(self, status_name: str) -> str:
         """
-        Mapeia os status de pagamento do gateway para os status internos da aplicação.
-        
-        :return: Dicionário contendo o mapeamento dos status.
+        Mapeia o status retornado pelo gateway para o status interno do sistema.
+
+        :param status_name: Nome do status retornado pelo gateway.
+        :return: Nome do status interno correspondente.
         """
         pass
