@@ -173,7 +173,9 @@ class OrderService(IOrderService):
         employee_id = int(current_user['person']['id']) if current_user['profile']['name'] in ['employee', 'manager'] else None
         employee = self.employee_repository.get_by_id(employee_id)
         order.next_step(self.order_status_repository, employee=employee)
-        self.order_repository.update(order)
+        order = self.order_repository.update(order)
+
+        return {"detail": f"Pedido avançado para o próximo passo: {order.order_status.status}"}
 
     def go_back(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)

@@ -183,8 +183,7 @@ async def next_step(
     current_user: dict = Depends(get_current_user),
     service: OrderService = Depends(_get_order_service),
 ):
-    service.next_step(order_id, current_user)
-    return {"detail": "Pedido avançado com sucesso."}
+    return service.next_step(order_id, current_user)
 
 # Retornar ao passo anterior
 @router.post(

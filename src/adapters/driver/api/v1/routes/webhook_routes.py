@@ -42,9 +42,6 @@ async def webhook(request: Request, payment_service: IPaymentService = Depends(_
     """
     try:
         payload = await request.json()
-        
-        if "resource" not in payload:
-            raise BadRequestException("Payload inválido. O campo 'resource' é obrigatório.")
 
         payment_service.handle_webhook(payload)
         return JSONResponse(content={"message": "Webhook processado com sucesso!"}, status_code=200)

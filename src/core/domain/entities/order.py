@@ -301,8 +301,6 @@ class Order(BaseEntity):
         self._record_status_change(new_status, owner)
         self.order_status = new_status
 
-        self.payment = self.payment_service.process_payment(self.id, self.payment_method, self.current_user)
-
     def set_status_paid(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
         if self.order_status.status != OrderStatusEnum.ORDER_PLACED.status:
             raise BadRequestException("Não é possível confirmar o pagamento neste momento.")
