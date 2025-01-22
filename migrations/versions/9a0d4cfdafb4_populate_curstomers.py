@@ -5,6 +5,7 @@ Revises: a95708419da2
 Create Date: 2025-01-21 21:44:11.725559
 
 """
+import os
 from typing import Sequence, Union
 
 from alembic import op
@@ -22,6 +23,9 @@ customers = [
 ]
 
 def upgrade() -> None:
+    if os.getenv("ENVIRONMENT") == "testing":
+        return
+
     for customer in customers:
         op.execute(
             f"""
@@ -31,6 +35,9 @@ def upgrade() -> None:
         )
 
 def downgrade() -> None:
+    if os.getenv("ENVIRONMENT") == "testing":
+        return
+
     for customer in reversed(customers):
         op.execute(
             f"""
