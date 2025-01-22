@@ -10,13 +10,6 @@ class MercadoPagoGateway(IPaymentGateway):
     """
     Implementação do gateway de pagamento usando a API oficial do Mercado Pago.
     """
-
-    STATUS_MAP = {
-        PaymentStatusEnum.PAYMENT_PENDING.status: "opened",
-        PaymentStatusEnum.PAYMENT_COMPLETED.status: "closed",
-        PaymentStatusEnum.PAYMENT_CANCELLED.status: "expired",        
-    }
-
     def __init__(self):
         self.base_url = 'https://api.mercadopago.com'
         self.headers = {
@@ -41,25 +34,41 @@ class MercadoPagoGateway(IPaymentGateway):
 
         url = f"{self.base_url}/instore/orders/qr/seller/collectors/{MERCADO_PAGO_USER_ID}/pos/{MERCADO_PAGO_POS_ID}/qrs"
         response = requests.post(url, json=payload, headers=self.headers)
-        response.raise_for_status()
+
+        if response.status_code != 201:
+            raise BadRequestException(f"Erro ao criar pagamento: {response.text}")
+
         return response.json()
 
-    def verify_payment(self, payload: str) -> Dict[str, Any]:
+    def verify_payment(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """
         Verifica o status de um pagamento.
-        :param payment_id: ID único do pagamento.
+        :param payload: Dados do payload para verificar o pagamento.
         :return: Detalhes do status do pagamento.
         """
+        if "action" in payload and payload["action"] == "payment.created":
+            return {"message": payload.get("action"), "action": 'return'}
+
         resource = payload.get("resource")
         if not resource:
             raise BadRequestException("Payload inválido: recurso ausente.")
-        
-        merchant_order_id = resource.split("/")[-1]
 
-        url = f"{self.base_url}/v1/payments/{merchant_order_id}"
-        response = requests.get(url, headers=self.headers)
-        response.raise_for_status()
+        if not resource.startswith('https://api.mercadolibre.com'):
+            parts = resource.split('/')
+            merchant_order_id = parts[-1]
+            if 'merchant_order' in payload.get('topic', ''):
+                resource = f"{self.base_url}/merchant_orders/{merchant_order_id}"
+            else:
+                resource = f"{self.base_url}/v1/payments/{merchant_order_id}"
+
+        response = requests.get(resource, headers=self.headers)
+        
+        if response.status_code != 200:
+            raise BadRequestException(f"Erro ao buscar pagamento: {response.text}")
+
         payment_data = response.json()
+        if not payment_data:
+            raise BadRequestException("Dados de pagamento não encontrados.")
 
         return {
             "external_reference": payment_data.get("external_reference"),
@@ -68,9 +77,10 @@ class MercadoPagoGateway(IPaymentGateway):
             "transaction_amount": payment_data.get("transaction_amount"),
             "payment_date": payment_data.get("date_created"),
             "merchant_order_id": payment_data.get("merchant_order_id"),
-            "payer_email": payment_data.get("payer", {}).get("email"),
+            "payer": payment_data.get("payer"),
             "payment_type": payment_data.get("payment_type_id"),
-            "last_modified": payment_data.get("date_last_updated")
+            "last_modified": payment_data.get("date_last_updated"),
+            "action": 'process'
         }
 
     def status_map(self, status_name: str) -> str:
