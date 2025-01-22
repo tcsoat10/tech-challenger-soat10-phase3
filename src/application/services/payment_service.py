@@ -146,6 +146,11 @@ class PaymentService(IPaymentService):
             payment = self.repository.update_payment_status(payment, new_status.id)
 
             if new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status:
+                if len(payment.order) == 0:
+                    cancelled_status = self.payment_status_repository.get_by_name(PaymentStatusEnum.PAYMENT_CANCELLED.status)
+                    self.repository.update_payment_status(payment, cancelled_status.id)
+                    return
+                
                 payment.order[0].next_step(self.order_status_repository)
                 self.order_repository.update(payment.order[0])
 
