@@ -16,6 +16,8 @@ from src.core.domain.dtos.order.order_dto import OrderDTO
 from src.core.domain.entities.order import Order
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order.i_order_service import IOrderService
+from src.core.ports.payment.i_payment_service import IPaymentService
+from src.application.services.payment_service import PaymentService
 
 
 class OrderService(IOrderService):
@@ -27,7 +29,8 @@ class OrderService(IOrderService):
         customer_repository: ICustomerRepository,
         employee_repository:IEmployeeRepository,
         product_repository: IProductRepository,
-        payment_method_repository: IPaymentMethodRepository
+        payment_method_repository: IPaymentMethodRepository,
+        payment_service: IPaymentService
     ):
         self.order_repository = repository
         self.order_status_repository = order_status_repository
@@ -35,6 +38,7 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
         self.payment_method_repository = payment_method_repository
+        self.payment_service = payment_service
 
     def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [
@@ -155,12 +159,11 @@ class OrderService(IOrderService):
     
     def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
-        
         payment_method = self.payment_method_repository.get_by_name(method_payment)
         if not payment_method:
             raise EntityNotFoundException(message="Não foi possível encontrar o método de pagamento informado.")
 
-        order.process_payment(self.order_status_repository, payment_method.id)
+        order.process_payment(self.payment_service, payment_method.id)
         self.order_repository
 
     def next_step(self, order_id: int, current_user: dict) -> None:
