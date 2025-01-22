@@ -115,18 +115,10 @@ profile_permissions = {
         *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
     ],
     "4": [  # Customer: acesso mínimo
-        # *OrderPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
-        # *OrderItemPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW", "CAN_UPDATE", "CAN_DELETE"]),
-        # *CategoryPermissions.list_only_values(only=["CAN_VIEW"]),
-        # *ProductPermissions.list_only_values(only=["CAN_VIEW"]),
-        # *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
-        # *PaymentStatusPermissions.list_only_values(only=["CAN_VIEW"]),
-        # *OrderStatusPermissions.list_only_values(only=["CAN_VIEW"]),
-        # *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
-        # *PersonPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *OrderPermissions.values(),
         *CustomerPermissions.list_only_values(only=["CAN_VIEW", "CAN_UPDATE"]),
         *PaymentPermissions.list_only_values(only=["CAN_CREATE", "CAN_VIEW"]),
+        *PaymentMethodPermissions.list_only_values(only=["CAN_VIEW"]),
     ]
 }
 
