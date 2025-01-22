@@ -10,10 +10,7 @@ from tests.factories.order_item_factory import OrderItemFactory
 from tests.factories.order_status_factory import OrderStatusFactory
 from tests.factories.person_factory import PersonFactory
 from src.constants.permissions import OrderPermissions
-from src.constants.permissions import PaymentPermissions
 from tests.factories.product_factory import ProductFactory
-from tests.factories.payment_method_factory import PaymentMethodFactory
-from tests.factories.order_status_factory import OrderStatusFactory
 
 
 def test_create_order_success(client, populate_order_status):

@@ -1,7 +1,7 @@
 """populate payment methods
 
 Revision ID: 3ea8f2d1c9b7
-Revises: b6dfcf4e95ee
+Revises: edc0b61709a8
 Create Date: 2025-01-18 17:50:12.951580
 
 """
@@ -15,7 +15,7 @@ from sqlalchemy import String, Integer
 from src.constants.payment_method_enum import PaymentMethodEnum
 
 revision = '3ea8f2d1c9b7'
-down_revision: Union[str, None] = 'b6dfcf4e95ee'
+down_revision: Union[str, None] = 'edc0b61709a8'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

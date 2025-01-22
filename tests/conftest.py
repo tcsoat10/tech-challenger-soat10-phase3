@@ -29,7 +29,6 @@ from tests.factories.user_profile_factory import UserProfileFactory
 from tests.factories.person_factory import PersonFactory
 from tests.factories.customer_factory import CustomerFactory
 from tests.factories.payment_factory import PaymentFactory
-from tests.factories.order_payment_factory import OrderPaymentFactory
 
 
 def create_database_url(user: str, password: str, host: str, port: str, database_name: str = ""):
@@ -234,7 +233,6 @@ def setup_factories(db_session):
         OrderStatusFactory,
         OrderFactory,
         PaymentFactory,
-        OrderPaymentFactory
     ]
 
     for factory in factories:

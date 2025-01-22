@@ -43,9 +43,8 @@ class Order(BaseEntity):
     id_payment = Column(ForeignKey('payments.id'), nullable=True)
     payment = relationship('Payment', back_populates='order')
 
-    payments = relationship('OrderPayment', back_populates='order', cascade='all, delete-orphan')
-
     order_items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
+
     status_history = relationship(
         'OrderStatusMovement',
         back_populates='order',
