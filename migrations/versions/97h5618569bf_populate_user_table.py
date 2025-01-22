@@ -30,10 +30,6 @@ users_table = table(
 
 users = [
     {
-        'name': 'joao.silva', 
-        'password_hash': bcrypt.hashpw('joao.silva'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    },
-    {
         'name': 'carla.pereira',
         'password_hash': bcrypt.hashpw('carla.pereira'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     },
