@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 class IPaymentService(ABC):
 
     @abstractmethod
-    def process_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_payment(self,  order_id: int, method_payment: str, current_user: dict) -> Dict[str, Any]:
         """
         Processa o pagamento e retorna os detalhes relevantes, como o QR Code ou links de pagamento.
         
