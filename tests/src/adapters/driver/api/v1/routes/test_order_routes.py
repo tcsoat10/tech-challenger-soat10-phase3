@@ -555,7 +555,7 @@ def test_next_step_order_status_and_return_success(client):
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
-    assert data["detail"] == "Pedido avançado com sucesso."
+    assert data["detail"] == "Pedido avançado para o próximo passo: order_waiting_sides"
 
 def test_try_next_step_order_status_when_order_not_exists_and_return_error(client):
     person = PersonFactory()
