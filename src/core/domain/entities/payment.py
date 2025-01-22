@@ -18,6 +18,8 @@ class Payment(BaseEntity):
     amount = Column(Float, nullable=False)
     external_reference = Column(String(500), nullable=False)
 
+    qr_code = Column(String(500), nullable=True)
+    transaction_id = Column(String(100), nullable=True)
 
 
 __all__ = ['Payment']

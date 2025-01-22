@@ -2,8 +2,6 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 
-from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
-from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
@@ -34,7 +32,6 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
     order_status_repository: IOrderStatusRepository = OrderStatusRepository(db_session)
     employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
     product_repository: IProductRepository = ProductRepository(db_session)
-    payment_method_repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
     repository: IOrderRepository = OrderRepository(db_session)
 
 
@@ -43,8 +40,7 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
         order_status_repository,
         customer_repository,
         employee_repository,
-        product_repository,
-        payment_method_repository
+        product_repository
     )
 
 router = APIRouter()

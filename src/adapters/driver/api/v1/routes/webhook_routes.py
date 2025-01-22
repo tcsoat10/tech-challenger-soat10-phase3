@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+from src.core.exceptions.bad_request_exception import BadRequestException
 from src.adapters.driven.repositories.payment_repository import PaymentRepository
 from src.adapters.driver.api.v1.decorators.bypass_auth import bypass_auth
 from src.adapters.driven.payment_providers.mercado_pago_gateway import MercadoPagoGateway
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from config.database import get_db
-from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.ports.payment.i_payment_gateway import IPaymentGateway
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
@@ -34,23 +34,19 @@ def _get_payment_service(db_session: Session = Depends(get_db)) -> IPaymentServi
         payment_status_repository=payment_status_repository
     )
 
-
 @router.post("/webhook/payment", tags=["webhooks"], include_in_schema=False)
 @bypass_auth()
 async def webhook(request: Request, payment_service: IPaymentService = Depends(_get_payment_service)):
     """
-    Endpoint to process webhooks sent by Mercado Pago.
-
-    This endpoint is used to process payment webhooks sent by Mercado Pago. It receives a JSON payload from the webhook
-    and processes it using the payment service.
-
-    This endpoit is not documented in the OpenAPI schema because it is not meant to be used by external clients.
+    Endpoint para processar webhooks enviados pelo Mercado Pago.
     """
     try:
         payload = await request.json()
-        payment_service.handle_webhook(payload)
+        
+        if "resource" not in payload:
+            raise BadRequestException("Payload inválido. O campo 'resource' é obrigatório.")
 
+        payment_service.handle_webhook(payload)
         return JSONResponse(content={"message": "Webhook processado com sucesso!"}, status_code=200)
     except Exception as e:
-        # Lidar com erros e retornar uma resposta de erro apropriada
-        raise BadRequestException(str(e))
+        raise HTTPException(status_code=500, detail=f"Erro ao processar webhook: {str(e)}")

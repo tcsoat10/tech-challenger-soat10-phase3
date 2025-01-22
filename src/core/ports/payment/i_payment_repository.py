@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
 
 from src.core.domain.entities.payment import Payment
 
@@ -30,7 +29,7 @@ class IPaymentRepository(ABC):
         pass
 
     @abstractmethod
-    def get_payment_by_id(self, payment_id: int) -> Dict[str, Any]:
+    def get_payment_by_id(self, payment_id: int) -> Payment:
         """
         Recupera os detalhes de um pagamento pelo ID.
         
@@ -40,7 +39,7 @@ class IPaymentRepository(ABC):
         pass
 
     @abstractmethod
-    def get_payment_by_reference(self, external_reference: str) -> Dict[str, Any]:
+    def get_payment_by_reference(self, external_reference: str) -> Payment:
         """
         Recupera os detalhes de um pagamento pela referência externa.
         

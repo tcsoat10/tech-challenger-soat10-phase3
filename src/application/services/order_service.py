@@ -1,5 +1,4 @@
 from typing import List, Optional
-from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.product.i_product_repository import IProductRepository
@@ -27,14 +26,12 @@ class OrderService(IOrderService):
         customer_repository: ICustomerRepository,
         employee_repository:IEmployeeRepository,
         product_repository: IProductRepository,
-        payment_method_repository: IPaymentMethodRepository,
     ):
         self.order_repository = repository
         self.order_status_repository = order_status_repository
         self.customer_repository = customer_repository
         self.employee_repository = employee_repository
         self.product_repository = product_repository
-        self.payment_method_repository = payment_method_repository
 
     def create_order(self, current_user: dict) -> OrderDTO:
         open_statuses = [

@@ -1,6 +1,7 @@
 from typing import Dict, Any
-import requests
-from config.settings import MERCADO_PAGO_ACCESS_TOKEN, WEBHOOK_URL
+from fastapi import logger
+from config.settings import WEBHOOK_URL
+from src.core.domain.entities.order import Order
 from src.constants.order_status import OrderStatusEnum
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
@@ -36,21 +37,35 @@ class PaymentService(IPaymentService):
         self.order_repository = order_repository
         self.order_status_repository = order_status_repository
 
-    #def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> None:
-        
-
-    def process_payment(self,  order_id: int, method_payment: str, current_user: dict) -> Dict[str, Any]:
+    def process_payment(self, order_id: int, method_payment: str, current_user: dict) -> Dict[str, Any]:
         """
         Inicia o pagamento através do gateway e registra no banco de dados.
-        :param payment_data: Dados necessários para criar o pagamento.
-        :return: Detalhes do pagamento, como QR Code ou link de checkout.
+        :param order_id: ID do pedido.
+        :param method_payment: Método de pagamento selecionado.
+        :param current_user: Usuário autenticado.
+        :return: Detalhes do pagamento.
         """
-        #order = self._get_order(order_id, current_user)
-        order = self.order_repository.get_by_id(order_id)
+        order: Order = self.order_repository.get_by_id(order_id)
         
+        if not order:
+            raise EntityNotFoundException("Pedido não encontrado.")
+        
+        if order.id_customer != current_user["person"]["id"]:
+            raise BadRequestException("Você não tem permissão para acessar este pedido.")
+        
+        if order.payment and order.payment.payment_status.name in [
+            PaymentStatusEnum.PAYMENT_PENDING.status,
+            PaymentStatusEnum.PAYMENT_COMPLETED.status
+        ]:
+            return {
+                "payment_id": order.payment,
+                "transaction_id": order.payment.transaction_id,
+                "qr_code_link": order.payment.qr_code
+            }
+
         payment_method = self.payment_method_repository.get_by_name(method_payment)
         if not payment_method:
-            raise EntityNotFoundException(message="Não foi possível encontrar o método de pagamento informado.")
+            raise EntityNotFoundException("Não foi possível encontrar o método de pagamento informado.")
 
         if order.order_status.status != OrderStatusEnum.ORDER_PLACED.status:
             raise BadRequestException("Não é possível processar o pagamento neste momento.")
@@ -61,7 +76,6 @@ class PaymentService(IPaymentService):
             "total_amount": order.total,
             "items": [
                 {
-                    "sku_number": None, # SKU is not available
                     "category": order_item.product.category.name,
                     "title": order_item.product.name,
                     "description": order_item.product.description,
@@ -76,34 +90,25 @@ class PaymentService(IPaymentService):
             "description": f"Compra do pedido {order.id}"
         }
 
-        '''try:
-            payment_response = self.process_payment(payment_data)
-            self.payments.append(payment_response) # TODO: Verificar se está correto e se é necessário
-
-        except Exception as e:
-            raise BadRequestException(f"Erro ao criar pagamento: {str(e)}")
-        '''
-
-        # Recupera o status inicial do pagamento
         payment_status = self.payment_status_repository.get_by_name(PaymentStatusEnum.PAYMENT_PENDING.status)
         if not payment_status:
             raise ValueError(f"Status de pagamento não encontrado: {PaymentStatusEnum.PAYMENT_PENDING.status}")
 
-        # Cria o pagamento no gateway
         gateway_response = self.gateway.initiate_payment(payment_data)
-
-        
-        
-        # Salva os detalhes no banco de dados
 
         payment = Payment(
             payment_method_id=payment_method.id,
             payment_status_id=payment_status.id,
             amount=payment_data['total_amount'],
-            external_reference=gateway_response["in_store_order_id"]
+            external_reference=gateway_response["external_reference"],
+            qr_code=gateway_response.get("qr_code"),
+            transaction_id=gateway_response.get("id"),
         )
 
         payment = self.repository.create_payment(payment)
+        order.payment = payment
+        self.order_repository.update(order)
+
         return {
             "payment_id": payment.id,
             "transaction_id": gateway_response["in_store_order_id"],
@@ -112,42 +117,50 @@ class PaymentService(IPaymentService):
 
     def handle_webhook(self, payload: Dict[str, Any]) -> None:
         """
-        Processa um webhook enviado pelo gateway e atualiza o status do pagamento.
-        :param payload: Dados enviados pelo gateway.
+        Processa um webhook enviado pelo Mercado Pago.
+        :param payload: Dados do webhook enviados pelo Mercado Pago.
         """
-        
+        resource = payload.get("resource")
+        if not resource:
+            logger.error("Payload inválido: recurso ausente.")
+            raise BadRequestException("Payload inválido: recurso ausente.")
 
-        headers = {
-            "Authorization": f"Bearer {MERCADO_PAGO_ACCESS_TOKEN}",
-            "Content-Type": "application/json"
-        }
+        try:
+            merchant_order_id = resource.split("/")[-1]
+            payment_details = self.gateway.verify_payment(merchant_order_id)
 
-        status_reference = {
-            'opened': PaymentStatusEnum.PAYMENT_PENDING.status,
-            'closed': PaymentStatusEnum.PAYMENT_COMPLETED.status,
-            'expired': PaymentStatusEnum.PAYMENT_CANCELLED.status
-        }
-        
-        resource = payload.get('resource')
-        merchan_order_id = resource.split('/')[-1]
+            external_reference = payment_details.get("external_reference")
+            status_name = payment_details.get("status")
 
-        res = requests.get(f'https://api.mercadopago.com/merchant_orders/{merchan_order_id}', headers=headers)
-        res = res.json()
-        transaction_id = res.get("id")
-        new_status_name = res.get("status")
-        external_reference = res.get("external_reference")
-        # Status do pagamento recebido no webhook
-        # Recupera o status do pagamento pelo nome
-        new_status = self.payment_status_repository.get_by_name(status_reference[new_status_name])
-        #payment.payment_status_id = new_status.id
+            status_reference = {
+                "opened": PaymentStatusEnum.PAYMENT_PENDING.status,
+                "closed": PaymentStatusEnum.PAYMENT_COMPLETED.status,
+                "expired": PaymentStatusEnum.PAYMENT_CANCELLED.status,
+            }
 
-        # Recupera o pagamento pela referência externa
-        payment = self.repository.get_payment_by_reference(external_reference)
-        if not payment:
-            raise ValueError(f"Pagamento com referência {transaction_id} não encontrado.")
+            if status_name not in status_reference:
+                logger.error(f"Status desconhecido: {status_name}")
+                raise BadRequestException(f"Status desconhecido recebido: {status_name}")
 
-        if new_status_name == 'closed' or new_status_name == 'expired':
-            self.repository.update_payment_status(new_status.id)
-        
-        if new_status_name == 'closed':
-            payment.order.next_step(self.order_status_repository)
+            # Buscando o pagamento no banco de dados
+            payment = self.repository.get_payment_by_reference(external_reference)
+            if not payment:
+                logger.error(f"Pagamento com referência {external_reference} não encontrado.")
+                raise ValueError(f"Pagamento com referência {external_reference} não encontrado.")
+
+            # Atualizando o status do pagamento
+            new_status = self.payment_status_repository.get_by_name(status_reference[status_name])
+            if not new_status:
+                logger.error(f"Status de pagamento {status_name} não encontrado.")
+                raise ValueError(f"Status de pagamento não encontrado: {status_name}")
+
+            self.repository.update_payment_status(payment, new_status.id)
+            logger.info(f"Status do pagamento {payment.id} atualizado para {new_status.name}.")
+
+            # Atualizando o status do pedido, se necessário
+            if status_name == "closed":
+                payment.order.next_step(self.order_status_repository)
+                logger.info(f"Status do pedido associado ao pagamento {payment.id} atualizado.")
+        except Exception as e:
+            logger.error(f"Erro ao processar webhook: {str(e)}")
+            raise BadRequestException(f"Erro ao processar webhook: {str(e)}")

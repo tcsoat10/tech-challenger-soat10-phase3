@@ -6,7 +6,7 @@ from src.core.ports.payment.i_payment_gateway import IPaymentGateway
 
 class MercadoPagoGateway(IPaymentGateway):
     """
-    Implementação do gateway de pagamento usando a biblioteca oficial do Mercado Pago.
+    Implementação do gateway de pagamento usando a API oficial do Mercado Pago.
     """
 
     def __init__(self):
@@ -22,28 +22,6 @@ class MercadoPagoGateway(IPaymentGateway):
         :param payment_data: Dados para criar o pagamento.
         :return: Detalhes do pagamento, como QR Code e ID da transação.
         """
-
-        '''  EXAMPLE REQUEST BODY
-        payment_data = {
-            "external_reference": "<can add any alphanumeric identificator>",
-            "notification_url":"ADD WEBHOOK URL HERE",
-            "total_amount": 1000.00,
-            "items": [
-                {
-                    "sku_number": "12312312",
-                    "category": "Food",
-                    "title": "<order name/tag>",
-                    "description": "<order description>",
-                    "quantity": 1,
-                    "unit_measure": "unit",
-                    "unit_price": 1000.00,
-                    "total_amount": 1000.00
-                }
-            ],
-            "title": "Compra en tienda",
-            "description": "Compra en tienda" 
-        }
-        '''
         payload = {
             "external_reference": payment_data.get("external_reference", ""),
             "notification_url": payment_data.get("notification_url", ""),
@@ -64,9 +42,7 @@ class MercadoPagoGateway(IPaymentGateway):
         :param payment_id: ID único do pagamento.
         :return: Detalhes do status do pagamento.
         """
-        url = f'{self.base_url}/merchant_orders/:merchanOrderId'
-        response = self.sdk.payment().get(payment_id)
-        if response["status"] != 200:
-            raise Exception(f"Erro ao verificar pagamento: {response}")
-
-        return response["response"]
+        url = f"{self.base_url}/v1/payments/{payment_id}"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
