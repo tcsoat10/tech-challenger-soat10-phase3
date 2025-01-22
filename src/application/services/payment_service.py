@@ -1,4 +1,6 @@
+import traceback
 from typing import Dict, Any
+import uuid
 from config.settings import WEBHOOK_URL
 from src.core.domain.entities.order import Order
 from src.constants.order_status import OrderStatusEnum
@@ -70,7 +72,7 @@ class PaymentService(IPaymentService):
             raise BadRequestException("Não é possível processar o pagamento neste momento.")
 
         payment_data = {
-            "external_reference": f"order-{order.id}",
+            "external_reference": f"order-{order.id}-{uuid.uuid4()}",
             "notification_url": f"{WEBHOOK_URL}/api/v1/webhook/payment",
             "total_amount": order.total,
             "items": [
@@ -116,36 +118,37 @@ class PaymentService(IPaymentService):
 
     def handle_webhook(self, payload: Dict[str, Any]) -> None:
         """
-        Processa um webhook enviado pelo serviço de pagamento.
-        :param payload: Dados do webhook enviados pelo serviço de pagamento.
+        Processes a webhook sent by the payment service.
+        :param payload: Data sent by the payment service webhook.
         """
-        breakpoint()
-        payment_details = self.gateway.verify_payment(payload)
+        try:
+            payment_details = self.gateway.verify_payment(payload)
+            if payment_details.get("action") == "return":
+                return payment_details
 
-        external_reference = payment_details.get("external_reference")
-        status_name = payment_details.get("payment_status")
+            external_reference = payment_details.get("external_reference")
+            status_name = payment_details.get("payment_status")
 
-        status_reference = {
-            self.gateway.status_map[PaymentStatusEnum.PAYMENT_PENDING.status]: PaymentStatusEnum.PAYMENT_PENDING.status,
-            self.gateway.status_map[PaymentStatusEnum.PAYMENT_COMPLETED.status]: PaymentStatusEnum.PAYMENT_COMPLETED.status,
-            self.gateway.status_map[PaymentStatusEnum.PAYMENT_CANCELLED.status]: PaymentStatusEnum.PAYMENT_CANCELLED.status,
-        }
+            status_mapped = self.gateway.status_map(status_name)
+            if not status_mapped:
+                raise BadRequestException(f"Status desconhecido recebido: {status_name}")
 
-        if status_name not in status_reference:
-            raise BadRequestException(f"Status desconhecido recebido: {status_name}")
+            # Buscando o pagamento no banco de dados
+            payment = self.repository.get_payment_by_reference(external_reference)
+            if not payment:
+                raise BadRequestException(f"Pagamento com referência {external_reference} não encontrado.")
 
-        # Buscando o pagamento no banco de dados
-        payment = self.repository.get_payment_by_reference(external_reference)
-        if not payment:
-            raise BadRequestException(f"Pagamento com referência {external_reference} não encontrado.")
+            # Atualizando o status do pagamento
+            new_status = self.payment_status_repository.get_by_name(status_mapped.status)
+            if not new_status:
+                raise BadRequestException(f"Status de pagamento não encontrado: {status_name}")
 
-        # Atualizando o status do pagamento
-        new_status = self.payment_status_repository.get_by_name(status_reference[status_name])
-        if not new_status:
-            raise BadRequestException(f"Status de pagamento não encontrado: {status_name}")
+            payment = self.repository.update_payment_status(payment, new_status.id)
 
-        self.repository.update_payment_status(payment, new_status.id)
+            if new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status:
+                payment.order[0].next_step(self.order_status_repository)
+                self.order_repository.update(payment.order[0])
 
-        if status_name == "closed":
-            payment.order.next_step(self.order_status_repository)
-            self.order_repository.update(payment.order)
+        except Exception as e:
+            traceback.print_exc()
+            raise BadRequestException(f"Erro ao processar webhook: {str(e)}")

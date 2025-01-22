@@ -1,3 +1,4 @@
+import traceback
 import requests
 from typing import Dict, Any
 from config.settings import MERCADO_PAGO_ACCESS_TOKEN, MERCADO_PAGO_USER_ID, MERCADO_PAGO_POS_ID
@@ -46,42 +47,46 @@ class MercadoPagoGateway(IPaymentGateway):
         :param payload: Dados do payload para verificar o pagamento.
         :return: Detalhes do status do pagamento.
         """
-        if "action" in payload and payload["action"] == "payment.created":
-            return {"message": payload.get("action"), "action": 'return'}
+        try:
+            if "action" in payload and payload["action"] == "payment.created":
+                return {"message": payload.get("action"), "action": 'return'}
 
-        resource = payload.get("resource")
-        if not resource:
-            raise BadRequestException("Payload inválido: recurso ausente.")
+            resource = payload.get("resource")
+            if not resource:
+                raise BadRequestException("Payload inválido: recurso ausente.")
 
-        if not resource.startswith('https://api.mercadolibre.com'):
-            parts = resource.split('/')
-            merchant_order_id = parts[-1]
-            if 'merchant_order' in payload.get('topic', ''):
-                resource = f"{self.base_url}/merchant_orders/{merchant_order_id}"
-            else:
-                resource = f"{self.base_url}/v1/payments/{merchant_order_id}"
+            if not resource.startswith('https://api.mercadolibre.com'):
+                parts = resource.split('/')
+                merchant_order_id = parts[-1]
+                if 'merchant_order' in payload.get('topic', ''):
+                    resource = f"{self.base_url}/merchant_orders/{merchant_order_id}"
+                else:
+                    resource = f"{self.base_url}/v1/payments/{merchant_order_id}"
 
-        response = requests.get(resource, headers=self.headers)
-        
-        if response.status_code != 200:
-            raise BadRequestException(f"Erro ao buscar pagamento: {response.text}")
+            response = requests.get(resource, headers=self.headers)
+            
+            if response.status_code != 200:
+                raise BadRequestException(f"Erro ao buscar pagamento: {response.text}")
 
-        payment_data = response.json()
-        if not payment_data:
-            raise BadRequestException("Dados de pagamento não encontrados.")
+            payment_data = response.json()
+            if not payment_data:
+                raise BadRequestException("Dados de pagamento não encontrados.")
 
-        return {
-            "external_reference": payment_data.get("external_reference"),
-            "payment_status": payment_data.get("status"),
-            "payment_method": payment_data.get("payment_method_id"),
-            "transaction_amount": payment_data.get("transaction_amount"),
-            "payment_date": payment_data.get("date_created"),
-            "merchant_order_id": payment_data.get("merchant_order_id"),
-            "payer": payment_data.get("payer"),
-            "payment_type": payment_data.get("payment_type_id"),
-            "last_modified": payment_data.get("date_last_updated"),
-            "action": 'process'
-        }
+            return {
+                "external_reference": payment_data.get("external_reference"),
+                "payment_status": payment_data.get("status"),
+                "payment_method": payment_data.get("payment_method_id"),
+                "transaction_amount": payment_data.get("transaction_amount"),
+                "payment_date": payment_data.get("date_created"),
+                "merchant_order_id": payment_data.get("merchant_order_id"),
+                "payer": payment_data.get("payer"),
+                "payment_type": payment_data.get("payment_type_id"),
+                "last_modified": payment_data.get("date_last_updated"),
+                "action": 'process'
+            }
+        except Exception as e:
+            traceback.print_exc()
+            raise BadRequestException(f"Erro ao verificar pagamento: {str(e)}")
 
     def status_map(self, status_name: str) -> str:
         """
