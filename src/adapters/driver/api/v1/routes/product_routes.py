@@ -60,10 +60,10 @@ def get_product_by_name(
 )
 def get_product_by_id(
     product_id: int,
-    service: IProductService = Depends(_get_product_service),
+    controller: ProductController = Depends(_get_product_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_product_by_id(product_id=product_id)
+    return controller.get_product_by_id(product_id=product_id)
 
 @router.get(
     "/products",

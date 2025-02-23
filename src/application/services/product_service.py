@@ -15,12 +15,6 @@ class ProductService(IProductService):
         self.repository = repository
         self.category_repository = category_repository
 
-    def get_product_by_id(self, product_id: int) -> ProductDTO:
-        product = self.repository.get_by_id(product_id=product_id)
-        if not product:
-            raise EntityNotFoundException(entity_name="Product")
-        return ProductDTO.from_entity(product)
-
     def get_all_products(self, include_deleted: Optional[bool] = False) -> List[ProductDTO]:
         products = self.repository.get_all(include_deleted=include_deleted)
         return [ProductDTO.from_entity(product) for product in products]

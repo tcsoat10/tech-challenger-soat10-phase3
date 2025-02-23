@@ -1,5 +1,6 @@
 
 
+from src.application.usecases.product_usecase.get_product_by_id_usecase import GetProductByIdUseCase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.product_usecase.create_product_usecase import CreateProductUsecase
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
@@ -27,3 +28,7 @@ class ProductController:
         product = product_by_name.execute(name)
         return DTOPresenter.transform(product, ProductDTO)
     
+    def get_product_by_id(self, product_id: int) -> ProductDTO:
+        get_product_by_id_usecase = GetProductByIdUseCase.build(self.product_gateway)
+        product = get_product_by_id_usecase.execute(product_id)
+        return DTOPresenter.transform(product, ProductDTO)
