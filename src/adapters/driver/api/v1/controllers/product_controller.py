@@ -1,5 +1,7 @@
 
 
+from typing import List, Optional
+from src.application.usecases.product_usecase.get_all_products_usecase import GetAllProductsUseCase
 from src.application.usecases.product_usecase.get_product_by_id_usecase import GetProductByIdUseCase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.product_usecase.create_product_usecase import CreateProductUsecase
@@ -32,3 +34,9 @@ class ProductController:
         get_product_by_id_usecase = GetProductByIdUseCase.build(self.product_gateway)
         product = get_product_by_id_usecase.execute(product_id)
         return DTOPresenter.transform(product, ProductDTO)
+    
+    def get_all_products(self, categories: Optional[List[str]], include_deleted: Optional[bool] = False) -> list[ProductDTO]:
+        all_products_usecase = GetAllProductsUseCase.build(self.product_gateway)
+        products = all_products_usecase.execute(categories, include_deleted)
+        return DTOPresenter.transform_list(products, ProductDTO)
+

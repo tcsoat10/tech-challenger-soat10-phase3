@@ -73,10 +73,11 @@ def get_product_by_id(
 )
 def get_all_products(
     include_deleted: Optional[bool] = Query(False),
-    service: IProductService = Depends(_get_product_service),
+    categories: Optional[list[str]] = Query(None),
+    controller: ProductController = Depends(_get_product_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_products(include_deleted=include_deleted)
+    return controller.get_all_products(categories=categories, include_deleted=include_deleted)
 
 @router.put(
     "/products/{product_id}",
