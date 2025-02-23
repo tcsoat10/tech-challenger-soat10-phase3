@@ -7,6 +7,7 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.category_usecase.get_category_by_name_usecase import GetCategoryByNameUseCase
 from src.application.usecases.category_usecase.create_category_usecase import CreateCategoryUseCase
 from src.application.usecases.category_usecase.update_category_usecase import UpdateCategoryUseCase
+from src.application.usecases.category_usecase.delete_category_usecase import DeleteCategoryUseCase
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
@@ -41,3 +42,7 @@ class CategoryController:
         update_category_usecase = UpdateCategoryUseCase.build(self.category_gateway)
         category = update_category_usecase.execute(category_id, dto)
         return DTOPresenter.transform(category, CategoryDTO)
+
+    def delete_category(self, category_id: int) -> None:
+        delete_category_usecase = DeleteCategoryUseCase.build(self.category_gateway)
+        delete_category_usecase.execute(category_id)

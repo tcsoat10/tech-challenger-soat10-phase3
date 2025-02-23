@@ -8,18 +8,10 @@ from src.constants.permissions import CategoryPermissions
 from config.database import get_db
 from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.adapters.driven.repositories.category_repository import CategoryRepository
-from src.application.services.category_service import CategoryService
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
-from src.core.ports.category.i_category_repository import ICategoryRepository
-from src.core.ports.category.i_category_service import ICategoryService
 
 router = APIRouter()
-
-# Substituir por lib DI.
-def _get_category_service(db_session: Session = Depends(get_db)) -> ICategoryService:
-    repository: ICategoryRepository = CategoryRepository(db_session)
-    return CategoryService(repository)
 
 def _get_category_controller(db_session: Session = Depends(get_db)) -> CategoryController:
     return CategoryController(db_session)
@@ -95,7 +87,7 @@ def update_category(
 )
 def delete_category(
     category_id: int,
-    service: ICategoryService = Depends(_get_category_service),
+    controller: CategoryController = Depends(_get_category_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_category(category_id)
+    controller.delete_category(category_id)
