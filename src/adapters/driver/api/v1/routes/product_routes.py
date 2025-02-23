@@ -47,10 +47,10 @@ def create_product(
 )
 def get_product_by_name(
     product_name: str,
-    service: IProductService = Depends(_get_product_service),
+    controller: ProductController = Depends(_get_product_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_product_by_name(name=product_name)
+    return controller.get_product_by_name(name=product_name)
 
 @router.get(
     "/products/{product_id}/id",

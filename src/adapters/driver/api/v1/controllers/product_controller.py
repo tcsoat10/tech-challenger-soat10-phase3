@@ -8,6 +8,7 @@ from src.adapters.driven.repositories.category_repository import CategoryReposit
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.core.ports.product.i_product_repository import IProductRepository
+from src.application.usecases.product_usecase.get_product_by_name_usecase import GetProductByNameUseCase
 
 from sqlalchemy.orm import Session
 
@@ -20,4 +21,9 @@ class ProductController:
         create_product_usecase = CreateProductUsecase.build(self.product_gateway, self.category_gateway)
         product = create_product_usecase.execute(dto)
         return DTOPresenter.transform(product, ProductDTO)    
+    
+    def get_product_by_name(self, name: str) -> ProductDTO:
+        product_by_name = GetProductByNameUseCase.build(self.product_gateway)
+        product = product_by_name.execute(name)
+        return DTOPresenter.transform(product, ProductDTO)
     

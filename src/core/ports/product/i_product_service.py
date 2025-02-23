@@ -7,10 +7,6 @@ from src.core.domain.dtos.product.product_dto import ProductDTO
 class IProductService(ABC):
 
     @abstractmethod
-    def get_product_by_name(self, name: str) -> ProductDTO:
-        pass
-
-    @abstractmethod
     def get_product_by_id(self, product_id: int) -> ProductDTO:
         pass
 
