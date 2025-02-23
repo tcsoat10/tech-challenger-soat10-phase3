@@ -15,16 +15,6 @@ class CategoryService(ICategoryService):
     def __init__(self, repository: ICategoryRepository):
         self.repository = repository
 
-    def update_category(self, category_id: int, dto: UpdateCategoryDTO) -> CategoryDTO:
-        category = self.repository.get_by_id(category_id)
-        if not category:
-            raise EntityNotFoundException(entity_name="Category")
-
-        category.name = dto.name
-        category.description = dto.description
-        updated_category = self.repository.update(category)
-        return CategoryDTO.from_entity(updated_category)
-
     def delete_category(self, category_id: int) -> None:
         category = self.repository.get_by_id(category_id)
         if not category:

@@ -83,10 +83,10 @@ def get_all_categories(
 def update_category(
     category_id: int,
     dto: UpdateCategoryDTO,
-    service: ICategoryService = Depends(_get_category_service),
+    controller: CategoryController = Depends(_get_category_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_category(category_id, dto)
+    return controller.update_category(category_id, dto)
 
 @router.delete(
     "/categories/{category_id}",
