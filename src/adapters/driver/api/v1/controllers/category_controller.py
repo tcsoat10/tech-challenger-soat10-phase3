@@ -1,4 +1,6 @@
 
+from typing import Optional
+from src.application.usecases.category_usecase.get_all_categories_usecase import GetAllCategoriesUseCase
 from src.application.usecases.category_usecase.get_category_by_id_usecase import GetCategoryByIdUseCase
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
@@ -28,3 +30,8 @@ class CategoryController:
         category_by_id_usecase = GetCategoryByIdUseCase.build(self.category_gateway)
         category = category_by_id_usecase.execute(category_id)
         return DTOPresenter.transform(category, CategoryDTO)
+
+    def get_all_categories(self, include_deleted: Optional[bool] = False):
+        all_categories_usecase = GetAllCategoriesUseCase.build(self.category_gateway)
+        categories = all_categories_usecase.execute(include_deleted)
+        return DTOPresenter.transform_list(categories, CategoryDTO)

@@ -70,10 +70,10 @@ def get_category_by_id(
 )
 def get_all_categories(
     include_deleted: Optional[bool] = Query(False),
-    service: ICategoryService = Depends(_get_category_service),
+    controller: CategoryController = Depends(_get_category_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_categories(include_deleted=include_deleted)
+    return controller.get_all_categories(include_deleted=include_deleted)
 
 @router.put(
     "/categories/{category_id}",

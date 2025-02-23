@@ -15,10 +15,6 @@ class CategoryService(ICategoryService):
     def __init__(self, repository: ICategoryRepository):
         self.repository = repository
 
-    def get_all_categories(self, include_deleted: Optional[bool] = False) -> List[CategoryDTO]:
-        categories = self.repository.get_all(include_deleted=include_deleted)
-        return [CategoryDTO.from_entity(category) for category in categories]
-
     def update_category(self, category_id: int, dto: UpdateCategoryDTO) -> CategoryDTO:
         category = self.repository.get_by_id(category_id)
         if not category:
