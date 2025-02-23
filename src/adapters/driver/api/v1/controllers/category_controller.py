@@ -1,7 +1,8 @@
 
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
-from src.application.usecases.health_check_usecase.create_category_usecase import CreateCategoryUseCase
+from src.application.usecases.category_usecase.get_category_by_name_usecase import GetCategoryByNameUseCase
+from src.application.usecases.category_usecase.create_category_usecase import CreateCategoryUseCase
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
@@ -15,4 +16,9 @@ class CategoryController:
     def create_category(self, dto: CreateCategoryDTO) -> CategoryDTO:
         create_category_usecase = CreateCategoryUseCase.build(self.category_gateway)
         category = create_category_usecase.execute(dto)
+        return DTOPresenter.transform(category, CategoryDTO)
+
+    def get_category_by_name(self, name: str) -> CategoryDTO:
+        category_by_name_usecase = GetCategoryByNameUseCase.build(self.category_gateway)
+        category = category_by_name_usecase.execute(name)
         return DTOPresenter.transform(category, CategoryDTO)
