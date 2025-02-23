@@ -17,28 +17,6 @@ class ProductService(IProductService):
         self.repository = repository
         self.category_repository = category_repository
     
-    def create_product(self, dto: CreateProductDTO) -> ProductDTO:
-        category = self.category_repository.get_by_id(category_id=dto.category_id)
-        if not category:
-            raise EntityNotFoundException(entity_name="Category")
-
-        product = self.repository.get_by_name(name=dto.name)
-        if product:
-            if not product.is_deleted():
-                raise EntityDuplicatedException(entity_name="Product")
-            
-            product.name = dto.name
-            product.description = dto.description
-            product.price = dto.price
-            product.category = category
-            product.reactivate()
-            self.repository.update(product)
-        else:
-            product = Product(name=dto.name, description=dto.description, price=dto.price, category=category)
-            product = self.repository.create(product)
-
-        return ProductDTO.from_entity(product)
-    
     def get_product_by_name(self, name: str) -> ProductDTO:
         product = self.repository.get_by_name(name=name)
         if not product:
