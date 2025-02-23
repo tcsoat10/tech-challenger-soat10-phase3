@@ -58,10 +58,10 @@ def get_category_by_name(
 )
 def get_category_by_id(
     category_id: int,
-    service: ICategoryService = Depends(_get_category_service),
+    controller: CategoryRepository = Depends(_get_category_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_category_by_id(category_id=category_id)
+    return controller.get_category_by_id(category_id=category_id)
 
 @router.get(
     "/categories",

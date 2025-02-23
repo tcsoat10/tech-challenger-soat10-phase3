@@ -9,10 +9,6 @@ from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 class ICategoryService(ABC):
 
     @abstractmethod
-    def get_category_by_id(self, category_id: int) -> CategoryDTO:
-        pass
-
-    @abstractmethod
     def get_all_categories(self, include_deleted: Optional[bool] = False) -> List[CategoryDTO]:
         pass
 
