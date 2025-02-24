@@ -1,4 +1,3 @@
-from typing import List
 from config.database import DELETE_MODE
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
@@ -15,11 +14,6 @@ class OrderItemService(IOrderItemService):
         self.repository = repository
         self.product_repository = product_repository
         self.order_repository = order_repository
-
-    
-    def get_all_order_items(self, include_deleted: bool = False) -> List[OrderItemDTO]:
-        order_items = self.repository.get_all(include_deleted)
-        return [OrderItemDTO.from_entity(order_item) for order_item in order_items]
     
     def update_order_item(self, order_item_id: int, dto: UpdateOrderItemDTO) -> OrderItemDTO:
         order_item = self.repository.get_by_id(order_item_id)

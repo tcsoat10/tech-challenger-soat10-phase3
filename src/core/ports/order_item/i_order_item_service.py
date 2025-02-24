@@ -7,12 +7,6 @@ from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 
 class IOrderItemService(ABC):
 
-
-
-    @abstractmethod
-    def get_all_order_items(self, include_deleted: Optional[bool] = False) -> List[OrderItemDTO]:
-        pass
-
     @abstractmethod
     def update_order_item(self, order_item_id: int, dto: UpdateOrderItemDTO) -> OrderItemDTO:
         pass

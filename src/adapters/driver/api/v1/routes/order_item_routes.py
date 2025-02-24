@@ -63,10 +63,10 @@ def get_order_item_by_id(
 )
 def get_all_order_items(
     include_deleted: bool = False,
-    service: IOrderItemService = Depends(_get_order_item_service),
+    controller: OrderItemController = Depends(_get_order_item_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_order_items(include_deleted)
+    return controller.get_all_order_items(include_deleted)
 
 @router.put(
         "/order-items/{order_item_id}",
