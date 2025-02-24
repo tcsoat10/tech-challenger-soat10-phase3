@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 
+from src.adapters.driver.api.v1.controllers.order_controller import OrderController
 from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
@@ -42,6 +43,9 @@ def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
         employee_repository,
         product_repository
     )
+    
+def _get_order_controller(db_session: Session = Depends(get_db)) -> OrderController:
+    return OrderController(db_session)
 
 router = APIRouter()
 
@@ -54,9 +58,9 @@ router = APIRouter()
 )
 async def create_order(
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    return service.create_order(current_user)
+    return controller.create_order(current_user)
 
 # Listar produtos com base no status do pedido
 @router.get(

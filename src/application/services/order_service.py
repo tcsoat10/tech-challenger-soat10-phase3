@@ -33,34 +33,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def create_order(self, current_user: dict) -> OrderDTO:
-        open_statuses = [
-            OrderStatusEnum.ORDER_PENDING.status,
-            OrderStatusEnum.ORDER_WAITING_BURGERS.status,
-            OrderStatusEnum.ORDER_WAITING_SIDES.status,
-            OrderStatusEnum.ORDER_WAITING_DRINKS.status,
-            OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-            OrderStatusEnum.ORDER_READY_TO_PLACE.status
-        ]
-
-        open_orders = self.order_repository.get_all(status=open_statuses, customer_id=int(current_user['person']['id']))
-        if open_orders:
-            raise BadRequestException("Já existe um pedido em aberto para este cliente")
-
-        order_status = self.order_status_repository.get_by_status(OrderStatusEnum.ORDER_PENDING.status)
-        if not order_status:
-            raise EntityNotFoundException(entity_name="OrderStatus")
-
-        customer = self.customer_repository.get_by_id(int(current_user['person']['id']))
-        if not customer:
-            raise EntityNotFoundException(entity_name="Customer")
-
-        order = Order(
-            customer=customer,
-            order_status=order_status
-        )
-        order = self.order_repository.create(order)
-        return OrderDTO.from_entity(order)
     
     def list_products_by_order_status(self, order_id: int, current_user: dict) -> List[ProductDTO]:
         order = self._get_order(order_id, current_user)
