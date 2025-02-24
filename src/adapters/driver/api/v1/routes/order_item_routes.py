@@ -51,10 +51,10 @@ def create_order_item(
 )
 def get_order_item_by_id(
     order_item_id: int,
-    service: IOrderItemService = Depends(_get_order_item_service),
+    controller: OrderItemController = Depends(_get_order_item_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_order_item_by_id(order_item_id)
+    return controller.get_order_item_by_id(order_item_id)
 
 @router.get(
         "/order-items",

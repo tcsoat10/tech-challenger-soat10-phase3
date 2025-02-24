@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_item_usecase.get_order_item_by_id import GetOrderItemByIdUseCase
 from src.application.usecases.order_item_usecase.create_order_item_usecase import CreateOrderItemUseCase
 from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
 from src.adapters.driven.repositories.order_repository import OrderRepository
@@ -21,4 +22,9 @@ class OrderItemController:
     def create_order_item(self, dto: CreateOrderItemDTO) -> OrderItemDTO:
         create_order_item_usecase = CreateOrderItemUseCase.build(self.order_item_gateway, self.product_gateway, self.order_gateway)
         order_item = create_order_item_usecase.execute(dto)
+        return DTOPresenter.transform(order_item, OrderItemDTO)
+
+    def get_order_item_by_id(self, order_item_id: int) -> OrderItemDTO:
+        order_item_by_id = GetOrderItemByIdUseCase.build(self.order_item_gateway)
+        order_item = order_item_by_id.execute(order_item_id)
         return DTOPresenter.transform(order_item, OrderItemDTO)
