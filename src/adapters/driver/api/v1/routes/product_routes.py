@@ -88,10 +88,10 @@ def get_all_products(
 def update_product(
     product_id: int,
     dto: UpdateProductDTO,
-    service: IProductService = Depends(_get_product_service),
+    controller: ProductController = Depends(_get_product_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_product(product_id, dto)
+    return controller.update_product(product_id, dto)
 
 @router.delete(
     "/products/{product_id}",

@@ -1,9 +1,6 @@
-from typing import List, Optional
+
 from config.database import DELETE_MODE
-from src.core.domain.dtos.product.update_product_dto import UpdateProductDTO
-from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
-from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.core.ports.product.i_product_service import IProductService
@@ -14,24 +11,6 @@ class ProductService(IProductService):
     def __init__(self, repository: IProductRepository, category_repository: ICategoryRepository):
         self.repository = repository
         self.category_repository = category_repository
-
-    def update_product(self, product_id: int, dto: UpdateProductDTO) -> ProductDTO:
-        product = self.repository.get_by_id(product_id)
-        if not product:
-            raise EntityDuplicatedException(entity_name="Product")
-        
-        category = self.category_repository.get_by_id(category_id=dto.category_id)
-        if not category:
-            raise EntityNotFoundException(entity_name="Category")
-
-        product.name=dto.name,
-        product.description=dto.description,
-        product.price=dto.price,
-        product.category=category
-
-        product = self.repository.update(product)
-
-        return ProductDTO.from_entity(product)
 
     def delete_product(self, product_id: int) -> None:
         product = self.repository.get_by_id(product_id)
