@@ -7,22 +7,10 @@ from config.database import get_db
 from src.constants.permissions import ProductPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.product.update_product_dto import UpdateProductDTO
-from src.adapters.driven.repositories.category_repository import CategoryRepository
-from src.core.ports.category.i_category_repository import ICategoryRepository
-from src.adapters.driven.repositories.product_repository import ProductRepository
-from src.application.services.product_service import ProductService
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.core.ports.product.i_product_repository import IProductRepository
-from src.core.ports.product.i_product_service import IProductService
 
 router = APIRouter()
-
-# Substituir por lib DI.
-def _get_product_service(db_session: Session = Depends(get_db)) -> IProductService:
-    product_repository: IProductRepository = ProductRepository(db_session)
-    category_repository: ICategoryRepository = CategoryRepository(db_session)
-    return ProductService(product_repository, category_repository)
 
 def _get_product_controller(db_session: Session = Depends(get_db)):
     return ProductController(db_session)
@@ -98,5 +86,5 @@ def update_product(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[ProductPermissions.CAN_DELETE_PRODUCT])]
 )
-def delete_product(product_id: int, service: IProductService = Depends(_get_product_service)):
-    service.delete_product(product_id)
+def delete_product(product_id: int, controller: ProductController = Depends(_get_product_controller)):
+    controller.delete_product(product_id)

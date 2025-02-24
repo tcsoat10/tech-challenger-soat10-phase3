@@ -1,6 +1,7 @@
 
 
 from typing import List, Optional
+from src.application.usecases.product_usecase.delete_product_usecase import DeleteProductUseCase
 from src.application.usecases.product_usecase.update_product_usecase import UpdateProductUsecase
 from src.application.usecases.product_usecase.get_all_products_usecase import GetAllProductsUseCase
 from src.application.usecases.product_usecase.get_product_by_id_usecase import GetProductByIdUseCase
@@ -45,3 +46,7 @@ class ProductController:
         update_product_usecase = UpdateProductUsecase.build(self.product_gateway, self.category_gateway)
         product = update_product_usecase.execute(product_id, dto)
         return DTOPresenter.transform(product, ProductDTO)
+
+    def delete_product(self, product_id: int) -> None:
+        delete_product_usecase = DeleteProductUseCase.build(self.product_gateway)
+        delete_product_usecase.execute(product_id)
