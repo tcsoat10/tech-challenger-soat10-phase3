@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from src.adapters.driver.api.v1.controllers.order_item_controller import OrderItemController
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.core.ports.order.i_order_repository import IOrderRepository
-from src.application.services.order_item_service import OrderItemService
 from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from config.database import get_db
@@ -12,20 +11,12 @@ from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderIte
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.order_item.update_order_item_dto import UpdateOrderItemDTO
 from src.core.ports.order_item.i_order_item_repository import IOrderItemRepository
-from src.core.ports.order_item.i_order_item_service import IOrderItemService
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import OrderItemPermissions
 
 
 router = APIRouter()
-
-# Substituir por lib DI.
-def _get_order_item_service(db_session: Session = Depends(get_db)) -> IOrderItemService:
-    order_item_repository: IOrderItemRepository = OrderItemRepository(db_session)
-    product_repository: IProductRepository = ProductRepository(db_session)
-    order_repository: IOrderRepository = OrderRepository(db_session)
-    return OrderItemService(order_item_repository, product_repository, order_repository)
 
 def _get_order_item_controller(db_session: Session = Depends(get_db)):
     return OrderItemController(db_session)
@@ -88,7 +79,7 @@ def update_order_item(
 )
 def delete_order_item(
     order_item_id: int,
-    service: IOrderItemService = Depends(_get_order_item_service),
+    controller: OrderItemController = Depends(_get_order_item_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_order_item(order_item_id)
+    controller.delete_order_item(order_item_id)

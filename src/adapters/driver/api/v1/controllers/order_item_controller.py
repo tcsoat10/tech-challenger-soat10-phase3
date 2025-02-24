@@ -2,6 +2,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_item_usecase.delete_order_item_usecase import DeleteOrderItemUseCase
 from src.application.usecases.order_item_usecase.upodate_order_item_usecase import UpdateOrderItemUseCase
 from src.core.domain.dtos.order_item.update_order_item_dto import UpdateOrderItemDTO
 from src.application.usecases.order_item_usecase.get_all_order_items_usecase import GetAllOrderItemsUsecase
@@ -42,3 +43,7 @@ class OrderItemController:
         update_order_item_usecase = UpdateOrderItemUseCase.build(self.order_item_gateway, self.product_gateway)
         order_item = update_order_item_usecase.execute(order_item_id, dto)
         return DTOPresenter.transform(order_item, OrderItemDTO)
+    
+    def delete_order_item(self, order_item_id: int) -> None:
+        delete_order_item_usecase = DeleteOrderItemUseCase.build(self.order_item_gateway)
+        delete_order_item_usecase.execute(order_item_id)
