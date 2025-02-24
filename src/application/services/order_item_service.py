@@ -17,28 +17,6 @@ class OrderItemService(IOrderItemService):
         self.repository = repository
         self.product_repository = product_repository
         self.order_repository = order_repository
-
-    def create_order_item(self, dto: CreateOrderItemDTO) -> OrderItemDTO:
-        product = self.product_repository.get_by_id(dto.product_id)
-        if not product:
-            raise EntityNotFoundException(entity_name="Product")
-
-        if not dto.order_id:
-            raise EntityNotFoundException(entity_name="Order ID")
-
-        order = self.order_repository.get_by_id(dto.order_id)
-        if not order:
-            raise EntityNotFoundException(entity_name="Order")
-
-        order_item = OrderItem(
-            order=order,
-            product=product,
-            quantity=dto.quantity,
-            observation=dto.observation,
-        )
-
-        order_item = self.repository.create(order_item)
-        return OrderItemDTO.from_entity(order_item)
     
     def get_order_item_by_order_id(self, order_id: int, include_deleted: bool = False) -> List[OrderItemDTO]:
         order_items = self.repository.get_by_order_id(order_id, include_deleted)

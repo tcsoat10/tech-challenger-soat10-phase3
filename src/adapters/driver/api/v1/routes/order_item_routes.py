@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 
+from src.adapters.driver.api.v1.controllers.order_item_controller import OrderItemController
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.application.services.order_item_service import OrderItemService
@@ -26,6 +27,9 @@ def _get_order_item_service(db_session: Session = Depends(get_db)) -> IOrderItem
     order_repository: IOrderRepository = OrderRepository(db_session)
     return OrderItemService(order_item_repository, product_repository, order_repository)
 
+def _get_order_item_controller(db_session: Session = Depends(get_db)):
+    return OrderItemController(db_session)
+
 @router.post(
         "/order-items",
         response_model=OrderItemDTO,
@@ -34,10 +38,10 @@ def _get_order_item_service(db_session: Session = Depends(get_db)) -> IOrderItem
 )
 def create_order_item(
     dto: CreateOrderItemDTO,
-    service: IOrderItemService = Depends(_get_order_item_service),
+    controller: OrderItemController = Depends(_get_order_item_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_order_item(dto)
+    return controller.create_order_item(dto)
 
 @router.get(
         "/order-items/{order_item_id}/id",
