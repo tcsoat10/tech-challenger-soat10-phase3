@@ -76,10 +76,10 @@ def get_all_order_items(
 def update_order_item(
     order_item_id: int,
     dto: UpdateOrderItemDTO,
-    service: IOrderItemService = Depends(_get_order_item_service),
+    controller: OrderItemController = Depends(_get_order_item_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_order_item(order_item_id, dto)
+    return controller.update_order_item(order_item_id, dto)
 
 @router.delete(
         "/order-items/{order_item_id}",
