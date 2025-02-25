@@ -1,17 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.core.domain.dtos.order.update_order_dto import UpdateOrderDTO
 from src.core.domain.dtos.order.order_dto import OrderDTO
 from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 
 
 class IOrderService(ABC):
-
-    @abstractmethod
-    def list_products_by_order_status(self, order_id: int, current_user: dict) -> List[ProductDTO]:
-        pass
     
     @abstractmethod
     def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:

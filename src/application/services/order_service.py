@@ -1,6 +1,4 @@
 from typing import List, Optional
-from src.constants.product_category import ProductCategoryEnum
-from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.constants.order_status import OrderStatusEnum
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
@@ -32,23 +30,6 @@ class OrderService(IOrderService):
         self.customer_repository = customer_repository
         self.employee_repository = employee_repository
         self.product_repository = product_repository
-
-    
-    def list_products_by_order_status(self, order_id: int, current_user: dict) -> List[ProductDTO]:
-        order = self._get_order(order_id, current_user)
-
-        order_status_to_category = {
-            OrderStatusEnum.ORDER_WAITING_BURGERS.status: ProductCategoryEnum.BURGERS.name,
-            OrderStatusEnum.ORDER_WAITING_SIDES.status: ProductCategoryEnum.SIDES.name,
-            OrderStatusEnum.ORDER_WAITING_DRINKS.status: ProductCategoryEnum.DRINKS.name,
-            OrderStatusEnum.ORDER_WAITING_DESSERTS.status: ProductCategoryEnum.DESSERTS.name,
-        }
-        
-        if order.order_status.status not in order_status_to_category:
-            raise BadRequestException("Não existem produtos disponíveis para este status de pedido.")
-
-        products = self.product_repository.get_all(categories=[order_status_to_category[order.order_status.status]])
-        return [ProductDTO.from_entity(product) for product in products]
 
     def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
         order = self._get_order(order_id, current_user)
