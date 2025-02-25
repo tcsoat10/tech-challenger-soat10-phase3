@@ -31,10 +31,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
-        order = self._get_order(order_id, current_user)
-        return OrderDTO.from_entity(order)
-
     def add_item(self, order_id: int, order_item_dto: CreateOrderItemDTO, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
         product = self.product_repository.get_by_id(order_item_dto.product_id)

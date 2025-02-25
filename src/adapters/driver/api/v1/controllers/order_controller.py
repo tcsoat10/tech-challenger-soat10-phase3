@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_usecase.get_order_by_id_usecase import GetOrderByIdUseCase
 from src.application.usecases.order_usecase.list_products_by_order_status_usecase import ListProductsByOrderStatusUseCase
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
@@ -31,9 +32,13 @@ class OrderController:
         create_order_usecase = CreateOrderUseCase.build(self.order_gateway, self.order_status_gateway, self.customer_gateway)
         order = create_order_usecase.execute(current_user)
         return DTOPresenter.transform(order, OrderDTO)
-    
-    
+
     def list_products_by_order_status(self, order_id: int, current_user: dict) -> List[ProductDTO]:
         list_products_by_order_status_usecase = ListProductsByOrderStatusUseCase.build(self.order_gateway, self.product_gateway)
         products = list_products_by_order_status_usecase.execute(order_id, current_user)
         return DTOPresenter.transform_list(products, ProductDTO)
+
+    def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
+        order_by_id_usecase = GetOrderByIdUseCase.build(self.order_gateway)
+        order = order_by_id_usecase.execute(order_id, current_user)
+        return DTOPresenter.transform(order, OrderDTO)

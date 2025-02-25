@@ -85,9 +85,9 @@ async def list_products_by_order_status(
 async def get_order_by_id(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    return service.get_order_by_id(order_id, current_user)
+    return controller.get_order_by_id(order_id, current_user)
 
 # Adicionar item ao pedido
 @router.post(

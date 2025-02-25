@@ -6,10 +6,6 @@ from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 
 
 class IOrderService(ABC):
-    
-    @abstractmethod
-    def get_order_by_id(self, order_id: int, current_user: dict) -> OrderDTO:
-        pass
 
     @abstractmethod
     def add_item(self, order_id: int, item_dto: CreateOrderDTO, current_user: dict) -> None:
