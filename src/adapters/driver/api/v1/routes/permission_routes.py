@@ -5,10 +5,6 @@ from typing import List
 from config.database import get_db
 from src.constants.permissions import PermissionPermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.permission.i_permission_service import IPermissionService
-#from src.core.ports.permission.i_permission_repository import IPermissionRepository
-#from src.adapters.driven.repositories.permission_repository import PermissionRepository
-#from src.application.services.permission_service import PermissionService
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.core.domain.dtos.permission.create_permission_dto import CreatePermissionDTO
 from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
