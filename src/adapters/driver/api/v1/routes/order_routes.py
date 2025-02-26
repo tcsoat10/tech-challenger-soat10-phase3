@@ -174,9 +174,9 @@ async def clear_order(
 async def list_order_items(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    return service.list_order_items(order_id, current_user)
+    return controller.list_order_items(order_id, current_user)
 
 # Cancelar pedido
 @router.post(
