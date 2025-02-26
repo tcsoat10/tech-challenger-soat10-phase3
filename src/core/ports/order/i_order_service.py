@@ -7,10 +7,6 @@ from src.core.domain.dtos.order.order_dto import OrderDTO
 class IOrderService(ABC):
 
     @abstractmethod
-    def remove_item(self, order_id: int, item_id: int, current_user: dict) -> None:
-        pass
-
-    @abstractmethod
     def change_item_quantity(self, order_id: int, item_id: int, new_quantity: int, current_user: dict) -> None:
         pass
 

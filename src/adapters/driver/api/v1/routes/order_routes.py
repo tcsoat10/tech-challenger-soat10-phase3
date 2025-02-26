@@ -114,9 +114,9 @@ async def remove_item(
     order_id: int,
     item_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.remove_item(order_id, item_id, current_user)
+    controller.remove_item(order_id, item_id, current_user)
     return {"detail": "Item removido com sucesso."}
 
 # Atualizar quantidade de item do pedido
