@@ -151,6 +151,18 @@ async def change_item_observation(
     controller.change_item_observation(order_id, item_id, new_observation, current_user)
     return {"detail": "Observação atualizada com sucesso."}
 
+@router.delete(
+    "/orders/{order_id}/clear",
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CLEAR_ORDER])],
+    status_code=status.HTTP_200_OK,
+)
+async def clear_order(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    controller: OrderController = Depends(_get_order_controller),
+):
+    controller.clear_order(order_id, current_user)
+    return {"detail": "Pedido limpo com sucesso."}
 
 # Listar itens do pedido
 @router.get(

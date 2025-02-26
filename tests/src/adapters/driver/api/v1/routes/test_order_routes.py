@@ -578,3 +578,50 @@ def test_try_next_step_order_status_when_order_not_exists_and_return_error(clien
 
     data = response.json()
     assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+def test_clear_order_and_return_success(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order = OrderFactory(order_status=order_status)
+
+    response = client.delete(
+        f"/api/v1/orders/{order.id}/clear",
+        permissions=[OrderPermissions.CAN_CLEAR_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": order.id}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["detail"] == "Pedido limpo com sucesso."
+    
+def test_try_clear_order_when_order_not_exists_and_return_error(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+
+    response = client.delete(
+        "/api/v1/orders/999/clear",
+        permissions=[OrderPermissions.CAN_CLEAR_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": 999}
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    data = response.json()
+    assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."

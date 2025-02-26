@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_usecase.clear_order_usecase import ClearOrderUseCase
 from src.application.usecases.order_usecase.change_item_observation_usecase import ChangeItemObservationUseCase
 from src.application.usecases.order_usecase.change_item_quantity_usecase import ChangeItemQuantityUseCase
 from src.application.usecases.order_usecase.remove_order_item_from_order_usecase import RemoveOrderItemFromOrderUseCase
@@ -63,5 +64,9 @@ class OrderController:
     def change_item_observation(self, order_id: int, item_id: int, new_observation: str, current_user: dict) -> None:
         change_item_observation_usecase = ChangeItemObservationUseCase.build(self.order_gateway)
         change_item_observation_usecase.execute(order_id, item_id, new_observation, current_user)
+        
+    def clear_order(self, order_id: int, current_user: dict) -> None:
+        clear_order_usecase = ClearOrderUseCase.build(self.order_gateway, self.order_status_gateway)
+        clear_order_usecase.execute(order_id, current_user)
 
     

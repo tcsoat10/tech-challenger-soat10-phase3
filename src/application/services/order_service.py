@@ -31,11 +31,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def clear_order(self, order_id: int, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-        order.clear_order(self.order_status_repository)
-        self.order_repository.update(order)
-
     def list_order_items(self, order_id: int, current_user: dict) -> List[OrderItemDTO]:
         order = self._get_order(order_id, current_user)
         return [OrderItemDTO.from_entity(item) for item in order.list_order_items()]
