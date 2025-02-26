@@ -31,12 +31,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def change_item_quantity(self, order_id: int, item_id: int, new_quantity: int, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-        item = self._get_item_from_order(order, item_id)
-        order.change_item_quantity(item, new_quantity)
-        self.order_repository.update(order)
-
     def change_item_observation(self, order_id: int, order_item_id: int, new_observation: str, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
         item = self._get_item_from_order(order, order_item_id)

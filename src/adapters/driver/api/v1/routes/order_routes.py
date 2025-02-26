@@ -130,9 +130,9 @@ async def change_item_quantity(
     order_item_id: int,
     new_quantity: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.change_item_quantity(order_id, order_item_id, new_quantity, current_user)
+    controller.change_item_quantity(order_id, order_item_id, new_quantity, current_user)
     return {"detail": "Quantidade atualizada com sucesso."}
 
 # Atualizar observação de item do pedido

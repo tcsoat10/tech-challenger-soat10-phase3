@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_usecase.change_item_quantity_usecase import ChangeItemQuantityUseCase
 from src.application.usecases.order_usecase.remove_order_item_from_order_usecase import RemoveOrderItemFromOrderUseCase
 from src.application.usecases.order_usecase.add_order_item_in_order_usecase import AddOrderItemInOrderUseCase
 from src.application.usecases.order_usecase.get_order_by_id_usecase import GetOrderByIdUseCase
@@ -53,4 +54,8 @@ class OrderController:
     def remove_item(self, order_id: int, order_item_id: int, current_user: dict) -> None:
         remove_order_item_in_order_usecase = RemoveOrderItemFromOrderUseCase.build(self.order_gateway)
         remove_order_item_in_order_usecase.execute(order_id, order_item_id, current_user)
+        
+    def change_item_quantity(self, order_id: int, item_id: int, new_quantity: int, current_user: dict) -> None:
+        change_item_quantity_usecase = ChangeItemQuantityUseCase.build(self.order_gateway)
+        change_item_quantity_usecase.execute(order_id, item_id, new_quantity, current_user)
     
