@@ -146,9 +146,9 @@ async def change_item_observation(
     item_id: int,
     new_observation: str,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.change_item_observation(order_id, item_id, new_observation, current_user)
+    controller.change_item_observation(order_id, item_id, new_observation, current_user)
     return {"detail": "Observação atualizada com sucesso."}
 
 
