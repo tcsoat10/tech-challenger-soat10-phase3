@@ -99,9 +99,9 @@ async def add_item(
     order_id: int,
     dto: CreateOrderItemDTO,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.add_item(order_id, dto, current_user)
+    controller.add_item(order_id, dto, current_user)
     return {"detail": "Item adicionado com sucesso."}
 
 # Remover item do pedido

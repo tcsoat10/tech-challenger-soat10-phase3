@@ -31,37 +31,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def add_item(self, order_id: int, order_item_dto: CreateOrderItemDTO, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-        product = self.product_repository.get_by_id(order_item_dto.product_id)
-        if not product:
-            raise EntityNotFoundException(f"Product ID '{order_item_dto.product_id}'")
-        
-        order_item = OrderItem(
-            order=order,
-            product=product,
-            quantity=order_item_dto.quantity,
-            observation=order_item_dto.observation
-        )
-        order.add_item(order_item)
-        
-        # Agrupar itens
-        # existing_item = next((order_item for order_item in order.order_items if order_item.product_id == order_item_dto.product_id), None)
-        # if existing_item:
-        #     order.change_item_quantity(existing_item, existing_item.quantity + order_item_dto.quantity) # Adiciona a quantidade ao item existente
-        #     order.change_item_observation(existing_item, order_item_dto.observation) # Substitui a observação anterior pela nova
-        # else:
-        #     # Adiciona um novo item ao pedido
-        #     order_item = OrderItem(
-        #         order=order,
-        #         product=product,
-        #         quantity=order_item_dto.quantity,
-        #         observation=order_item_dto.observation
-        #     )
-        #     order.add_item(order_item)
-
-        self.order_repository.update(order)
-
     def remove_item(self, order_id: int, order_item_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
         item = self._get_item_from_order(order, order_item_id)

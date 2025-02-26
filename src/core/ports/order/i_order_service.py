@@ -2,14 +2,9 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from src.core.domain.dtos.order.order_dto import OrderDTO
-from src.core.domain.dtos.order.create_order_dto import CreateOrderDTO
 
 
 class IOrderService(ABC):
-
-    @abstractmethod
-    def add_item(self, order_id: int, item_dto: CreateOrderDTO, current_user: dict) -> None:
-        pass
 
     @abstractmethod
     def remove_item(self, order_id: int, item_id: int, current_user: dict) -> None:
