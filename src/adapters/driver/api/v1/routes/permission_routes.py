@@ -6,20 +6,20 @@ from config.database import get_db
 from src.constants.permissions import PermissionPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.ports.permission.i_permission_service import IPermissionService
-from src.core.ports.permission.i_permission_repository import IPermissionRepository
-from src.adapters.driven.repositories.permission_repository import PermissionRepository
-from src.application.services.permission_service import PermissionService
+#from src.core.ports.permission.i_permission_repository import IPermissionRepository
+#from src.adapters.driven.repositories.permission_repository import PermissionRepository
+#from src.application.services.permission_service import PermissionService
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.core.domain.dtos.permission.create_permission_dto import CreatePermissionDTO
 from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
+from src.adapters.driver.api.v1.controllers.permission_controller import PermissionController
 
 
 router = APIRouter()
 
 
-def _get_permission_service(db_session: Session = Depends(get_db)) -> IPermissionService:
-    repository: IPermissionRepository = PermissionRepository(db_session)
-    return PermissionService(repository)
+def _get_permission_controller(db_session: Session = Depends(get_db)) -> PermissionController:
+    return PermissionController(db_session)
 
 
 @router.post(
@@ -30,10 +30,10 @@ def _get_permission_service(db_session: Session = Depends(get_db)) -> IPermissio
 )
 def create_permission(
     dto: CreatePermissionDTO,
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_permission(dto)
+    return controller.create_permission(dto)
 
 
 @router.get(
@@ -44,10 +44,10 @@ def create_permission(
 )
 def get_permission_by_name(
     permission_name: str,
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_permission_by_name(name=permission_name)
+    return controller.get_permission_by_name(name=permission_name)
 
 
 @router.get(
@@ -58,10 +58,10 @@ def get_permission_by_name(
 )
 def get_permission_by_id(
     permission_id: int,
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_permission_by_id(permission_id)
+    return controller.get_permission_by_id(permission_id)
 
 
 @router.get(
@@ -71,10 +71,10 @@ def get_permission_by_id(
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_VIEW_PERMISSIONS])]
 )
 def get_all_permissions(
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_permissions()
+    return controller.get_all_permissions()
 
 
 @router.put(
@@ -86,10 +86,10 @@ def get_all_permissions(
 def update_permission(
     permission_id: int,
     dto: UpdatePermissionDTO,
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_permission(permission_id, dto)
+    return controller.update_permission(permission_id, dto)
 
 
 @router.delete(
@@ -99,8 +99,8 @@ def update_permission(
 )
 def delete_permission(
     permission_id: int,
-    service: IPermissionService = Depends(_get_permission_service),
+    controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_permission(permission_id)
+    controller.delete_permission(permission_id)
 
