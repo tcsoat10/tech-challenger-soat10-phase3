@@ -10,6 +10,7 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.permission_usecase.get_permission_by_name_usecase import GetPermissionByNameUseCase
 from src.application.usecases.permission_usecase.get_permission_by_id_usecase import GetPermissionByIdUsecase
 from src.application.usecases.permission_usecase.get_all_permissions_usecase import GetAllPermissionsUsecase
+from src.application.usecases.permission_usecase.update_permission_usecase import UpdatePermissionUsecase
 
 
 class PermissionController:
@@ -35,3 +36,8 @@ class PermissionController:
         all_permissions_usecase = GetAllPermissionsUsecase.build(self.permission_gateway)
         permissions = all_permissions_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(permissions, PermissionDTO)
+    
+    def update_permission(self, permission_id: int, dto: CreatePermissionDTO) -> PermissionDTO:
+        update_permission_usecase = UpdatePermissionUsecase.build(self.permission_gateway)
+        permission = update_permission_usecase.execute(permission_id, dto)
+        return DTOPresenter.transform(permission, PermissionDTO)
