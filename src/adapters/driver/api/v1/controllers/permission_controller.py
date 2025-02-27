@@ -11,6 +11,7 @@ from src.application.usecases.permission_usecase.get_permission_by_name_usecase 
 from src.application.usecases.permission_usecase.get_permission_by_id_usecase import GetPermissionByIdUsecase
 from src.application.usecases.permission_usecase.get_all_permissions_usecase import GetAllPermissionsUsecase
 from src.application.usecases.permission_usecase.update_permission_usecase import UpdatePermissionUsecase
+from src.application.usecases.permission_usecase.delete_permission_usecase import DeletePermissionUsecase
 
 
 class PermissionController:
@@ -41,3 +42,7 @@ class PermissionController:
         update_permission_usecase = UpdatePermissionUsecase.build(self.permission_gateway)
         permission = update_permission_usecase.execute(permission_id, dto)
         return DTOPresenter.transform(permission, PermissionDTO)
+    
+    def delete_permission(self, permission_id: int) -> None:
+        delete_permission_usecase = DeletePermissionUsecase.build(self.permission_gateway)
+        delete_permission_usecase.execute(permission_id)
