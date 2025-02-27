@@ -187,9 +187,9 @@ async def list_order_items(
 async def cancel_order(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.cancel_order(order_id, current_user)
+    controller.cancel_order(order_id, current_user)
     return {"detail": "Pedido cancelado com sucesso."}
 
 # Avançar para o próximo passo no pedido

@@ -625,3 +625,52 @@ def test_try_clear_order_when_order_not_exists_and_return_error(client):
 
     data = response.json()
     assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+def test_cancel_order_and_return_success(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order = OrderFactory(order_status=order_status)
+
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_CANCELLED.status, description=OrderStatusEnum.ORDER_CANCELLED.description)
+
+    response = client.post(
+        f"/api/v1/orders/{order.id}/cancel",
+        permissions=[OrderPermissions.CAN_CANCEL_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": order.id}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["detail"] == "Pedido cancelado com sucesso."
+    
+def test_try_cancel_order_when_order_not_exists_and_return_error(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+
+    response = client.post(
+        "/api/v1/orders/999/cancel",
+        permissions=[OrderPermissions.CAN_CANCEL_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": 999}
+    )
+    
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    
+    data = response.json()
+    assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."

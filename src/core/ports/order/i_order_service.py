@@ -5,9 +5,6 @@ from src.core.domain.dtos.order.order_dto import OrderDTO
 
 
 class IOrderService(ABC):
-    @abstractmethod
-    def cancel_order(self, order_id: int, current_user: dict) -> None:
-        pass
 
     @abstractmethod
     def next_step(self, order_id: int, current_user: dict) -> None:

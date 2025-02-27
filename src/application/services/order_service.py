@@ -31,12 +31,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def cancel_order(self, order_id: int, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-        order.cancel_order(self.order_status_repository)
-        order.soft_delete()
-        self.order_repository.update(order)
-
     def next_step(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
 
