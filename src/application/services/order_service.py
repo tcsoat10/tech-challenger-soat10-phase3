@@ -1,10 +1,8 @@
 from typing import List, Optional
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.constants.order_status import OrderStatusEnum
-from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.entities.order_item import OrderItem
 from src.core.exceptions.bad_request_exception import BadRequestException
-from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
@@ -63,15 +61,6 @@ class OrderService(IOrderService):
         order = self._get_order(order_id, current_user)
         order.go_back(self.order_status_repository)
         self.order_repository.update(order)
-
-    def list_orders(self, current_user: dict, status: Optional[List[str]] = None) -> List[OrderDTO]:
-        if current_user['profile']['name'] == 'customer':
-            customer_id = int(current_user['person']['id'])
-            orders = self.order_repository.get_all(status=status, customer_id=customer_id)
-        else:
-            orders = self.order_repository.get_all(status=status)
-
-        return [OrderDTO.from_entity(order) for order in orders]
 
     def _get_order(self, order_id: int, current_user: dict) -> Order:
         order = self.order_repository.get_by_id(order_id)

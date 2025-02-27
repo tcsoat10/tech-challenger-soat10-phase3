@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_usecase.list_orders_usecase import ListOrdersUseCase
 from src.application.usecases.order_usecase.cancel_order_usecase import CancelOrderUseCase
 from src.application.usecases.order_usecase.list_order_item_usecase import ListOrderItemsUseCase
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
@@ -80,3 +81,8 @@ class OrderController:
     def cancel_order(self, order_id: int, current_user: dict) -> None:
         cancel_order_usecase = CancelOrderUseCase.build(self.order_gateway, self.order_status_gateway)
         cancel_order_usecase.execute(order_id, current_user)
+
+    def list_orders(self, current_user: dict, status: List[str] = None) -> List[OrderDTO]:
+        list_orders_usecase = ListOrdersUseCase.build(self.order_gateway)
+        orders = list_orders_usecase.execute(current_user, status)
+        return DTOPresenter.transform_list(orders, OrderDTO)

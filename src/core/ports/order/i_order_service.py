@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
-
-from src.core.domain.dtos.order.order_dto import OrderDTO
 
 
 class IOrderService(ABC):
@@ -12,8 +9,4 @@ class IOrderService(ABC):
 
     @abstractmethod
     def go_back(self, order_id: int, current_user: dict) -> None:
-        pass
-
-    @abstractmethod
-    def list_orders(self, current_user: dict, status: Optional[List[str]]) -> List[OrderDTO]:
         pass

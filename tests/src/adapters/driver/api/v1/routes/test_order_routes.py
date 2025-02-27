@@ -1,5 +1,7 @@
 from fastapi import status
+import pytest
 
+from src.core.domain.entities.order_status import OrderStatus
 from src.constants.product_category import ProductCategoryEnum
 from src.constants.order_status import OrderStatusEnum
 from tests.factories.category_factory import CategoryFactory
@@ -674,3 +676,45 @@ def test_try_cancel_order_when_order_not_exists_and_return_error(client):
     
     data = response.json()
     assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+@pytest.mark.parametrize("order_status", [
+    OrderStatusEnum.ORDER_WAITING_BURGERS,
+    OrderStatusEnum.ORDER_WAITING_SIDES,
+    OrderStatusEnum.ORDER_WAITING_DRINKS,
+    OrderStatusEnum.ORDER_WAITING_DESSERTS
+])
+def test_list_orders_and_return_success(order_status, client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status_waiting_sandwich = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order_status_waiting_sides = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_SIDES.status, description=OrderStatusEnum.ORDER_WAITING_SIDES.description)
+    order_status_waiting_drinks = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DRINKS.status, description=OrderStatusEnum.ORDER_WAITING_DRINKS.description)
+    order_status_waiting_desserts = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DESSERTS.status, description=OrderStatusEnum.ORDER_WAITING_DESSERTS.description)
+    
+    OrderFactory(order_status=order_status_waiting_sandwich)
+    OrderFactory(order_status=order_status_waiting_sides)
+    OrderFactory(order_status=order_status_waiting_drinks)
+    OrderFactory(order_status=order_status_waiting_desserts)
+
+    response = client.get(
+        "/api/v1/orders",
+        permissions=[OrderPermissions.CAN_LIST_ORDERS],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"status": order_status.status}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["id"] is not None
+    assert data[0]["order_status"]["status"] == order_status.status
+    assert data[0]["order_status"]["description"] == order_status.description
+    

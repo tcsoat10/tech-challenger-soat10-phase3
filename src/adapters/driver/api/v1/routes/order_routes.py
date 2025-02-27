@@ -228,6 +228,6 @@ async def list_orders(
         description="Lista de status dos pedidos para filtrar, por exemplo: ?status=order_pending&status=order_paid"
     ),
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    return service.list_orders(current_user, status)
+    return controller.list_orders(current_user, status)
