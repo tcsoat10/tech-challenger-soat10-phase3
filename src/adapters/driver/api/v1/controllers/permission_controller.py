@@ -7,6 +7,7 @@ from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.application.usecases.permission_usecase.create_permission_usecase import CreatePermissionUsecase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.permission_usecase.get_permission_by_name_usecase import GetPermissionByNameUseCase
+from src.application.usecases.permission_usecase.get_permission_by_id_usecase import GetPermissionByIdUsecase
 
 
 class PermissionController:
@@ -21,4 +22,9 @@ class PermissionController:
     def get_permission_by_name(self, name: str) -> PermissionDTO:
         permission_by_name_usecase = GetPermissionByNameUseCase.build(self.permission_gateway)
         permission = permission_by_name_usecase.execute(name)
+        return DTOPresenter.transform(permission, PermissionDTO)
+    
+    def get_permission_by_id(self, permission_id: int) -> PermissionDTO:
+        permission_by_id_usecase = GetPermissionByIdUsecase.build(self.permission_gateway)
+        permission = permission_by_id_usecase.execute(permission_id)
         return DTOPresenter.transform(permission, PermissionDTO)
