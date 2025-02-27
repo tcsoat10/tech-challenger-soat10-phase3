@@ -35,8 +35,6 @@ class PermissionRepository(IPermissionRepository):
         self.db_session.commit()
         return permission
     
-    def delete(self, permission_id: int) -> None:
-        permission = self.get_by_id(permission_id=permission_id)
-        if permission:
-            self.db_session.delete(permission)
-            self.db_session.commit()
+    def delete(self, permission: Permission) -> None:
+        self.db_session.delete(permission)
+        self.db_session.commit()

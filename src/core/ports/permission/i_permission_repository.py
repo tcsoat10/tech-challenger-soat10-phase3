@@ -30,5 +30,5 @@ class IPermissionRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, permission_id: int) -> None:
+    def delete(self, permission: Permission) -> None:
         pass
