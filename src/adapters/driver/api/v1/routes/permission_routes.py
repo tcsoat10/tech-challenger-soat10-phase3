@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.constants.permissions import PermissionPermissions
@@ -67,10 +67,11 @@ def get_permission_by_id(
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_VIEW_PERMISSIONS])]
 )
 def get_all_permissions(
+    include_deleted: Optional[bool] = Query(False),
     controller: PermissionController = Depends(_get_permission_controller),
     user=Depends(get_current_user)
 ):
-    return controller.get_all_permissions()
+    return controller.get_all_permissions(include_deleted)
 
 
 @router.put(
