@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Optional, List
 
 from src.core.ports.permission.i_permission_repository import IPermissionRepository
 from src.adapters.driven.repositories.permission_repository import PermissionRepository
@@ -8,6 +9,7 @@ from src.application.usecases.permission_usecase.create_permission_usecase impor
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.permission_usecase.get_permission_by_name_usecase import GetPermissionByNameUseCase
 from src.application.usecases.permission_usecase.get_permission_by_id_usecase import GetPermissionByIdUsecase
+from src.application.usecases.permission_usecase.get_all_permissions_usecase import GetAllPermissionsUsecase
 
 
 class PermissionController:
@@ -28,3 +30,8 @@ class PermissionController:
         permission_by_id_usecase = GetPermissionByIdUsecase.build(self.permission_gateway)
         permission = permission_by_id_usecase.execute(permission_id)
         return DTOPresenter.transform(permission, PermissionDTO)
+    
+    def get_all_permissions(self, include_deleted: Optional[bool]) -> List[PermissionDTO]:
+        all_permissions_usecase = GetAllPermissionsUsecase.build(self.permission_gateway)
+        permissions = all_permissions_usecase.execute(include_deleted)
+        return DTOPresenter.transform_list(permissions, PermissionDTO)
