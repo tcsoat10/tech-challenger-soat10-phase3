@@ -1,25 +1,21 @@
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.constants.permissions import ProfilePermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.profile.i_profile_service import IProfileService
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.application.services.profile_service import ProfileService
 from src.core.domain.dtos.profile.profile_dto import ProfileDTO
 from src.core.domain.dtos.profile.create_profile_dto import CreateProfileDTO
 from src.core.domain.dtos.profile.update_profile_dto import UpdateProfileDTO
+from src.adapters.driver.api.v1.controllers.profile_controller import ProfileController
 
 
 router = APIRouter()
 
 
-def _get_profile_service(db_session: Session = Depends(get_db)) -> IProfileService:
-    repository: IProfileRepository = ProfileRepository(db_session)
-    return ProfileService(repository)
+def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileController:
+    return ProfileController(db_session)
 
 
 @router.post(
@@ -30,10 +26,10 @@ def _get_profile_service(db_session: Session = Depends(get_db)) -> IProfileServi
 )
 def create_profile(
     dto: CreateProfileDTO,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_profile(dto)
+    return controller.create_profile(dto)
 
 
 @router.get(
@@ -44,10 +40,10 @@ def create_profile(
 )
 def get_profile_by_name(
     profile_name: str,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_by_name(name=profile_name)
+    return controller.get_profile_by_name(name=profile_name)
 
 
 @router.get(
@@ -58,10 +54,10 @@ def get_profile_by_name(
 )
 def get_profile_by_id(
     profile_id: int,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_by_id(profile_id)
+    return controller.get_profile_by_id(profile_id)
 
 
 @router.get(
@@ -71,10 +67,11 @@ def get_profile_by_id(
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_VIEW_PROFILES])]
 )
 def get_all_profiles(
-    service: IProfileService = Depends(_get_profile_service),
+    include_deleted: Optional[bool] = Query(False),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_profiles()
+    return controller.get_all_profiles(include_deleted)
 
 
 @router.put(
@@ -86,10 +83,10 @@ def get_all_profiles(
 def update_profile(
     profile_id: int,
     dto: UpdateProfileDTO,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_profile(profile_id, dto)
+    return controller.update_profile(profile_id, dto)
 
 
 @router.delete(
@@ -99,7 +96,7 @@ def update_profile(
 )
 def delete_profile(
     profile_id: int,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_profile(profile_id)
+    controller.delete_profile(profile_id)

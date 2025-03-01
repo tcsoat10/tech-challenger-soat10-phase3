@@ -22,7 +22,7 @@ class IProfileRepository(ABC):
         pass
     
     @abstractmethod
-    def get_all(self) -> Profile:
+    def get_all(self, include_deleted: bool = False) -> Profile:
         pass
 
     @abstractmethod
