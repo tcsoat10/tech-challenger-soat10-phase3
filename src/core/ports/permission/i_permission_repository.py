@@ -22,7 +22,7 @@ class IPermissionRepository(ABC):
         pass
     
     @abstractmethod
-    def get_all(self) -> Permission:
+    def get_all(self, include_deleted: bool = False) -> Permission:
         pass
 
     @abstractmethod
@@ -30,5 +30,5 @@ class IPermissionRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, permission_id: int) -> None:
+    def delete(self, permission: Permission) -> None:
         pass

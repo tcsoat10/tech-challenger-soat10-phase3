@@ -1,7 +1,8 @@
 import pytest
 from src.adapters.driven.repositories.permission_repository import PermissionRepository
 from src.core.domain.entities.permission import Permission
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from tests.factories.permission_factory import PermissionFactory
 
 
 class TestPermissionRepository:
@@ -162,23 +163,25 @@ class TestPermissionRepository:
 
     def test_delete_permission(self):
         '''
-        Testa a delação de uma permissão
+        Testa a deleção de uma permissão
         '''
-
-        permission = Permission(name="Admin", description="System admin privileges")
-        created_permission = self.repository.create(permission)
-
-        self.repository.delete(created_permission.id)
+        
+        permission = PermissionFactory()
+        self.repository.delete(permission)
 
         assert len(self.repository.get_all()) == 0
 
     def test_delete_permission_with_inexistent_id(self):
-        permission = Permission(name="Admin", description="System admin privileges")
-        self.repository.create(permission)
+        permission = PermissionFactory()
+        unregistered_permission = Permission(name='test_permission', description='not_in_db')
 
-        self.repository.delete(2)
+        with pytest.raises(InvalidRequestError):
+            self.repository.delete(unregistered_permission)
 
-        assert len(self.repository.get_all()) == 1
+        permissions = self.repository.get_all()
+        assert len(permissions) == 1
+        assert permissions[0] == permission
+
 
         
         

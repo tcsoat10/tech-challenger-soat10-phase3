@@ -24,16 +24,17 @@ class PermissionRepository(IPermissionRepository):
     def get_by_id(self, permission_id: int) -> Permission:
         return self.db_session.query(Permission).filter(Permission.id == permission_id).first()
     
-    def get_all(self) -> List[Permission]:
-        return self.db_session.query(Permission).all()
+    def get_all(self, include_deleted: bool = False) -> List[Permission]:
+        query = self.db_session.query(Permission)
+        if not include_deleted:
+            query = query.filter(Permission.inactivated_at.is_(None))
+        return query.all()
     
     def update(self, permission: Permission) -> Permission:
         self.db_session.merge(permission)
         self.db_session.commit()
         return permission
     
-    def delete(self, permission_id: int) -> None:
-        permission = self.get_by_id(permission_id=permission_id)
-        if permission:
-            self.db_session.delete(permission)
-            self.db_session.commit()
+    def delete(self, permission: Permission) -> None:
+        self.db_session.delete(permission)
+        self.db_session.commit()
