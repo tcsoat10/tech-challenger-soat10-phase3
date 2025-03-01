@@ -1,6 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.profile_usecase.update_profile_usecase import UpdateProfileUsecase
 from src.application.usecases.profile_usecase.get_all_profiles_usecase import GetAllProfilesUsecase
 from src.application.usecases.profile_usecase.get_profile_by_id_usecase import GetProfileByIdUsecase
 from src.application.usecases.profile_usecase.get_profile_by_name_usecase import GetProfileByNameUseCase
@@ -35,3 +36,8 @@ class ProfileController:
         all_profiles_usecase = GetAllProfilesUsecase.build(self.profile_gateway)
         profiles = all_profiles_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(profiles, ProfileDTO)
+    
+    def update_profile(self, profile_id: int, dto: CreateProfileDTO) -> ProfileDTO:
+        update_profile_usecase = UpdateProfileUsecase.build(self.profile_gateway)
+        profile = update_profile_usecase.execute(profile_id, dto)
+        return DTOPresenter.transform(profile, ProfileDTO)

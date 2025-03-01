@@ -92,10 +92,10 @@ def get_all_profiles(
 def update_profile(
     profile_id: int,
     dto: UpdateProfileDTO,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_profile(profile_id, dto)
+    return controller.update_profile(profile_id, dto)
 
 
 @router.delete(
