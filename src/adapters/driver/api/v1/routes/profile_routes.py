@@ -12,9 +12,14 @@ from src.application.services.profile_service import ProfileService
 from src.core.domain.dtos.profile.profile_dto import ProfileDTO
 from src.core.domain.dtos.profile.create_profile_dto import CreateProfileDTO
 from src.core.domain.dtos.profile.update_profile_dto import UpdateProfileDTO
+from src.adapters.driver.api.v1.controllers.profile_controller import ProfileController
 
 
 router = APIRouter()
+
+
+def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileController:
+    return ProfileController(db_session)
 
 
 def _get_profile_service(db_session: Session = Depends(get_db)) -> IProfileService:
@@ -30,10 +35,10 @@ def _get_profile_service(db_session: Session = Depends(get_db)) -> IProfileServi
 )
 def create_profile(
     dto: CreateProfileDTO,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_profile(dto)
+    return controller.create_profile(dto)
 
 
 @router.get(
