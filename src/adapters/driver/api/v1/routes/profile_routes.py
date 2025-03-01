@@ -63,10 +63,10 @@ def get_profile_by_name(
 )
 def get_profile_by_id(
     profile_id: int,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_by_id(profile_id)
+    return controller.get_profile_by_id(profile_id)
 
 
 @router.get(
