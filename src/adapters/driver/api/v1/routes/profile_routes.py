@@ -49,10 +49,10 @@ def create_profile(
 )
 def get_profile_by_name(
     profile_name: str,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_by_name(name=profile_name)
+    return controller.get_profile_by_name(name=profile_name)
 
 
 @router.get(
