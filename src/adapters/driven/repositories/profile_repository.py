@@ -24,8 +24,11 @@ class ProfileRepository(IProfileRepository):
     def get_by_id(self, profile_id: int) -> Profile:
         return self.db_session.query(Profile).filter(Profile.id == profile_id).first()
     
-    def get_all(self) -> List[Profile]:
-        return self.db_session.query(Profile).all()
+    def get_all(self, include_deleted: bool = False) -> List[Profile]:
+        query = self.db_session.query(Profile)
+        if not include_deleted:
+            query = query.filter(Profile.inactivated_at.is_(None))
+        return query.all()
     
     def update(self, profile: Profile) -> Profile:
         self.db_session.merge(profile)
