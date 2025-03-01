@@ -5,10 +5,6 @@ from typing import List, Optional
 from config.database import get_db
 from src.constants.permissions import ProfilePermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.profile.i_profile_service import IProfileService
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.application.services.profile_service import ProfileService
 from src.core.domain.dtos.profile.profile_dto import ProfileDTO
 from src.core.domain.dtos.profile.create_profile_dto import CreateProfileDTO
 from src.core.domain.dtos.profile.update_profile_dto import UpdateProfileDTO
@@ -20,11 +16,6 @@ router = APIRouter()
 
 def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileController:
     return ProfileController(db_session)
-
-
-def _get_profile_service(db_session: Session = Depends(get_db)) -> IProfileService:
-    repository: IProfileRepository = ProfileRepository(db_session)
-    return ProfileService(repository)
 
 
 @router.post(
