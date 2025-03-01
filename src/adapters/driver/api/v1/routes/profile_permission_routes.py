@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driver.api.v1.controllers.profile_permission_controller import ProfilePermissionController
 from config.database import get_db
 from src.constants.permissions import ProfilePermissionPermissions
 from src.core.auth.dependencies import get_current_user
@@ -20,6 +21,10 @@ from src.core.domain.dtos.profile_permission.update_profile_permission_dto impor
 
 router = APIRouter()
 
+def _get_profile_permission_controller(db_session: Session = Depends(get_db)) -> ProfilePermissionController:
+    return ProfilePermissionController(db_session)
+
+
 
 def _get_profile_permission_service(db_session: Session = Depends(get_db)) -> IProfilePermissionService:
     profile_permission_repository: IProfilePermissionRepository = ProfilePermissionRepository(db_session)
@@ -36,10 +41,10 @@ def _get_profile_permission_service(db_session: Session = Depends(get_db)) -> IP
 )
 def create_profile_permission(
     dto: CreateProfilePermissionDTO,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_profile_permission(dto)
+    return controller.create_profile_permission(dto)
 
 
 @router.get(
