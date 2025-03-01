@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.constants.permissions import ProfilePermissions
@@ -76,10 +76,11 @@ def get_profile_by_id(
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_VIEW_PROFILES])]
 )
 def get_all_profiles(
-    service: IProfileService = Depends(_get_profile_service),
+    include_deleted: Optional[bool] = Query(False),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_profiles()
+    return controller.get_all_profiles(include_deleted)
 
 
 @router.put(
