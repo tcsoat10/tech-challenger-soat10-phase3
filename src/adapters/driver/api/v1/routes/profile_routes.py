@@ -105,7 +105,7 @@ def update_profile(
 )
 def delete_profile(
     profile_id: int,
-    service: IProfileService = Depends(_get_profile_service),
+    controller: ProfileController = Depends(_get_profile_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_profile(profile_id)
+    controller.delete_profile(profile_id)
