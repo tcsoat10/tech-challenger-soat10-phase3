@@ -12,10 +12,6 @@ class PaymentMethodService(IPaymentMethodService):
     def __init__(self, payment_method_repository: IPaymentMethodRepository):
         self.repository = payment_method_repository
 
-    def get_payment_method_by_name(self, name):
-        payment_method = self.repository.get_by_name(name)
-        return PaymentMethodDTO.from_entity(payment_method)
-
     def get_payment_method_by_id(self, payment_method_id):
         payment_method = self.repository.get_by_id(payment_method_id)
         return PaymentMethodDTO.from_entity(payment_method)

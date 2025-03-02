@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_method_usecase.get_payment_method_by_name_usecase import GetPaymentMethodByNameUseCase
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
@@ -18,4 +19,8 @@ class PaymentMethodController:
         create_payment_method_use_case = CreatePaymentMethodUseCase.build(self.payment_method_gateway)
         payment_method = create_payment_method_use_case.execute(dto)
         return DTOPresenter.transform(payment_method, PaymentMethodDTO)
-        
+    
+    def get_payment_method_by_name(self, name: str) -> PaymentMethodDTO:
+        get_payment_method_by_name_use_case = GetPaymentMethodByNameUseCase.build(self.payment_method_gateway)
+        payment_method = get_payment_method_by_name_use_case.execute(name)
+        return DTOPresenter.transform(payment_method, PaymentMethodDTO)

@@ -45,10 +45,10 @@ def create_payment_method(
 )
 def get_payment_method_by_name(
     payment_method_name: str,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_payment_method_by_name(name=payment_method_name)
+    return controller.get_payment_method_by_name(name=payment_method_name)
 
 @router.get(
         "/payment-methods/{payment_method_id}/id",
