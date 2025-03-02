@@ -31,7 +31,7 @@ class OrderService(IOrderService):
 
     def go_back(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
-        order.go_back(self.order_status_repository)
+        order.revert_order_status(self.order_status_repository)
         self.order_repository.update(order)
 
     def _get_order(self, order_id: int, current_user: dict) -> Order:

@@ -180,7 +180,7 @@ class TestOrderRepository:
         assert order.order_status.status == OrderStatusEnum.ORDER_PENDING.status
         assert order.status_history[-1].changed_by == 'System'
 
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
 
         burger_category = CategoryFactory(name=ProductCategoryEnum.BURGERS.name, description=ProductCategoryEnum.BURGERS.description)
@@ -191,7 +191,7 @@ class TestOrderRepository:
             product=ProductFactory(category=burger_category)
         )
         order.add_item(order_item1)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
@@ -202,7 +202,7 @@ class TestOrderRepository:
             product=ProductFactory(category=side_category)
         )
         order.add_item(order_item2)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
         
@@ -212,7 +212,7 @@ class TestOrderRepository:
             product=ProductFactory(category=drink_category)
         )
         order.add_item(order_item3)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
 
@@ -222,32 +222,32 @@ class TestOrderRepository:
             product=ProductFactory(category=dessert_category)
         )
         order.add_item(order_item4)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
     
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
         assert order.status_history[-1].changed_by == order.customer_name
 
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PAID.status
         assert order.status_history[-1].changed_by == 'System'
 
         employee = EmployeeFactory()
-        order.next_step(self.order_status_repository, employee=employee)
+        order.advance_order_status(self.order_status_repository, employee=employee)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_PREPARING.status
         assert order.status_history[-1].changed_by == order.employee_name
 
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY.status
         assert order.status_history[-1].changed_by == order.employee_name
 
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_COMPLETED.status
         assert order.status_history[-1].changed_by == order.employee_name
@@ -271,7 +271,7 @@ class TestOrderRepository:
         assert order.status_history[-1].changed_by == order.customer_name
 
         with pytest.raises(BadRequestException) as exc:
-            order.next_step(self.order_status_repository)
+            order.advance_order_status(self.order_status_repository)
 
         assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
 
@@ -294,7 +294,7 @@ class TestOrderRepository:
         assert order.status_history[-1].changed_by == order.customer_name
 
         with pytest.raises(BadRequestException) as exc:
-            order.next_step(self.order_status_repository)
+            order.advance_order_status(self.order_status_repository)
 
         assert exc.value.detail['message'] == "O estado atual order_cancelled não permite transições."
 
@@ -325,7 +325,7 @@ class TestOrderRepository:
         order = self.repository.create(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
         
-        order.go_back(self.order_status_repository)
+        order.revert_order_status(self.order_status_repository)
         order = self.repository.update(order)
 
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
@@ -343,7 +343,7 @@ class TestOrderRepository:
         assert order.order_status.status == OrderStatusEnum.ORDER_PLACED.status
 
         with pytest.raises(BadRequestException) as exc:
-            order.go_back(self.order_status_repository)
+            order.revert_order_status(self.order_status_repository)
         
         assert exc.value.detail['message'] == "O status atual 'order_placed' não permite voltar."
 
@@ -360,7 +360,7 @@ class TestOrderRepository:
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
 
         with pytest.raises(BadRequestException) as exc:
-            order.go_back(self.order_status_repository)
+            order.revert_order_status(self.order_status_repository)
         
         assert exc.value.detail['message'] == "O status atual 'order_waiting_burgers' não permite voltar."
 
@@ -376,7 +376,7 @@ class TestOrderRepository:
         order = self.repository.create(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
 
-        order.go_back(self.order_status_repository)
+        order.revert_order_status(self.order_status_repository)
         order = self.repository.update(order)
 
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_BURGERS.status
@@ -393,7 +393,7 @@ class TestOrderRepository:
         order = self.repository.create(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
 
-        order.go_back(self.order_status_repository)
+        order.revert_order_status(self.order_status_repository)
         order = self.repository.update(order)
 
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
@@ -410,7 +410,7 @@ class TestOrderRepository:
         order = self.repository.create(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
 
-        order.go_back(self.order_status_repository)
+        order.revert_order_status(self.order_status_repository)
         order = self.repository.update(order)
 
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
@@ -453,7 +453,7 @@ class TestOrderRepository:
             product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.BURGERS.name, description=ProductCategoryEnum.BURGERS.description))
         )
         order.add_item(order_item1)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_SIDES.status
 
@@ -462,7 +462,7 @@ class TestOrderRepository:
             product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.SIDES.name, description=ProductCategoryEnum.SIDES.description))
         )
         order.add_item(order_item2)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DRINKS.status
 
@@ -471,7 +471,7 @@ class TestOrderRepository:
             product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.DRINKS.name, description=ProductCategoryEnum.DRINKS.description))
         )
         order.add_item(order_item3)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_WAITING_DESSERTS.status
 
@@ -480,7 +480,7 @@ class TestOrderRepository:
             product=ProductFactory(category=CategoryFactory(name=ProductCategoryEnum.DESSERTS.name, description=ProductCategoryEnum.DESSERTS.description))
         )
         order.add_item(order_item4)
-        order.next_step(self.order_status_repository)
+        order.advance_order_status(self.order_status_repository)
         order = self.repository.update(order)
         assert order.order_status.status == OrderStatusEnum.ORDER_READY_TO_PLACE.status
 

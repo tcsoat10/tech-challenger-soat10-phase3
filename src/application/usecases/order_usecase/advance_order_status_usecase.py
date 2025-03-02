@@ -1,5 +1,5 @@
 
-from src.constants.order_status import OrderStatusEnum
+from src.constants.order_transition import STATUS_ALLOWED_ACCESS_ONLY_CUSTOMER, STATUS_ALLOWED_ACCESS_ONLY_EMPLOYEE
 from src.core.domain.entities.order import Order
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
@@ -26,27 +26,15 @@ class AdvanceOrderStatusUseCase:
         if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != int(current_user['person']['id']):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
 
-        if order.order_status.status in [
-            OrderStatusEnum.ORDER_PAID.status,
-            OrderStatusEnum.ORDER_PREPARING.status,
-            OrderStatusEnum.ORDER_READY.status,
-        ] and current_user['profile']['name'] not in ['employee', 'manager']:
+        if order.order_status in STATUS_ALLOWED_ACCESS_ONLY_EMPLOYEE and current_user['profile']['name'] not in ['employee', 'manager']:
             raise BadRequestException("Você não tem permissão para avançar o pedido para o próximo passo.")
 
-        if order.order_status.status in [
-            OrderStatusEnum.ORDER_PENDING.status,
-            OrderStatusEnum.ORDER_WAITING_BURGERS.status,
-            OrderStatusEnum.ORDER_WAITING_SIDES.status,
-            OrderStatusEnum.ORDER_WAITING_DRINKS.status,
-            OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-            OrderStatusEnum.ORDER_READY_TO_PLACE.status,
-            OrderStatusEnum.ORDER_PLACED.status,
-        ] and current_user['profile']['name'] not in ['customer', 'anonymous']:
+        if order.order_status in STATUS_ALLOWED_ACCESS_ONLY_CUSTOMER and current_user['profile']['name'] not in ['customer', 'anonymous']:
             raise BadRequestException("Você não tem permissão para avançar o pedido para o próximo passo.")
 
         employee_id = int(current_user['person']['id']) if current_user['profile']['name'] in ['employee', 'manager'] else None
         employee = self.employee_gateway.get_by_id(employee_id)
-        order.next_step(self.order_status_gateway, employee=employee)
+        order.advance_order_status(self.order_status_gateway, employee=employee)
         order = self.order_gateway.update(order)
 
         return order
