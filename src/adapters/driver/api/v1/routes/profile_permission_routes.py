@@ -2,17 +2,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driver.api.v1.controllers.profile_permission_controller import ProfilePermissionController
 from config.database import get_db
 from src.constants.permissions import ProfilePermissionPermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.profile_permission.i_profile_permission_service import IProfilePermissionService
-from src.core.ports.profile_permission.i_profile_permission_repository import IProfilePermissionRepository
-from src.adapters.driven.repositories.profile_permission_repository import ProfilePermissionRepository
-from src.core.ports.permission.i_permission_repository import IPermissionRepository
-from src.adapters.driven.repositories.permission_repository import PermissionRepository
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.application.services.profile_permission_service import ProfilePermissionService
 from src.core.domain.dtos.profile_permission.profile_permission_dto import ProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.create_profile_permission_dto import CreateProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
@@ -20,12 +13,8 @@ from src.core.domain.dtos.profile_permission.update_profile_permission_dto impor
 
 router = APIRouter()
 
-
-def _get_profile_permission_service(db_session: Session = Depends(get_db)) -> IProfilePermissionService:
-    profile_permission_repository: IProfilePermissionRepository = ProfilePermissionRepository(db_session)
-    permission_repository: IPermissionRepository = PermissionRepository(db_session)
-    profile_repository: IProfileRepository = ProfileRepository(db_session)
-    return ProfilePermissionService(profile_permission_repository, permission_repository, profile_repository)
+def _get_profile_permission_controller(db_session: Session = Depends(get_db)) -> ProfilePermissionController:
+    return ProfilePermissionController(db_session)
 
 
 @router.post(
@@ -36,10 +25,10 @@ def _get_profile_permission_service(db_session: Session = Depends(get_db)) -> IP
 )
 def create_profile_permission(
     dto: CreateProfilePermissionDTO,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_profile_permission(dto)
+    return controller.create_profile_permission(dto)
 
 
 @router.get(
@@ -50,10 +39,10 @@ def create_profile_permission(
 )
 def get_profile_permission_by_id(
     profile_permission_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_permission_by_id(profile_permission_id)
+    return controller.get_profile_permission_by_id(profile_permission_id)
 
 
 @router.get(
@@ -64,10 +53,10 @@ def get_profile_permission_by_id(
 )
 def get_profile_permission_by_permission_id(
     permission_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_permission_by_permission_id(permission_id)
+    return controller.get_profile_permission_by_permission_id(permission_id)
 
 
 @router.get(
@@ -78,10 +67,10 @@ def get_profile_permission_by_permission_id(
 )
 def get_profile_permission_by_profile_id(
     profile_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_permission_by_profile_id(profile_id)
+    return controller.get_profile_permission_by_profile_id(profile_id)
 
 
 @router.get(
@@ -92,10 +81,10 @@ def get_profile_permission_by_profile_id(
 )
 def get_all_profile_permissions(
     include_deleted: Optional[bool] = False,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_profile_permissions(include_deleted=include_deleted)
+    return controller.get_all_profile_permissions(include_deleted=include_deleted)
 
 
 @router.put(
@@ -107,10 +96,10 @@ def get_all_profile_permissions(
 def update_profile_permission(
     profile_permission_id: int,
     dto: UpdateProfilePermissionDTO,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_profile_permission(profile_permission_id, dto)
+    return controller.update_profile_permission(profile_permission_id, dto)
 
 
 @router.delete(
@@ -120,7 +109,7 @@ def update_profile_permission(
 )
 def delete_profile_permission(
     profile_permission_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_profile_permission(profile_permission_id)
+    controller.delete_profile_permission(profile_permission_id)
