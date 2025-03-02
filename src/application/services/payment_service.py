@@ -151,7 +151,7 @@ class PaymentService(IPaymentService):
                     self.repository.update_payment_status(payment, cancelled_status.id)
                     return {"message": "Pagamento cancelado, pedido não encontrado."}
                 
-                payment.order[0].next_step(self.order_status_repository)
+                payment.order[0].advance_order_status(self.order_status_repository)
                 self.order_repository.update(payment.order[0])
 
         except Exception as e:

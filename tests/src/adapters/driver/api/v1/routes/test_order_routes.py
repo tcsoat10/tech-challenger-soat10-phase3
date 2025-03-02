@@ -542,7 +542,7 @@ def test_next_step_order_status_and_return_success(client):
     order = OrderFactory(order_status=order_status)
 
     response = client.post(
-        f"/api/v1/orders/{order.id}/next-step",
+        f"/api/v1/orders/{order.id}/advance",
         permissions=[OrderPermissions.CAN_NEXT_STEP],
         profile_name="customer",
         person={
@@ -557,14 +557,14 @@ def test_next_step_order_status_and_return_success(client):
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
-    assert data["detail"] == "Pedido avançado para o próximo passo: order_waiting_sides"
+    assert data['order_status']['status'] == "order_waiting_sides"
 
 def test_try_next_step_order_status_when_order_not_exists_and_return_error(client):
     person = PersonFactory()
     EmployeeFactory(person=person)
 
     response = client.post(
-        "/api/v1/orders/999/next-step",
+        "/api/v1/orders/999/advance",
         permissions=[OrderPermissions.CAN_NEXT_STEP],
         profile_name="employee",
         person={

@@ -91,5 +91,4 @@ class OrderController:
     def advance_order_status(self, order_id: int, current_user: dict) -> OrderDTO:
         advance_status_usecase = AdvanceOrderStatusUseCase.build(self.order_gateway, self.order_status_gateway, self.employee_gateway)
         order = advance_status_usecase.execute(order_id, current_user)
-        # return DTOPresenter.transform(order, OrderDTO)
-        return {"detail": f"Pedido avançado para o próximo passo: {order.order_status.status}"}
+        return DTOPresenter.transform(order, OrderDTO)

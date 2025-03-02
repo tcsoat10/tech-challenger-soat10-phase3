@@ -193,8 +193,8 @@ async def cancel_order(
     return {"detail": "Pedido cancelado com sucesso."}
 
 # Avançar para o próximo passo no pedido
-@router.post("/orders/{order_id}/next-step")
-async def next_step(
+@router.post("/orders/{order_id}/advance")
+async def advance_order_status(
     order_id: int,
     current_user: dict = Depends(get_current_user),
     controller: OrderController = Depends(_get_order_controller),
