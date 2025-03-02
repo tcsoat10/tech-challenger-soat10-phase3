@@ -3,21 +3,18 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from config.database import get_db
 
+from src.adapters.driver.api.v1.controllers.payment_status_controller import PaymentStatusController
 from src.core.domain.dtos.payment_status.update_payment_status_dto import UpdatePaymentStatusDTO
 from src.core.domain.dtos.payment_status.create_payment_status_dto import CreatePaymentStatusDTO
 from src.core.domain.dtos.payment_status.payment_status_dto import PaymentStatusDTO
-from src.core.ports.payment_status.i_payment_status_service import IPaymentStatusService
-from src.application.services.payment_status_service import PaymentStatusService
-from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import PaymentStatusPermissions
 
 
 router = APIRouter()
 
-def _get_payment_status_service(db_session: Session = Depends(get_db)) -> IPaymentStatusService:
-    repository = PaymentStatusRepository(db_session)
-    return PaymentStatusService(repository)
+def _get_payment_status_controller(db_session: Session = Depends(get_db)) -> PaymentStatusController:
+    return PaymentStatusController(db_session)
 
 @router.post(
         "/payment-status",
@@ -27,10 +24,10 @@ def _get_payment_status_service(db_session: Session = Depends(get_db)) -> IPayme
 )
 def create_payment_status(
     dto: CreatePaymentStatusDTO,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_payment_status(dto)
+    return controller.create_payment_status(dto)
 
 @router.get(
         "/payment-status/{payment_status_name}/name",
@@ -40,10 +37,10 @@ def create_payment_status(
 )
 def get_payment_status_by_name(
     payment_status_name: str,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_payment_status_by_name(name=payment_status_name)
+    return controller.get_payment_status_by_name(name=payment_status_name)
 
 @router.get(
         "/payment-status/{payment_status_id}/id",
@@ -53,10 +50,10 @@ def get_payment_status_by_name(
 )
 def get_payment_status_by_id(
     payment_status_id: int,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_payment_status_by_id(payment_status_id=payment_status_id)
+    return controller.get_payment_status_by_id(payment_status_id=payment_status_id)
 
 @router.get(
         "/payment-status",
@@ -65,10 +62,10 @@ def get_payment_status_by_id(
 )
 def get_all_payment_status(
     include_deleted: Optional[bool] = False,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_payment_status(include_deleted=include_deleted)
+    return controller.get_all_payment_status(include_deleted=include_deleted)
 
 @router.put(
         "/payment-status/{payment_status_id}",
@@ -78,10 +75,10 @@ def get_all_payment_status(
 def update_payment_status(
     payment_status_id: int,
     dto: UpdatePaymentStatusDTO,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_payment_status(payment_status_id, dto)
+    return controller.update_payment_status(payment_status_id, dto)
 
 @router.delete(
         "/payment-status/{payment_status_id}",
@@ -90,7 +87,7 @@ def update_payment_status(
 )
 def delete_payment_status(
     payment_status_id: int,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_payment_status(payment_status_id=payment_status_id)
+    controller.delete_payment_status(payment_status_id=payment_status_id)
