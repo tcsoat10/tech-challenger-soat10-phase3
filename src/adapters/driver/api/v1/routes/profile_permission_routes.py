@@ -112,10 +112,10 @@ def get_all_profile_permissions(
 def update_profile_permission(
     profile_permission_id: int,
     dto: UpdateProfilePermissionDTO,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_profile_permission(profile_permission_id, dto)
+    return controller.update_profile_permission(profile_permission_id, dto)
 
 
 @router.delete(
