@@ -12,6 +12,7 @@ from src.core.domain.dtos.user.user_dto import UserDTO
 from src.core.domain.dtos.user.create_user_dto import CreateUserDTO
 from src.application.services.user_service import UserService
 from src.core.domain.dtos.user.update_user_dto import UpdateUserDTO
+from src.adapters.driver.api.v1.controllers.user_controller import UserController
 
 
 router = APIRouter()
@@ -22,6 +23,10 @@ def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
     return UserService(repository)
 
 
+def _get_user_controller(db_session: Session = Depends(get_db)) -> UserController:
+    return UserController(db_session)
+
+
 @router.post(
     path='/users',
     response_model=UserDTO,
@@ -30,10 +35,10 @@ def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
 )
 def create_user(
     dto: CreateUserDTO,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_user(dto)
+    return controller.create_user(dto)
 
 
 @router.get(
