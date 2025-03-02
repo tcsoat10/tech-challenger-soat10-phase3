@@ -3,23 +3,15 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from config.database import get_db
 from src.adapters.driver.api.v1.controllers.payment_method_controller import PaymentMethodController
-from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
-from src.application.services.payment_method_service import PaymentMethodService
 from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
 from src.core.domain.dtos.payment_method.update_payment_method_dto import UpdatePaymentMethodDTO
-from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
-from src.core.ports.payment_method.i_payment_method_service import IPaymentMethodService
 from src.constants.permissions import PaymentMethodPermissions
 from src.core.auth.dependencies import get_current_user
 
 
 router = APIRouter()
 
-# Substituir por lib DI.
-def _get_payment_method_service(db_session: Session = Depends(get_db)) -> IPaymentMethodService:
-    repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
-    return PaymentMethodService(repository)
 
 def _get_payment_method_controller(db_session: Session = Depends(get_db)) -> PaymentMethodController:
     return PaymentMethodController(db_session)
@@ -97,7 +89,7 @@ def update_payment_method(
 )
 def delete_payment_method(
     payment_method_id: int,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.delete_payment_method(payment_method_id)
+    return controller.delete_payment_method(payment_method_id)
