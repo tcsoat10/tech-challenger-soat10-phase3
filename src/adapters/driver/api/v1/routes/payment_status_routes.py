@@ -69,10 +69,10 @@ def get_payment_status_by_id(
 )
 def get_all_payment_status(
     include_deleted: Optional[bool] = False,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_payment_status(include_deleted=include_deleted)
+    return controller.get_all_payment_status(include_deleted=include_deleted)
 
 @router.put(
         "/payment-status/{payment_status_id}",

@@ -1,6 +1,8 @@
 
+from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_status_usecase.get_all_payment_status_usecase import GetAllPaymentStatusUsecase
 from src.application.usecases.payment_status_usecase.get_payment_status_by_id_usecase import GetPaymentStatusByIdUseCase
 from src.application.usecases.payment_status_usecase.get_payment_status_by_name_usecase import GetPaymentStatusByNameUseCase
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
@@ -30,3 +32,8 @@ class PaymentStatusController:
         get_payment_status_by_id_use_case = GetPaymentStatusByIdUseCase.build(self.payment_status_gateway)
         payment_status = get_payment_status_by_id_use_case.execute(payment_status_id)
         return DTOPresenter.transform(payment_status, PaymentStatusDTO)
+
+    def get_all_payment_status(self, include_deleted: bool = False) -> List[PaymentStatusDTO]:
+        get_all_payment_status_use_case = GetAllPaymentStatusUsecase.build(self.payment_status_gateway)
+        payment_statuses = get_all_payment_status_use_case.execute(include_deleted)
+        return DTOPresenter.transform_list(payment_statuses, PaymentStatusDTO)

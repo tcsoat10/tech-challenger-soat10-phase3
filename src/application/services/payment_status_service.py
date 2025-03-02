@@ -16,10 +16,6 @@ class PaymentStatusService(IPaymentStatusService):
     def __init__(self, payment_status_repository: IPaymentStatusRepository):
         self.repoistory = payment_status_repository
     
-    def get_all_payment_status(self, include_deleted: Optional[bool] = False) -> List[PaymentStatusDTO]:
-        payment_status = self.repoistory.get_all(include_deleted=include_deleted)
-        return [PaymentStatusDTO.from_entity(payment_status) for payment_status in payment_status]
-    
     def update_payment_status(self, payment_status_id: int, dto: UpdatePaymentStatusDTO) -> PaymentStatusDTO:
         payment_status = self.repoistory.get_by_id(payment_status_id)
         if not payment_status:
