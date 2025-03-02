@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
+from src.constants.order_transition import PRODUCT_CATEGORY_TO_ORDER_STATUS, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES_ALLOWING_REVERSAL_TRANSITIONS
 from src.constants.payment_status import PaymentStatusEnum
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
@@ -13,18 +14,6 @@ from src.core.exceptions.bad_request_exception import BadRequestException
 from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
 
-STATUS_TRANSITIONS = {
-    OrderStatusEnum.ORDER_PENDING: OrderStatusEnum.ORDER_WAITING_BURGERS, # Add burger
-    OrderStatusEnum.ORDER_WAITING_BURGERS: OrderStatusEnum.ORDER_WAITING_SIDES, # Add side dish
-    OrderStatusEnum.ORDER_WAITING_SIDES: OrderStatusEnum.ORDER_WAITING_DRINKS, # Add drink
-    OrderStatusEnum.ORDER_WAITING_DRINKS: OrderStatusEnum.ORDER_WAITING_DESSERTS, # Add dessert
-    OrderStatusEnum.ORDER_WAITING_DESSERTS: OrderStatusEnum.ORDER_READY_TO_PLACE, # Confirm order
-    OrderStatusEnum.ORDER_READY_TO_PLACE: OrderStatusEnum.ORDER_PLACED, # Place order
-    OrderStatusEnum.ORDER_PLACED: OrderStatusEnum.ORDER_PAID, # Pay order
-    OrderStatusEnum.ORDER_PAID: OrderStatusEnum.ORDER_PREPARING, # Prepare order
-    OrderStatusEnum.ORDER_PREPARING: OrderStatusEnum.ORDER_READY, # Order ready
-    OrderStatusEnum.ORDER_READY: OrderStatusEnum.ORDER_COMPLETED, # Complete order
-}
 
 class Order(BaseEntity):
     __tablename__ = 'orders'
@@ -49,27 +38,6 @@ class Order(BaseEntity):
         cascade='all, delete-orphan',
         order_by='OrderStatusMovement.changed_at',
     )
-
-    CATEGORY_TO_STATUS = {
-        ProductCategoryEnum.BURGERS.name: OrderStatusEnum.ORDER_WAITING_BURGERS,
-        ProductCategoryEnum.SIDES.name: OrderStatusEnum.ORDER_WAITING_SIDES,
-        ProductCategoryEnum.DRINKS.name: OrderStatusEnum.ORDER_WAITING_DRINKS,
-        ProductCategoryEnum.DESSERTS.name: OrderStatusEnum.ORDER_WAITING_DESSERTS,
-    }
-
-    REVERSIBLE_STATUSES = [
-        OrderStatusEnum.ORDER_WAITING_SIDES,
-        OrderStatusEnum.ORDER_WAITING_DRINKS,
-        OrderStatusEnum.ORDER_WAITING_DESSERTS,
-        OrderStatusEnum.ORDER_READY_TO_PLACE,
-    ]
-
-    SELECT_ITEMS_STATUSES_NAMES = [
-        OrderStatusEnum.ORDER_WAITING_BURGERS.status,
-        OrderStatusEnum.ORDER_WAITING_SIDES.status,
-        OrderStatusEnum.ORDER_WAITING_DRINKS.status,
-        OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-    ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -130,7 +98,7 @@ class Order(BaseEntity):
 
         :param category: The category of the item.
         '''
-        expected_status = self.CATEGORY_TO_STATUS.get(category_name)
+        expected_status = PRODUCT_CATEGORY_TO_ORDER_STATUS.get(category_name)
         if not expected_status:
             raise BadRequestException(f"Categoria inválida: {category_name}.")
 
@@ -209,21 +177,21 @@ class Order(BaseEntity):
         self.status_history.append(movement)
 
     def add_item(self, item: OrderItem) -> None:
-        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "adicionar itens")
+        self._validate_status([*PRODUCT_CATEGORY_TO_ORDER_STATUS.values()], "adicionar itens")
         self._validate_category_for_status(item.product.category.name)
 
         self.order_items.append(item)
         self._sort_order_items()
 
     def remove_item(self, order_item: OrderItem) -> None:
-        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "remover itens")
+        self._validate_status([*PRODUCT_CATEGORY_TO_ORDER_STATUS.values()], "remover itens")
         if order_item.quantity > 1:
             order_item.quantity -= 1
         else:    
             self.order_items.remove(order_item)
 
     def change_item_quantity(self, item: OrderItem, new_quantity: int) -> None:
-        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "alterar a quantidade de itens")
+        self._validate_status([*PRODUCT_CATEGORY_TO_ORDER_STATUS.values()], "alterar a quantidade de itens")
 
         if new_quantity <= 0:
             raise BadRequestException("A quantidade do item deve ser maior que zero.")
@@ -231,11 +199,11 @@ class Order(BaseEntity):
         item.quantity = new_quantity
 
     def change_item_observation(self, item: OrderItem, new_observation: str) -> None:
-        self._validate_status([*self.CATEGORY_TO_STATUS.values()], "alterar a observação do item")
+        self._validate_status([*PRODUCT_CATEGORY_TO_ORDER_STATUS.values()], "alterar a observação do item")
         item.observation = new_observation
 
     def clear_order(self, order_status_repository: IOrderStatusRepository) -> None:
-        self._validate_status([*self.CATEGORY_TO_STATUS.values(), OrderStatusEnum.ORDER_READY_TO_PLACE], "limpar o pedido")
+        self._validate_status([*PRODUCT_CATEGORY_TO_ORDER_STATUS.values(), OrderStatusEnum.ORDER_READY_TO_PLACE], "limpar o pedido")
         self.order_items = []
 
         self.order_status = order_status_repository.get_by_status(OrderStatusEnum.ORDER_WAITING_BURGERS.status)
@@ -247,7 +215,7 @@ class Order(BaseEntity):
         self._validate_status(
             [
                 OrderStatusEnum.ORDER_PENDING,
-                *self.CATEGORY_TO_STATUS.values(),
+                *PRODUCT_CATEGORY_TO_ORDER_STATUS.values(),
                 OrderStatusEnum.ORDER_READY_TO_PLACE,
                 OrderStatusEnum.ORDER_PLACED
             ], "cancelar o pedido"
@@ -347,7 +315,7 @@ class Order(BaseEntity):
         self.order_status = new_status
 
     
-    def next_step(
+    def advance_order_status(
         self,
         order_status_repository: IOrderStatusRepository,
         movement_owner: Optional[str] = None,
@@ -362,10 +330,10 @@ class Order(BaseEntity):
 
         current_status = OrderStatusEnum.from_status(self.order_status.status)
 
-        if current_status not in STATUS_TRANSITIONS:
+        if current_status not in ORDER_STATUS_TRANSITIONS:
             raise BadRequestException(f"O estado atual {current_status.status} não permite transições.")
 
-        expected_next_status = STATUS_TRANSITIONS[current_status]
+        expected_next_status = ORDER_STATUS_TRANSITIONS[current_status]
 
         if expected_next_status == OrderStatusEnum.ORDER_WAITING_BURGERS:
             self.set_status_waiting_burguer(order_status_repository, movement_owner)
@@ -390,7 +358,7 @@ class Order(BaseEntity):
         else:
             raise BadRequestException(f"Status não suportado: {expected_next_status.status}")
 
-    def go_back(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
+    def revert_order_status(self, order_status_repository: IOrderStatusRepository, movement_owner: Optional[str] = None) -> None:
         '''
         Reverts the order to the previous status.
         
@@ -406,13 +374,13 @@ class Order(BaseEntity):
         '''
 
         current_status = OrderStatusEnum.from_status(self.order_status.status)
-        if current_status not in self.REVERSIBLE_STATUSES:
+        if current_status not in ORDER_STATUSES_ALLOWING_REVERSAL_TRANSITIONS:
             raise BadRequestException(
                 f"O status atual '{current_status.status}' não permite voltar."
             )
 
         previous_status = None
-        for status, next_status in STATUS_TRANSITIONS.items():
+        for status, next_status in ORDER_STATUS_TRANSITIONS.items():
             if next_status == current_status:
                 previous_status = status
                 break

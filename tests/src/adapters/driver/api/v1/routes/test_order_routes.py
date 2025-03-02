@@ -1,5 +1,7 @@
 from fastapi import status
+import pytest
 
+from src.core.domain.entities.order_status import OrderStatus
 from src.constants.product_category import ProductCategoryEnum
 from src.constants.order_status import OrderStatusEnum
 from tests.factories.category_factory import CategoryFactory
@@ -456,7 +458,7 @@ def test_go_back_order_status_and_return_success(client):
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
-    assert data["detail"] == "Pedido retornado ao passo anterior com sucesso."
+    assert data["order_status"]["status"] == "order_waiting_burgers"
 
 def test_try_go_back_order_status_when_order_not_exists_and_return_error(client):
     person = PersonFactory()
@@ -540,7 +542,7 @@ def test_next_step_order_status_and_return_success(client):
     order = OrderFactory(order_status=order_status)
 
     response = client.post(
-        f"/api/v1/orders/{order.id}/next-step",
+        f"/api/v1/orders/{order.id}/advance",
         permissions=[OrderPermissions.CAN_NEXT_STEP],
         profile_name="customer",
         person={
@@ -555,14 +557,14 @@ def test_next_step_order_status_and_return_success(client):
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
-    assert data["detail"] == "Pedido avançado para o próximo passo: order_waiting_sides"
+    assert data['order_status']['status'] == "order_waiting_sides"
 
 def test_try_next_step_order_status_when_order_not_exists_and_return_error(client):
     person = PersonFactory()
     EmployeeFactory(person=person)
 
     response = client.post(
-        "/api/v1/orders/999/next-step",
+        "/api/v1/orders/999/advance",
         permissions=[OrderPermissions.CAN_NEXT_STEP],
         profile_name="employee",
         person={
@@ -578,3 +580,141 @@ def test_try_next_step_order_status_when_order_not_exists_and_return_error(clien
 
     data = response.json()
     assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+def test_clear_order_and_return_success(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order = OrderFactory(order_status=order_status)
+
+    response = client.delete(
+        f"/api/v1/orders/{order.id}/clear",
+        permissions=[OrderPermissions.CAN_CLEAR_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": order.id}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["detail"] == "Pedido limpo com sucesso."
+    
+def test_try_clear_order_when_order_not_exists_and_return_error(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+
+    response = client.delete(
+        "/api/v1/orders/999/clear",
+        permissions=[OrderPermissions.CAN_CLEAR_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": 999}
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    data = response.json()
+    assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+def test_cancel_order_and_return_success(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order = OrderFactory(order_status=order_status)
+
+    OrderStatusFactory(status=OrderStatusEnum.ORDER_CANCELLED.status, description=OrderStatusEnum.ORDER_CANCELLED.description)
+
+    response = client.post(
+        f"/api/v1/orders/{order.id}/cancel",
+        permissions=[OrderPermissions.CAN_CANCEL_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": order.id}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["detail"] == "Pedido cancelado com sucesso."
+    
+def test_try_cancel_order_when_order_not_exists_and_return_error(client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+
+    response = client.post(
+        "/api/v1/orders/999/cancel",
+        permissions=[OrderPermissions.CAN_CANCEL_ORDER],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"order_id": 999}
+    )
+    
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    
+    data = response.json()
+    assert data["detail"]["message"] == "O pedido com ID '999' não foi encontrado."
+
+@pytest.mark.parametrize("order_status", [
+    OrderStatusEnum.ORDER_WAITING_BURGERS,
+    OrderStatusEnum.ORDER_WAITING_SIDES,
+    OrderStatusEnum.ORDER_WAITING_DRINKS,
+    OrderStatusEnum.ORDER_WAITING_DESSERTS
+])
+def test_list_orders_and_return_success(order_status, client):
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+    
+    order_status_waiting_sandwich = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order_status_waiting_sides = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_SIDES.status, description=OrderStatusEnum.ORDER_WAITING_SIDES.description)
+    order_status_waiting_drinks = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DRINKS.status, description=OrderStatusEnum.ORDER_WAITING_DRINKS.description)
+    order_status_waiting_desserts = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_DESSERTS.status, description=OrderStatusEnum.ORDER_WAITING_DESSERTS.description)
+    
+    OrderFactory(order_status=order_status_waiting_sandwich)
+    OrderFactory(order_status=order_status_waiting_sides)
+    OrderFactory(order_status=order_status_waiting_drinks)
+    OrderFactory(order_status=order_status_waiting_desserts)
+
+    response = client.get(
+        "/api/v1/orders",
+        permissions=[OrderPermissions.CAN_LIST_ORDERS],
+        profile_name="employee",
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email,
+        },
+        params={"status": order_status.status}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["id"] is not None
+    assert data[0]["order_status"]["status"] == order_status.status
+    assert data[0]["order_status"]["description"] == order_status.description
+    
