@@ -125,7 +125,7 @@ def update_profile_permission(
 )
 def delete_profile_permission(
     profile_permission_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_profile_permission(profile_permission_id)
+    controller.delete_profile_permission(profile_permission_id)

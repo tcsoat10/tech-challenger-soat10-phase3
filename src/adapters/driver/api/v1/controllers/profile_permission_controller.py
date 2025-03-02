@@ -17,6 +17,7 @@ from src.application.usecases.profile_permission_usecase.get_profile_permission_
 from src.application.usecases.profile_permission_usecase.get_all_profile_permissions_usecase import GetAllProfilePermissionsUsecase
 from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
 from src.application.usecases.profile_permission_usecase.update_profile_permission_usecase import UpdateProfilePermissionUsecase
+from src.application.usecases.profile_permission_usecase.delete_profile_permission_usecase import DeleteProfilePermissionUsecase
 
 
 class ProfilePermissionController:
@@ -65,4 +66,7 @@ class ProfilePermissionController:
         )
         profile_permission = update_profile_permission_usecase.execute(profile_permission_id, dto)
         return DTOPresenter.transform(profile_permission, ProfilePermissionDTO)
-
+    
+    def delete_profile_permission(self, profile_permission_id: int) -> None:
+        delete_profile_permission_usecase = DeleteProfilePermissionUsecase.build(self.profile_permission_gateway)
+        delete_profile_permission_usecase.execute(profile_permission_id)
