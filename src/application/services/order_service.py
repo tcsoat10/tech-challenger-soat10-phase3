@@ -29,34 +29,6 @@ class OrderService(IOrderService):
         self.employee_repository = employee_repository
         self.product_repository = product_repository
 
-    def next_step(self, order_id: int, current_user: dict) -> None:
-        order = self._get_order(order_id, current_user)
-
-        if order.order_status.status in [
-            OrderStatusEnum.ORDER_PAID.status,
-            OrderStatusEnum.ORDER_PREPARING.status,
-            OrderStatusEnum.ORDER_READY.status,
-        ] and current_user['profile']['name'] not in ['employee', 'manager']:
-            raise BadRequestException("Você não tem permissão para avançar o pedido para o próximo passo.")
-
-        if order.order_status.status in [
-            OrderStatusEnum.ORDER_PENDING.status,
-            OrderStatusEnum.ORDER_WAITING_BURGERS.status,
-            OrderStatusEnum.ORDER_WAITING_SIDES.status,
-            OrderStatusEnum.ORDER_WAITING_DRINKS.status,
-            OrderStatusEnum.ORDER_WAITING_DESSERTS.status,
-            OrderStatusEnum.ORDER_READY_TO_PLACE.status,
-            OrderStatusEnum.ORDER_PLACED.status,
-        ] and current_user['profile']['name'] not in ['customer', 'anonymous']:
-            raise BadRequestException("Você não tem permissão para avançar o pedido para o próximo passo.")
-
-        employee_id = int(current_user['person']['id']) if current_user['profile']['name'] in ['employee', 'manager'] else None
-        employee = self.employee_repository.get_by_id(employee_id)
-        order.next_step(self.order_status_repository, employee=employee)
-        order = self.order_repository.update(order)
-
-        return {"detail": f"Pedido avançado para o próximo passo: {order.order_status.status}"}
-
     def go_back(self, order_id: int, current_user: dict) -> None:
         order = self._get_order(order_id, current_user)
         order.go_back(self.order_status_repository)

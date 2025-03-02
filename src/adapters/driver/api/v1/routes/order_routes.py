@@ -197,9 +197,9 @@ async def cancel_order(
 async def next_step(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    return service.next_step(order_id, current_user)
+    return controller.advance_order_status(order_id, current_user)
 
 # Retornar ao passo anterior
 @router.post(

@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_usecase.advance_order_status_usecase import AdvanceOrderStatusUseCase
 from src.application.usecases.order_usecase.list_orders_usecase import ListOrdersUseCase
 from src.application.usecases.order_usecase.cancel_order_usecase import CancelOrderUseCase
 from src.application.usecases.order_usecase.list_order_item_usecase import ListOrderItemsUseCase
@@ -86,3 +87,9 @@ class OrderController:
         list_orders_usecase = ListOrdersUseCase.build(self.order_gateway)
         orders = list_orders_usecase.execute(current_user, status)
         return DTOPresenter.transform_list(orders, OrderDTO)
+
+    def advance_order_status(self, order_id: int, current_user: dict) -> OrderDTO:
+        advance_status_usecase = AdvanceOrderStatusUseCase.build(self.order_gateway, self.order_status_gateway, self.employee_gateway)
+        order = advance_status_usecase.execute(order_id, current_user)
+        # return DTOPresenter.transform(order, OrderDTO)
+        return {"detail": f"Pedido avançado para o próximo passo: {order.order_status.status}"}
