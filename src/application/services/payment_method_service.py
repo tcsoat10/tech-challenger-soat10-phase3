@@ -1,8 +1,6 @@
 from typing import Optional
 from config.database import DELETE_MODE
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
-from src.core.domain.entities.payment_method import PaymentMethod
-from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
 from src.core.domain.dtos.payment_method.update_payment_method_dto import UpdatePaymentMethodDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
@@ -13,22 +11,6 @@ from src.core.ports.payment_method.i_payment_method_service import IPaymentMetho
 class PaymentMethodService(IPaymentMethodService):
     def __init__(self, payment_method_repository: IPaymentMethodRepository):
         self.repository = payment_method_repository
-
-    def create_payment_method(self, dto: CreatePaymentMethodDTO):
-        payment_method = self.repository.get_by_name(dto.name)
-        if payment_method:
-            if not payment_method.is_deleted():
-                raise EntityDuplicatedException("Payment method")
-
-            payment_method.name = dto.name
-            payment_method.description = dto.description
-            payment_method.reactivate()
-            self.repository.update(payment_method)
-        else:
-            payment_method = PaymentMethod(name=dto.name, description=dto.description)
-            payment_method = self.repository.create(payment_method)
-
-        return PaymentMethodDTO.from_entity(payment_method)
 
     def get_payment_method_by_name(self, name):
         payment_method = self.repository.get_by_name(name)

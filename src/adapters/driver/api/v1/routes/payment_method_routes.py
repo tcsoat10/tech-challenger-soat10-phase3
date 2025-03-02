@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Security
 
 from sqlalchemy.orm import Session
 from config.database import get_db
+from src.adapters.driver.api.v1.controllers.payment_method_controller import PaymentMethodController
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.application.services.payment_method_service import PaymentMethodService
 from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
@@ -20,6 +21,8 @@ def _get_payment_method_service(db_session: Session = Depends(get_db)) -> IPayme
     repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
     return PaymentMethodService(repository)
 
+def _get_payment_method_controller(db_session: Session = Depends(get_db)) -> PaymentMethodController:
+    return PaymentMethodController(db_session)
 
 @router.post(
         "/payment-methods",
@@ -29,10 +32,10 @@ def _get_payment_method_service(db_session: Session = Depends(get_db)) -> IPayme
 )
 def create_payment_method(
     dto: CreatePaymentMethodDTO,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_payment_method(dto)
+    return controller.create_payment_method(dto)
 
 @router.get(
         "/payment-methods/{payment_method_name}/name",

@@ -7,10 +7,6 @@ from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethod
 class IPaymentMethodService(ABC):
 
     @abstractmethod
-    def create_payment_method(self, dto: CreatePaymentMethodDTO) -> PaymentMethodDTO:
-        pass
-
-    @abstractmethod
     def get_payment_method_by_name(self, name: str) -> PaymentMethodDTO:
         pass
 
