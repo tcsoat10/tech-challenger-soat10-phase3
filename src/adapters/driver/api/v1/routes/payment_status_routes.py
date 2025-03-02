@@ -82,10 +82,10 @@ def get_all_payment_status(
 def update_payment_status(
     payment_status_id: int,
     dto: UpdatePaymentStatusDTO,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_payment_status(payment_status_id, dto)
+    return controller.update_payment_status(payment_status_id, dto)
 
 @router.delete(
         "/payment-status/{payment_status_id}",
