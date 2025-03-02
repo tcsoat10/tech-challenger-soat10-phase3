@@ -58,10 +58,10 @@ def get_payment_method_by_name(
 )
 def get_payment_method_by_id(
     payment_method_id: int,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_payment_method_by_id(payment_method_id)
+    return controller.get_payment_method_by_id(payment_method_id)
 
 @router.get(
         "/payment-methods",
