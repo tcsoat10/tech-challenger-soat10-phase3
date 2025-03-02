@@ -12,6 +12,7 @@ from src.application.usecases.profile_permission_usecase.create_profile_permissi
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.profile_permission_usecase.get_profile_permission_by_id_usecase import GetProfilePermissionByIdUsecase
 from src.application.usecases.profile_permission_usecase.get_profile_permission_by_permission_id_usecase import GetProfilePermissionByPermissionIdUsecase
+from src.application.usecases.profile_permission_usecase.get_profile_permission_by_profile_id_usecase import GetProfilePermissionByProfileIdUsecase
 
 
 class ProfilePermissionController:
@@ -38,5 +39,12 @@ class ProfilePermissionController:
             self.profile_permission_gateway
         )
         profile_permission = get_profile_permission_by_permission_id_usecase.execute(permission_id)
+        return DTOPresenter.transform(profile_permission, ProfilePermissionDTO)
+    
+    def get_profile_permission_by_profile_id(self, profile_id: int) -> ProfilePermissionDTO:
+        get_profile_permission_by_profile_id_usecase = GetProfilePermissionByProfileIdUsecase(
+            self.profile_permission_gateway
+        )
+        profile_permission = get_profile_permission_by_profile_id_usecase.execute(profile_id)
         return DTOPresenter.transform(profile_permission, ProfilePermissionDTO)
 
