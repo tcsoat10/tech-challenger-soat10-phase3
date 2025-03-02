@@ -71,10 +71,10 @@ def get_payment_method_by_id(
 )
 def get_all_payment_methods(
     include_deleted: bool = False,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_payment_methods(include_deleted=include_deleted)
+    return controller.get_all_payment_methods(include_deleted=include_deleted)
 
 @router.put(
         "/payment-methods/{payment_method_id}",

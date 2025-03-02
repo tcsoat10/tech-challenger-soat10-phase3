@@ -1,6 +1,8 @@
 
+from typing import Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_method_usecase.get_all_payment_methods_usecase import GetAllPaymentMethodsUseCase
 from src.application.usecases.payment_method_usecase.get_payment_method_by_id_usecase import GetPaymentMethodByIdUseCase
 from src.application.usecases.payment_method_usecase.get_payment_method_by_name_usecase import GetPaymentMethodByNameUseCase
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
@@ -30,3 +32,8 @@ class PaymentMethodController:
         get_payment_method_by_id_use_case = GetPaymentMethodByIdUseCase.build(self.payment_method_gateway)
         payment_method = get_payment_method_by_id_use_case.execute(payment_method_id)
         return DTOPresenter.transform(payment_method, PaymentMethodDTO)
+
+    def get_all_payment_methods(self, include_deleted: Optional[bool] = False) -> list[PaymentMethodDTO]:
+        get_all_payment_methods_use_case = GetAllPaymentMethodsUseCase.build(self.payment_method_gateway)
+        payment_methods = get_all_payment_methods_use_case.execute(include_deleted=include_deleted)
+        return DTOPresenter.transform_list(payment_methods, PaymentMethodDTO)
