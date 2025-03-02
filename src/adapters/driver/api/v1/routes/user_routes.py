@@ -63,10 +63,10 @@ def get_user_by_name(
 )
 def get_user_by_id(
     user_id: int,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_user_by_id(user_id)
+    return controller.get_user_by_id(user_id)
 
 
 @router.get(
