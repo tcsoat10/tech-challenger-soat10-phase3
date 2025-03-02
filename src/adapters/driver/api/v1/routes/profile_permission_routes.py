@@ -6,14 +6,6 @@ from src.adapters.driver.api.v1.controllers.profile_permission_controller import
 from config.database import get_db
 from src.constants.permissions import ProfilePermissionPermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.profile_permission.i_profile_permission_service import IProfilePermissionService
-from src.core.ports.profile_permission.i_profile_permission_repository import IProfilePermissionRepository
-from src.adapters.driven.repositories.profile_permission_repository import ProfilePermissionRepository
-from src.core.ports.permission.i_permission_repository import IPermissionRepository
-from src.adapters.driven.repositories.permission_repository import PermissionRepository
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.application.services.profile_permission_service import ProfilePermissionService
 from src.core.domain.dtos.profile_permission.profile_permission_dto import ProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.create_profile_permission_dto import CreateProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
@@ -23,14 +15,6 @@ router = APIRouter()
 
 def _get_profile_permission_controller(db_session: Session = Depends(get_db)) -> ProfilePermissionController:
     return ProfilePermissionController(db_session)
-
-
-
-def _get_profile_permission_service(db_session: Session = Depends(get_db)) -> IProfilePermissionService:
-    profile_permission_repository: IProfilePermissionRepository = ProfilePermissionRepository(db_session)
-    permission_repository: IPermissionRepository = PermissionRepository(db_session)
-    profile_repository: IProfileRepository = ProfileRepository(db_session)
-    return ProfilePermissionService(profile_permission_repository, permission_repository, profile_repository)
 
 
 @router.post(
