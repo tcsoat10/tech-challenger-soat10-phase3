@@ -4,6 +4,7 @@ from src.core.domain.dtos.user.create_user_dto import CreateUserDTO
 from src.core.domain.dtos.user.user_dto import UserDTO
 from src.application.usecases.user_usecase.create_user_usecase import CreateUserUsecase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
+from src.application.usecases.user_usecase.get_user_by_name_usecase import GetUserByNameUsecase
 
 
 from sqlalchemy.orm import Session
@@ -16,4 +17,9 @@ class UserController:
     def create_user(self, dto: CreateUserDTO) -> UserDTO:
         create_user_usecase = CreateUserUsecase.build(self.user_gateway)
         user = create_user_usecase.execute(dto)
+        return DTOPresenter.transform(user, UserDTO)
+    
+    def get_user_by_name(self, name: str) -> UserDTO:
+        user_by_name_usecase = GetUserByNameUsecase.build(self.user_gateway)
+        user = user_by_name_usecase.execute(name)
         return DTOPresenter.transform(user, UserDTO)

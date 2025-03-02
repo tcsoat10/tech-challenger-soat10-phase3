@@ -49,10 +49,10 @@ def create_user(
 )
 def get_user_by_name(
     user_name: str,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_user_by_name(user_name)
+    return controller.get_user_by_name(user_name)
 
 
 @router.get(
