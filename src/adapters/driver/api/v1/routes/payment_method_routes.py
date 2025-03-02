@@ -85,10 +85,10 @@ def get_all_payment_methods(
 def update_payment_method(
     payment_method_id: int,
     dto: UpdatePaymentMethodDTO,
-    service: IPaymentMethodService = Depends(_get_payment_method_service),
+    controller: PaymentMethodController = Depends(_get_payment_method_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_payment_method(payment_method_id, dto)
+    return controller.update_payment_method(payment_method_id, dto)
 
 @router.delete(
         "/payment-methods/{payment_method_id}",

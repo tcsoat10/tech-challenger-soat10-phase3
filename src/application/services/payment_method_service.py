@@ -12,19 +12,6 @@ class PaymentMethodService(IPaymentMethodService):
     def __init__(self, payment_method_repository: IPaymentMethodRepository):
         self.repository = payment_method_repository
 
-    def update_payment_method(self, payment_method_id, dto: UpdatePaymentMethodDTO):
-        payment_method = self.repository.get_by_id(payment_method_id)
-        if not payment_method:
-            raise EntityNotFoundException(entity_name='Payment method')
-
-        if self.repository.exists_by_name(dto.name):
-            raise EntityDuplicatedException(entity_name='Payment method')
-
-        payment_method.name = dto.name
-        payment_method.description = dto.description
-        payment_method = self.repository.update(payment_method)
-        return PaymentMethodDTO.from_entity(payment_method)
-
     def delete_payment_method(self, payment_method_id):
         payment_method = self.repository.get_by_id(payment_method_id)
         
