@@ -69,10 +69,10 @@ def get_profile_permission_by_id(
 )
 def get_profile_permission_by_permission_id(
     permission_id: int,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_profile_permission_by_permission_id(permission_id)
+    return controller.get_profile_permission_by_permission_id(permission_id)
 
 
 @router.get(
