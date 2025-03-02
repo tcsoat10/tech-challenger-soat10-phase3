@@ -7,47 +7,16 @@ from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.adapters.driven.repositories.product_repository import ProductRepository
-from src.core.ports.product.i_product_repository import IProductRepository
-from src.adapters.driven.repositories.employee_repository import EmployeeRepository
-from src.core.ports.employee.i_employee_repository import IEmployeeRepository
-from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
-from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
-from src.adapters.driven.repositories.customer_repository import CustomerRepository
 from config.database import get_db
-from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.adapters.driven.repositories.order_repository import OrderRepository
-from src.application.services.order_service import OrderService
 from src.core.domain.dtos.order.order_dto import OrderDTO
-from src.core.ports.order.i_order_repository import IOrderRepository
-from src.core.ports.order.i_order_service import IOrderService
 
 from src.core.auth.dependencies import get_current_user
 
 
 router = APIRouter()
 
-# Substituir por lib DI.
-def _get_order_service(db_session: Session = Depends(get_db)) -> IOrderService:
-    customer_repository: ICustomerRepository = CustomerRepository(db_session)
-    order_status_repository: IOrderStatusRepository = OrderStatusRepository(db_session)
-    employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
-    product_repository: IProductRepository = ProductRepository(db_session)
-    repository: IOrderRepository = OrderRepository(db_session)
-
-
-    return OrderService(
-        repository,
-        order_status_repository,
-        customer_repository,
-        employee_repository,
-        product_repository
-    )
-    
 def _get_order_controller(db_session: Session = Depends(get_db)) -> OrderController:
     return OrderController(db_session)
-
-router = APIRouter()
 
 # Criar um pedido
 @router.post(
@@ -210,10 +179,9 @@ async def advance_order_status(
 async def go_back(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    service: OrderService = Depends(_get_order_service),
+    controller: OrderController = Depends(_get_order_controller),
 ):
-    service.go_back(order_id, current_user)
-    return {"detail": "Pedido retornado ao passo anterior com sucesso."}
+    return controller.revert_order_status(order_id, current_user)
 
 # Listar todos os pedidos
 @router.get(

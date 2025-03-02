@@ -15,7 +15,7 @@ class AdvanceOrderStatusUseCase:
         self.employee_gateway = employee_gateway
     
     @classmethod
-    def build(cls, order_gateway: IOrderRepository, order_status_gateway: IOrderStatusRepository, employee_gateway: IEmployeeRepository):
+    def build(cls, order_gateway: IOrderRepository, order_status_gateway: IOrderStatusRepository, employee_gateway: IEmployeeRepository) -> 'AdvanceOrderStatusUseCase':
         return cls(order_gateway, order_status_gateway, employee_gateway)
     
     def execute(self, order_id: int, current_user: dict) -> Order:

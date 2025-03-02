@@ -458,7 +458,7 @@ def test_go_back_order_status_and_return_success(client):
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()
-    assert data["detail"] == "Pedido retornado ao passo anterior com sucesso."
+    assert data["order_status"]["status"] == "order_waiting_burgers"
 
 def test_try_go_back_order_status_when_order_not_exists_and_return_error(client):
     person = PersonFactory()
