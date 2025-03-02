@@ -15,23 +15,6 @@ class PaymentStatusService(IPaymentStatusService):
 
     def __init__(self, payment_status_repository: IPaymentStatusRepository):
         self.repoistory = payment_status_repository
-
-    def create_payment_status(self, dto: CreatePaymentStatusDTO) -> PaymentStatusDTO:
-        payment_status = self.repoistory.get_by_name(dto.name)
-        
-        if payment_status:
-            if not payment_status.is_deleted():
-                raise EntityDuplicatedException(entity_name="PaymentStatus")
-            
-            payment_status.name = dto.name
-            payment_status.description = dto.description
-            payment_status.reactivate()
-            self.repoistory.update(payment_status)
-        else:
-            payment_status = PaymentStatus(name=dto.name, description=dto.description)
-            payment_status = self.repoistory.create(payment_status)
-
-        return PaymentStatusDTO.from_entity(payment_status)
     
     def get_payment_status_by_name(self, name: str) -> PaymentStatusDTO:
         payment_status = self.repoistory.get_by_name(name=name)

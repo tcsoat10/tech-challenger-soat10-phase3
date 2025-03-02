@@ -9,10 +9,6 @@ from src.core.domain.dtos.payment_status.payment_status_dto import PaymentStatus
 class IPaymentStatusService(ABC):
 
     @abstractmethod
-    def create_payment_status(self, dto: CreatePaymentStatusDTO) -> PaymentStatusDTO:
-        pass
-
-    @abstractmethod
     def get_payment_status_by_name(self, name: str) -> PaymentStatusDTO:
         pass
 
