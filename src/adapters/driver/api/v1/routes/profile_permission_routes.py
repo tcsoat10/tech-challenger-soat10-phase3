@@ -97,10 +97,10 @@ def get_profile_permission_by_profile_id(
 )
 def get_all_profile_permissions(
     include_deleted: Optional[bool] = False,
-    service: IProfilePermissionService = Depends(_get_profile_permission_service),
+    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_profile_permissions(include_deleted=include_deleted)
+    return controller.get_all_profile_permissions(include_deleted=include_deleted)
 
 
 @router.put(
