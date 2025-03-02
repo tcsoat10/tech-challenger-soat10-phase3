@@ -2,6 +2,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_status_usecase.delete_payment_status_usecase import DeletePaymentStatusUseCase
 from src.application.usecases.payment_status_usecase.update_payment_status_usecase import UpdatePaymentStatusUseCase
 from src.core.domain.dtos.payment_status.update_payment_status_dto import UpdatePaymentStatusDTO
 from src.application.usecases.payment_status_usecase.get_all_payment_status_usecase import GetAllPaymentStatusUsecase
@@ -44,3 +45,7 @@ class PaymentStatusController:
         update_payment_status_use_case = UpdatePaymentStatusUseCase.build(self.payment_status_gateway)
         payment_status = update_payment_status_use_case.execute(payment_status_id, dto)
         return DTOPresenter.transform(payment_status, PaymentStatusDTO)
+
+    def delete_payment_status(self, payment_status_id: int) -> None:
+        delete_payment_status_use_case = DeletePaymentStatusUseCase.build(self.payment_status_gateway)
+        delete_payment_status_use_case.execute(payment_status_id)

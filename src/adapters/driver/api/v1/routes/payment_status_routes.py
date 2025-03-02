@@ -7,18 +7,11 @@ from src.adapters.driver.api.v1.controllers.payment_status_controller import Pay
 from src.core.domain.dtos.payment_status.update_payment_status_dto import UpdatePaymentStatusDTO
 from src.core.domain.dtos.payment_status.create_payment_status_dto import CreatePaymentStatusDTO
 from src.core.domain.dtos.payment_status.payment_status_dto import PaymentStatusDTO
-from src.core.ports.payment_status.i_payment_status_service import IPaymentStatusService
-from src.application.services.payment_status_service import PaymentStatusService
-from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import PaymentStatusPermissions
 
 
 router = APIRouter()
-
-def _get_payment_status_service(db_session: Session = Depends(get_db)) -> IPaymentStatusService:
-    repository = PaymentStatusRepository(db_session)
-    return PaymentStatusService(repository)
 
 def _get_payment_status_controller(db_session: Session = Depends(get_db)) -> PaymentStatusController:
     return PaymentStatusController(db_session)
@@ -94,7 +87,7 @@ def update_payment_status(
 )
 def delete_payment_status(
     payment_status_id: int,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_payment_status(payment_status_id=payment_status_id)
+    controller.delete_payment_status(payment_status_id=payment_status_id)
