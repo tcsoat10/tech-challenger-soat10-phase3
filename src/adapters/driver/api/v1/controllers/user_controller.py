@@ -6,9 +6,11 @@ from src.application.usecases.user_usecase.create_user_usecase import CreateUser
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.user_usecase.get_user_by_name_usecase import GetUserByNameUsecase
 from src.application.usecases.user_usecase.get_user_by_id_usecase import GetUserByIdUsecase
+from src.application.usecases.user_usecase.get_all_users_usecase import GetAllUsersUsecase
 
 
 from sqlalchemy.orm import Session
+from typing import Optional, List
 
 
 class UserController:
@@ -29,3 +31,8 @@ class UserController:
         user_by_id_usecase = GetUserByIdUsecase.build(self.user_gateway)
         user = user_by_id_usecase.execute(user_id)
         return DTOPresenter.transform(user, UserDTO)
+    
+    def get_all_users(self, include_deleted: Optional[bool]) -> List[UserDTO]:
+        all_users_usecase = GetAllUsersUsecase.build(self.user_gateway)
+        users = all_users_usecase.execute(include_deleted)
+        return DTOPresenter.transform_list(users, UserDTO)

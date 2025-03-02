@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.constants.permissions import UserPermissions
@@ -76,10 +76,11 @@ def get_user_by_id(
     dependencies=[Security(get_current_user, scopes=[UserPermissions.CAN_VIEW_USERS])]
 )
 def get_all_users(
-    service: IUserService = Depends(_get_user_service),
+    include_deleted: Optional[bool] = False,
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_users()
+    return controller.get_all_users(include_deleted)
 
 
 @router.put(
