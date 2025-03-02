@@ -44,10 +44,10 @@ def create_payment_status(
 )
 def get_payment_status_by_name(
     payment_status_name: str,
-    service: IPaymentStatusService = Depends(_get_payment_status_service),
+    controller: PaymentStatusController = Depends(_get_payment_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_payment_status_by_name(name=payment_status_name)
+    return controller.get_payment_status_by_name(name=payment_status_name)
 
 @router.get(
         "/payment-status/{payment_status_id}/id",

@@ -15,13 +15,6 @@ class PaymentStatusService(IPaymentStatusService):
 
     def __init__(self, payment_status_repository: IPaymentStatusRepository):
         self.repoistory = payment_status_repository
-    
-    def get_payment_status_by_name(self, name: str) -> PaymentStatusDTO:
-        payment_status = self.repoistory.get_by_name(name=name)
-        if not payment_status:
-            raise EntityNotFoundException(entity_name="PaymentStatus")
-        
-        return PaymentStatusDTO.from_entity(payment_status)
 
     def get_payment_status_by_id(self, payment_status_id: int) -> PaymentStatusDTO:
         payment_status = self.repoistory.get_by_id(payment_status_id)
