@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_status_usecase.get_payment_status_by_id_usecase import GetPaymentStatusByIdUseCase
 from src.application.usecases.payment_status_usecase.get_payment_status_by_name_usecase import GetPaymentStatusByNameUseCase
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
@@ -23,4 +24,9 @@ class PaymentStatusController:
     def get_payment_status_by_name(self, name: str) -> PaymentStatusDTO:
         get_payment_status_by_name_use_case = GetPaymentStatusByNameUseCase.build(self.payment_status_gateway)
         payment_status = get_payment_status_by_name_use_case.execute(name)
+        return DTOPresenter.transform(payment_status, PaymentStatusDTO)
+    
+    def get_payment_status_by_id(self, payment_status_id: int) -> PaymentStatusDTO:
+        get_payment_status_by_id_use_case = GetPaymentStatusByIdUseCase.build(self.payment_status_gateway)
+        payment_status = get_payment_status_by_id_use_case.execute(payment_status_id)
         return DTOPresenter.transform(payment_status, PaymentStatusDTO)
