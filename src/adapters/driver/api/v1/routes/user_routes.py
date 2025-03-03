@@ -5,22 +5,13 @@ from typing import List, Optional
 from config.database import get_db
 from src.constants.permissions import UserPermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.user.i_user_service import IUserService
-from src.core.ports.user.i_user_repository import IUserRepository
-from src.adapters.driven.repositories.user_repository import UserRepository
 from src.core.domain.dtos.user.user_dto import UserDTO
 from src.core.domain.dtos.user.create_user_dto import CreateUserDTO
-from src.application.services.user_service import UserService
 from src.core.domain.dtos.user.update_user_dto import UpdateUserDTO
 from src.adapters.driver.api.v1.controllers.user_controller import UserController
 
 
 router = APIRouter()
-
-
-def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
-    repository: IUserRepository = UserRepository(db_session)
-    return UserService(repository)
 
 
 def _get_user_controller(db_session: Session = Depends(get_db)) -> UserController:
