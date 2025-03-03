@@ -9,9 +9,5 @@ from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrde
 class IOrderStatusService(ABC):
 
     @abstractmethod
-    def update_order_status(self, order_id: int, dto: UpdateOrderStatusDTO) -> OrderStatusDTO:
-        pass
-
-    @abstractmethod
     def delete_order_status(self, order_id: int, dto: UpdateOrderStatusDTO) -> OrderStatusDTO:
         pass

@@ -15,18 +15,6 @@ class OrderStatusService(IOrderStatusService):
     def __init__(self, repository: IOrderStatusRepository):
         self.repository = repository
 
-    def update_order_status(self, order_status_id: int, dto: UpdateOrderStatusDTO) -> OrderStatusDTO:
-        order_status = self.repository.get_by_id(order_status_id)
-        if not order_status:
-            raise EntityDuplicatedException(entity_name="OrderStatus")
-    
-        order_status.status=dto.status,
-        order_status.description=dto.description
-        
-        order_status = self.repository.update(order_status)
-
-        return OrderStatusDTO.from_entity(order_status)
-
     def delete_order_status(self, order_status_id: int) -> None:
         order_status = self.repository.get_by_id(order_status_id)
         if not order_status:

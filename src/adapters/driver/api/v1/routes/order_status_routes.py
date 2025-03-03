@@ -83,10 +83,10 @@ def get_all_order_status(
 def update_order_status(
     order_status_id: int,
     dto: UpdateOrderStatusDTO,
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_order_status(order_status_id, dto)
+    return controller.update_order_status(order_status_id, dto)
 
 @router.delete(
         "/order_status/{order_status_id}",
