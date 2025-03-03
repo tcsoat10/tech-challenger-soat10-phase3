@@ -2,7 +2,8 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from src.application.usecases.order_status_usecase.update_order_stauts_usecase import UpdateOrderStatusUseCase
+from src.application.usecases.order_status_usecase.delete_order_status_usecase import DeleteOrderStatusUseCase
+from src.application.usecases.order_status_usecase.update_order_status_usecase import UpdateOrderStatusUseCase
 from src.core.domain.dtos.order_status.update_order_status_dto import UpdateOrderStatusDTO
 from src.application.usecases.order_status_usecase.get_all_order_status_usecase import GetAllOrderStatusUseCase
 from src.application.usecases.order_status_usecase.get_order_status_by_id_usecase import GetOrderStatusByIdUseCase
@@ -44,3 +45,8 @@ class OrderStatusController:
         update_order_status_use_case = UpdateOrderStatusUseCase.build(self.order_status_gateway)
         order_status = update_order_status_use_case.execute(order_status_id, dto)
         return DTOPresenter.transform(order_status, OrderStatusDTO)
+    
+    def delete_order_status(self, order_status_id: int) -> None:
+        delete_order_status_use_case = DeleteOrderStatusUseCase.build(self.order_status_gateway)
+        delete_order_status_use_case.execute(order_status_id)
+        return None

@@ -5,21 +5,12 @@ from sqlalchemy.orm import Session
 from config.database import get_db
 from src.adapters.driver.api.v1.controllers.order_status_controller import OrderStatusController
 from src.core.domain.dtos.order_status.update_order_status_dto import UpdateOrderStatusDTO
-from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
-from src.application.services.order_status_service import OrderStatusService
 from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
 from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrderStatusDTO
-from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
-from src.core.ports.order_status.i_order_status_service import IOrderStatusService
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import OrderStatusPermissions
 
 router = APIRouter()
-
-# Substituir por lib DI.
-def _get_order_status_service(db_session: Session = Depends(get_db)) -> IOrderStatusService:
-    repository: IOrderStatusRepository = OrderStatusRepository(db_session)
-    return OrderStatusService(repository)
 
 def _get_order_status_controller(db_session: Session = Depends(get_db)) -> OrderStatusController:
     return OrderStatusController(db_session)
@@ -95,7 +86,7 @@ def update_order_status(
 )
 def delete_order_status(
     order_status_id: int,
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_order_status(order_status_id)
+    controller.delete_order_status(order_status_id)
