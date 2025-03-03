@@ -7,10 +7,6 @@ from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrde
 
 
 class IOrderStatusService(ABC):
-    
-    @abstractmethod
-    def get_order_status_by_id(self, order_id: int) -> OrderStatusDTO:
-        pass
 
     @abstractmethod
     def get_all_orders_status(self, include_deleted: Optional[bool] = False) -> List[OrderStatusDTO]:

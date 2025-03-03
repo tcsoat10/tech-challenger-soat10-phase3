@@ -18,7 +18,7 @@ class IOrderStatusRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, order_id: int) -> OrderStatus:
+    def get_by_id(self, order_status_id: int) -> OrderStatus:
         pass
 
     @abstractmethod

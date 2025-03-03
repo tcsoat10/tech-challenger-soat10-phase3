@@ -58,10 +58,10 @@ def get_order_status_by_status(
 )
 def get_order_status_by_id(
     order_status_id: int,
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_order_status_by_id(order_status_id=order_status_id)
+    return controller.get_order_status_by_id(order_status_id=order_status_id)
 
 @router.get(
         "/order_status",

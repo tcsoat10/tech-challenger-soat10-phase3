@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_status_usecase.get_order_status_by_id_usecase import GetOrderStatusByIdUseCase
 from src.application.usecases.order_status_usecase.get_order_status_by_status_usecase import GetOrderStatusByStatusUseCase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
@@ -23,4 +24,9 @@ class OrderStatusController:
     def get_order_status_by_status(self, status: str) -> OrderStatusDTO:
         get_order_status_by_status_use_case = GetOrderStatusByStatusUseCase.build(self.order_status_gateway)
         order_status = get_order_status_by_status_use_case.execute(status)
+        return DTOPresenter.transform(order_status, OrderStatusDTO)
+    
+    def get_order_status_by_id(self, order_status_id: int) -> OrderStatusDTO:
+        get_order_status_by_id_use_case = GetOrderStatusByIdUseCase.build(self.order_status_gateway)
+        order_status = get_order_status_by_id_use_case.execute(order_status_id)
         return DTOPresenter.transform(order_status, OrderStatusDTO)
