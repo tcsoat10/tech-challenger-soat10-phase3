@@ -92,10 +92,10 @@ def get_all_users(
 def update_user(
     user_id: int,
     dto: UpdateUserDTO,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_user(user_id, dto)
+    return controller.update_user(user_id, dto)
 
 
 @router.delete(

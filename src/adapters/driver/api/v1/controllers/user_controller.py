@@ -7,6 +7,7 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.user_usecase.get_user_by_name_usecase import GetUserByNameUsecase
 from src.application.usecases.user_usecase.get_user_by_id_usecase import GetUserByIdUsecase
 from src.application.usecases.user_usecase.get_all_users_usecase import GetAllUsersUsecase
+from src.application.usecases.user_usecase.update_user_usecase import UpdateUserUsecase
 
 
 from sqlalchemy.orm import Session
@@ -36,3 +37,8 @@ class UserController:
         all_users_usecase = GetAllUsersUsecase.build(self.user_gateway)
         users = all_users_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(users, UserDTO)
+
+    def update_user(self, user_id: int, dto: CreateUserDTO) -> UserDTO:
+        update_user_usecase = UpdateUserUsecase.build(self.user_gateway)
+        user = update_user_usecase.execute(user_id, dto)
+        return DTOPresenter.transform(user, UserDTO)
