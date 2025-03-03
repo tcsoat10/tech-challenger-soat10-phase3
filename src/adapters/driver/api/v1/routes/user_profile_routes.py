@@ -5,17 +5,10 @@ from sqlalchemy.orm import Session
 
 from src.constants.permissions import UserProfilePermissions
 from src.core.auth.dependencies import get_current_user
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.adapters.driven.repositories.user_repository import UserRepository
 from config.database import get_db
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.core.ports.user.i_user_repository import IUserRepository
-from src.application.services.user_profile_service import UserProfileService
-from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
 from src.core.domain.dtos.user_profile.create_user_profile_dto import CreateUserProfileDTO
 from src.core.domain.dtos.user_profile.update_user_profile_dto import UpdateUserProfileDTO
 from src.core.domain.dtos.user_profile.user_profile_dto import UserProfileDTO
-from src.core.ports.user_profile.i_user_profile_service import IUserProfileService
 from src.adapters.driver.api.v1.controllers.user_profile_controller import UserProfileController
 
 
@@ -25,12 +18,6 @@ router = APIRouter()
 def _get_user_profile_controller(db_session: Session = Depends(get_db)) -> UserProfileController:
     return UserProfileController(db_session)
 
-
-def _get_user_profile_service(db_session: Session = Depends(get_db)) -> IUserProfileService:
-    repository: IUserProfileService = UserProfileRepository(db_session)
-    user_repository: IUserRepository = UserRepository(db_session)
-    profile_repository: IProfileRepository = ProfileRepository(db_session)
-    return UserProfileService(repository, user_repository, profile_repository)
 
 @router.post(
     path='/user-profiles',
