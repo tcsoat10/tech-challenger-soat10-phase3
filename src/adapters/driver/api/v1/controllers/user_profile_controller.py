@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Optional, List
 
 from src.core.ports.user_profile.i_user_profile_repository import IUserProfileRepository
 from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
@@ -12,6 +13,7 @@ from src.application.usecases.user_profile_usecase.create_user_profile_usecase i
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.user_profile_usecase.get_user_profile_by_id_usecase import GetUserProfileByIdUsecase
 from src.application.usecases.user_profile_usecase.get_user_profile_by_user_id_and_profile_id_usecase import GetUserProfileByUserIdAndProfileIdUsecase
+from src.application.usecases.user_profile_usecase.get_all_user_profiles_usecase import GetAllUserProfilesUsecase
 
 
 class UserProfileController:
@@ -39,3 +41,7 @@ class UserProfileController:
         user_profile = user_profile_by_user_id_and_profile_id_usecase.execute(user_id, profile_id)
         return DTOPresenter.transform(user_profile, UserProfileDTO)
 
+    def get_all_user_profiles(self, include_deleted: Optional[bool] = False) -> List[UserProfileDTO]:
+        all_user_profiles_usecase = GetAllUserProfilesUsecase.build(self.user_profile_gateway)
+        user_profiles = all_user_profiles_usecase.execute(include_deleted)
+        return DTOPresenter.transform_list(user_profiles, UserProfileDTO)

@@ -80,10 +80,10 @@ def get_user_profile_by_user_id_and_profile_id(
 )
 def get_all_user_profiles(
     include_deleted: Optional[bool] = Query(False),
-    service: IUserProfileService = Depends(_get_user_profile_service),
+    controller: UserProfileController = Depends(_get_user_profile_controller),
     user: dict = Depends(get_current_user)
 ):
-    return service.get_all_user_profiles(include_deleted=include_deleted)
+    return controller.get_all_user_profiles(include_deleted=include_deleted)
 
 @router.put(
     path='/user-profiles/{user_profile_id}',
