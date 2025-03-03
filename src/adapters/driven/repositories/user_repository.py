@@ -21,8 +21,11 @@ class UserRepository(IUserRepository):
     def get_by_id(self, user_id: int) -> User:
         return self.db_session.query(User).filter(User.id == user_id).first()
 
-    def get_all(self) -> List[User]:
-        return self.db_session.query(User).all()
+    def get_all(self, include_deleted: bool = False) -> List[User]:
+        query =  self.db_session.query(User)
+        if not include_deleted:
+            query = query.filter(User.inactivated_at.is_(None))
+        return query.all()
     
     def update(self, user: User) -> User:
         self.db_session.merge(user)

@@ -1,25 +1,21 @@
 from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.constants.permissions import UserPermissions
 from src.core.auth.dependencies import get_current_user
-from src.core.ports.user.i_user_service import IUserService
-from src.core.ports.user.i_user_repository import IUserRepository
-from src.adapters.driven.repositories.user_repository import UserRepository
 from src.core.domain.dtos.user.user_dto import UserDTO
 from src.core.domain.dtos.user.create_user_dto import CreateUserDTO
-from src.application.services.user_service import UserService
 from src.core.domain.dtos.user.update_user_dto import UpdateUserDTO
+from src.adapters.driver.api.v1.controllers.user_controller import UserController
 
 
 router = APIRouter()
 
 
-def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
-    repository: IUserRepository = UserRepository(db_session)
-    return UserService(repository)
+def _get_user_controller(db_session: Session = Depends(get_db)) -> UserController:
+    return UserController(db_session)
 
 
 @router.post(
@@ -30,10 +26,10 @@ def _get_user_service(db_session: Session = Depends(get_db)) -> IUserService:
 )
 def create_user(
     dto: CreateUserDTO,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_user(dto)
+    return controller.create_user(dto)
 
 
 @router.get(
@@ -44,10 +40,10 @@ def create_user(
 )
 def get_user_by_name(
     user_name: str,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_user_by_name(user_name)
+    return controller.get_user_by_name(user_name)
 
 
 @router.get(
@@ -58,10 +54,10 @@ def get_user_by_name(
 )
 def get_user_by_id(
     user_id: int,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_user_by_id(user_id)
+    return controller.get_user_by_id(user_id)
 
 
 @router.get(
@@ -71,10 +67,11 @@ def get_user_by_id(
     dependencies=[Security(get_current_user, scopes=[UserPermissions.CAN_VIEW_USERS])]
 )
 def get_all_users(
-    service: IUserService = Depends(_get_user_service),
+    include_deleted: Optional[bool] = False,
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_users()
+    return controller.get_all_users(include_deleted)
 
 
 @router.put(
@@ -86,10 +83,10 @@ def get_all_users(
 def update_user(
     user_id: int,
     dto: UpdateUserDTO,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_user(user_id, dto)
+    return controller.update_user(user_id, dto)
 
 
 @router.delete(
@@ -99,7 +96,7 @@ def update_user(
 )
 def delete_user(
     user_id: int,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_user(user_id)
+    controller.delete_user(user_id)
