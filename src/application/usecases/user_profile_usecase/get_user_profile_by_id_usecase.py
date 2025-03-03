@@ -14,5 +14,5 @@ class GetUserProfileByIdUsecase:
     def execute(self, user_profile_id: int) -> UserProfile:
         user_profile = self.user_profile_gateway.get_by_id(user_profile_id)
         if not user_profile:
-            raise EntityNotFoundException(entity_name='User Profile')
+            raise EntityNotFoundException(entity_name='UserProfile')
         return user_profile
