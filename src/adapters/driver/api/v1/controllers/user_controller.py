@@ -8,6 +8,7 @@ from src.application.usecases.user_usecase.get_user_by_name_usecase import GetUs
 from src.application.usecases.user_usecase.get_user_by_id_usecase import GetUserByIdUsecase
 from src.application.usecases.user_usecase.get_all_users_usecase import GetAllUsersUsecase
 from src.application.usecases.user_usecase.update_user_usecase import UpdateUserUsecase
+from src.application.usecases.user_usecase.delete_user_usecase import DeleteUserUsecase
 
 
 from sqlalchemy.orm import Session
@@ -42,3 +43,7 @@ class UserController:
         update_user_usecase = UpdateUserUsecase.build(self.user_gateway)
         user = update_user_usecase.execute(user_id, dto)
         return DTOPresenter.transform(user, UserDTO)
+    
+    def delete_user(self, user_id: int) -> None:
+        delete_user_usecase = DeleteUserUsecase.build(self.user_gateway)
+        delete_user_usecase.execute(user_id)

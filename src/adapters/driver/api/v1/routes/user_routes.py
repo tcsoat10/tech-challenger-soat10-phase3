@@ -105,7 +105,7 @@ def update_user(
 )
 def delete_user(
     user_id: int,
-    service: IUserService = Depends(_get_user_service),
+    controller: UserController = Depends(_get_user_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_user(user_id)
+    controller.delete_user(user_id)
