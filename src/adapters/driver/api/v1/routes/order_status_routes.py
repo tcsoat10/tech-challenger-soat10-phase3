@@ -45,10 +45,10 @@ def create_order_status(
 )
 def get_order_status_by_status(
     order_status: str,
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_order_status_by_status(status=order_status)
+    return controller.get_order_status_by_status(status=order_status)
 
 @router.get(
         "/order_status/{order_status_id}/id",

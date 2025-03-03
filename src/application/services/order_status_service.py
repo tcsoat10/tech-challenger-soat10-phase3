@@ -14,12 +14,6 @@ class OrderStatusService(IOrderStatusService):
 
     def __init__(self, repository: IOrderStatusRepository):
         self.repository = repository
-    
-    def get_order_status_by_status(self, status: str) -> OrderStatusDTO:
-        order_status = self.repository.get_by_status(status=status)
-        if not order_status:
-            raise EntityNotFoundException(entity_name="OrderStatus")
-        return OrderStatusDTO.from_entity(order_status)
 
     def get_order_status_by_id(self, order_status_id: int) -> OrderStatusDTO:
         order_status = self.repository.get_by_id(order_status_id=order_status_id)
