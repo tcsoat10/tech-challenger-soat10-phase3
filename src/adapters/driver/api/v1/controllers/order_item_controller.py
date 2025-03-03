@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from src.application.usecases.order_item_usecase.delete_order_item_usecase import DeleteOrderItemUseCase
-from src.application.usecases.order_item_usecase.upodate_order_item_usecase import UpdateOrderItemUseCase
+from src.application.usecases.order_item_usecase.update_order_item_usecase import UpdateOrderItemUseCase
 from src.core.domain.dtos.order_item.update_order_item_dto import UpdateOrderItemDTO
 from src.application.usecases.order_item_usecase.get_all_order_items_usecase import GetAllOrderItemsUsecase
 from src.application.usecases.order_item_usecase.get_order_item_by_id import GetOrderItemByIdUseCase
