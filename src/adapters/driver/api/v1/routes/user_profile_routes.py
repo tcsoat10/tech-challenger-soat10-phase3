@@ -16,9 +16,15 @@ from src.core.domain.dtos.user_profile.create_user_profile_dto import CreateUser
 from src.core.domain.dtos.user_profile.update_user_profile_dto import UpdateUserProfileDTO
 from src.core.domain.dtos.user_profile.user_profile_dto import UserProfileDTO
 from src.core.ports.user_profile.i_user_profile_service import IUserProfileService
+from src.adapters.driver.api.v1.controllers.user_profile_controller import UserProfileController
 
 
 router = APIRouter()
+
+
+def _get_user_profile_controller(db_session: Session = Depends(get_db)) -> UserProfileController:
+    return UserProfileController(db_session)
+
 
 def _get_user_profile_service(db_session: Session = Depends(get_db)) -> IUserProfileService:
     repository: IUserProfileService = UserProfileRepository(db_session)
@@ -34,10 +40,10 @@ def _get_user_profile_service(db_session: Session = Depends(get_db)) -> IUserPro
 )
 def create_user_profile(
     dto: CreateUserProfileDTO,
-    service: IUserProfileService = Depends(_get_user_profile_service),
+    controller: UserProfileController = Depends(_get_user_profile_controller),
     user: dict = Depends(get_current_user)
 ):
-    return service.create_user_profile(dto)
+    return controller.create_user_profile(dto)
 
 @router.get(
     path='/user-profiles/{id}',
