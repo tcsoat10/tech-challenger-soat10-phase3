@@ -28,13 +28,14 @@ class CreateUserProfileUsecase:
         return cls(user_profile_gateway, profile_gateway, user_gateway)
     
     def execute(self, dto: CreateUserProfileDTO) -> UserProfile:
-        profile = self.profile_gateway.get_by_id(dto.profile_id)
-        if not profile:
-            raise EntityNotFoundException(entity_name='Profile')
-        
         user = self.user_gateway.get_by_id(dto.user_id)
         if not user:
             raise EntityNotFoundException(entity_name='User')
+
+        profile = self.profile_gateway.get_by_id(dto.profile_id)
+        if not profile:
+            raise EntityNotFoundException(entity_name='Profile')        
+        
         
         user_profile = self.user_profile_gateway.get_by_user_id_and_profile_id(dto.user_id, dto.profile_id)
         if user_profile:
