@@ -9,10 +9,6 @@ from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrde
 class IOrderStatusService(ABC):
 
     @abstractmethod
-    def create_order_status(self, dto: CreateOrderStatusDTO) -> OrderStatusDTO:
-        pass
-
-    @abstractmethod
     def get_order_status_by_status(self, status: str) -> OrderStatusDTO:
         pass
     

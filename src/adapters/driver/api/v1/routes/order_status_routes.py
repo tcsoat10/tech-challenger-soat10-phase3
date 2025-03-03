@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 
 from config.database import get_db
+from src.adapters.driver.api.v1.controllers.order_status_controller import OrderStatusController
 from src.core.domain.dtos.order_status.update_order_status_dto import UpdateOrderStatusDTO
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from src.application.services.order_status_service import OrderStatusService
@@ -20,6 +21,9 @@ def _get_order_status_service(db_session: Session = Depends(get_db)) -> IOrderSt
     repository: IOrderStatusRepository = OrderStatusRepository(db_session)
     return OrderStatusService(repository)
 
+def _get_order_status_controller(db_session: Session = Depends(get_db)) -> OrderStatusController:
+    return OrderStatusController(db_session)
+
 @router.post(
         "/order_status",
         response_model=OrderStatusDTO,
@@ -28,10 +32,10 @@ def _get_order_status_service(db_session: Session = Depends(get_db)) -> IOrderSt
 )
 def create_order_status(
     dto: CreateOrderStatusDTO,
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_order_status(dto)
+    return controller.create_order_status(dto)
 
 @router.get(
         "/order_status/{order_status}/status",

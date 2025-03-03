@@ -14,18 +14,6 @@ class OrderStatusService(IOrderStatusService):
 
     def __init__(self, repository: IOrderStatusRepository):
         self.repository = repository
-            
-    def create_order_status(self, dto: CreateOrderStatusDTO) -> OrderStatusDTO:
-        if self.repository.exists_by_status(dto.status):
-            raise EntityDuplicatedException(entity_name="OrderStatus")
-        
-        order_status = OrderStatus(
-            status=dto.status,
-            description=dto.description
-        )
-
-        order_status = self.repository.create(order_status)
-        return OrderStatusDTO.from_entity(order_status)
     
     def get_order_status_by_status(self, status: str) -> OrderStatusDTO:
         order_status = self.repository.get_by_status(status=status)
