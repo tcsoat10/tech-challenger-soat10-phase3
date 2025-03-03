@@ -14,6 +14,8 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.user_profile_usecase.get_user_profile_by_id_usecase import GetUserProfileByIdUsecase
 from src.application.usecases.user_profile_usecase.get_user_profile_by_user_id_and_profile_id_usecase import GetUserProfileByUserIdAndProfileIdUsecase
 from src.application.usecases.user_profile_usecase.get_all_user_profiles_usecase import GetAllUserProfilesUsecase
+from src.core.domain.dtos.user_profile.update_user_profile_dto import UpdateUserProfileDTO
+from src.application.usecases.user_profile_usecase.update_user_profile_usecase import UpdateUserProfileUsecase
 
 
 class UserProfileController:
@@ -45,3 +47,10 @@ class UserProfileController:
         all_user_profiles_usecase = GetAllUserProfilesUsecase.build(self.user_profile_gateway)
         user_profiles = all_user_profiles_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(user_profiles, UserProfileDTO)
+    
+    def update_user_profile(self, user_profile_id, dto: UpdateUserProfileDTO) -> UserProfileDTO:
+        update_user_profile_usecase = UpdateUserProfileUsecase.build(
+            self.user_profile_gateway, self.profile_gateway, self.user_gateway
+        )
+        user_profile = update_user_profile_usecase.execute(user_profile_id, dto)
+        return DTOPresenter.transform(user_profile, UserProfileDTO)
