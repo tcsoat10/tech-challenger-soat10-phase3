@@ -16,6 +16,7 @@ from src.application.usecases.user_profile_usecase.get_user_profile_by_user_id_a
 from src.application.usecases.user_profile_usecase.get_all_user_profiles_usecase import GetAllUserProfilesUsecase
 from src.core.domain.dtos.user_profile.update_user_profile_dto import UpdateUserProfileDTO
 from src.application.usecases.user_profile_usecase.update_user_profile_usecase import UpdateUserProfileUsecase
+from src.application.usecases.user_profile_usecase.delete_user_profile_usecase import DeleteUserProfileUsecase
 
 
 class UserProfileController:
@@ -54,3 +55,7 @@ class UserProfileController:
         )
         user_profile = update_user_profile_usecase.execute(user_profile_id, dto)
         return DTOPresenter.transform(user_profile, UserProfileDTO)
+    
+    def delete_user_profile(self, user_profile_id) -> None:
+        delete_user_profile_usecase = DeleteUserProfileUsecase.build(self.user_profile_gateway)
+        delete_user_profile_usecase.execute(user_profile_id)

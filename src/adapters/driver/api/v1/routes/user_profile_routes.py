@@ -106,7 +106,7 @@ def update_user_profile(
 )
 def delete_user_profile(
     user_profile_id: int,
-    service: IUserProfileService = Depends(_get_user_profile_service),
+    controller: UserProfileController = Depends(_get_user_profile_controller),
     user: dict = Depends(get_current_user)
 ):
-    service.delete_user_profile(user_profile_id)
+    controller.delete_user_profile(user_profile_id)
