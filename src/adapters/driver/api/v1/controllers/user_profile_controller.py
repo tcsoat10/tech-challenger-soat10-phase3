@@ -11,6 +11,7 @@ from src.core.domain.dtos.user_profile.user_profile_dto import UserProfileDTO
 from src.application.usecases.user_profile_usecase.create_user_profile_usecase import CreateUserProfileUsecase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.user_profile_usecase.get_user_profile_by_id_usecase import GetUserProfileByIdUsecase
+from src.application.usecases.user_profile_usecase.get_user_profile_by_user_id_and_profile_id_usecase import GetUserProfileByUserIdAndProfileIdUsecase
 
 
 class UserProfileController:
@@ -30,3 +31,11 @@ class UserProfileController:
         get_user_profile_by_id_usecase = GetUserProfileByIdUsecase.build(self.user_profile_gateway)
         user_profile = get_user_profile_by_id_usecase.execute(user_profile_id)
         return DTOPresenter.transform(user_profile, UserProfileDTO)
+    
+    def get_user_profile_by_user_id_and_profile_id(self, user_id: int, profile_id: int) -> UserProfileDTO:
+        user_profile_by_user_id_and_profile_id_usecase = GetUserProfileByUserIdAndProfileIdUsecase.build(
+            self.user_profile_gateway
+        )
+        user_profile = user_profile_by_user_id_and_profile_id_usecase.execute(user_id, profile_id)
+        return DTOPresenter.transform(user_profile, UserProfileDTO)
+

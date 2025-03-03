@@ -67,10 +67,10 @@ def get_user_profile_by_id(
 def get_user_profile_by_user_id_and_profile_id(
     user_id: int,
     profile_id: int,
-    service: IUserProfileService = Depends(_get_user_profile_service),
+    controller: UserProfileController = Depends(_get_user_profile_controller),
     user: dict = Depends(get_current_user)
 ):
-    return service.get_user_profile_by_user_id_and_profile_id(user_id, profile_id)
+    return controller.get_user_profile_by_user_id_and_profile_id(user_id, profile_id)
 
 @router.get(
     path='/user-profiles',
