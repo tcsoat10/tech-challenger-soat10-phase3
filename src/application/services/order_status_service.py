@@ -15,10 +15,6 @@ class OrderStatusService(IOrderStatusService):
     def __init__(self, repository: IOrderStatusRepository):
         self.repository = repository
 
-    def get_all_orders_status(self, include_deleted: Optional[bool] = False) -> List[OrderStatusDTO]:
-        order_status = self.repository.get_all(include_deleted=include_deleted)
-        return [OrderStatusDTO.from_entity(order_status) for order_status in order_status]
-
     def update_order_status(self, order_status_id: int, dto: UpdateOrderStatusDTO) -> OrderStatusDTO:
         order_status = self.repository.get_by_id(order_status_id)
         if not order_status:

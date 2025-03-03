@@ -1,6 +1,8 @@
 
+from typing import List, Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.order_status_usecase.get_all_order_status_usecase import GetAllOrderStatusUseCase
 from src.application.usecases.order_status_usecase.get_order_status_by_id_usecase import GetOrderStatusByIdUseCase
 from src.application.usecases.order_status_usecase.get_order_status_by_status_usecase import GetOrderStatusByStatusUseCase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
@@ -30,3 +32,8 @@ class OrderStatusController:
         get_order_status_by_id_use_case = GetOrderStatusByIdUseCase.build(self.order_status_gateway)
         order_status = get_order_status_by_id_use_case.execute(order_status_id)
         return DTOPresenter.transform(order_status, OrderStatusDTO)
+
+    def get_all_orders_status(self, include_deleted: Optional[bool] = False) -> List[OrderStatusDTO]:
+        get_all_order_status_use_case = GetAllOrderStatusUseCase.build(self.order_status_gateway)
+        order_status = get_all_order_status_use_case.execute(include_deleted=include_deleted)
+        return DTOPresenter.transform_list(order_status, OrderStatusDTO)

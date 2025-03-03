@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, status, Security
+from typing import List, Optional
+from fastapi import APIRouter, Depends, status, Security, Query
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -69,10 +69,11 @@ def get_order_status_by_id(
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
 )
 def get_all_order_status(
-    service: IOrderStatusService = Depends(_get_order_status_service),
+    include_deleted: Optional[bool] = Query(False),
+    controller: OrderStatusController = Depends(_get_order_status_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_orders_status()
+    return controller.get_all_orders_status(include_deleted=include_deleted)
 
 @router.put(
         "/order_status/{order_status_id}",
