@@ -16,38 +16,6 @@ class AuthService(IAuthService):
         self.profile_repository: IProfileRepository = profile_repository
         self.employee_repository: IEmployeeRepository = employee_repository
         self.customer_repository: ICustomerRepository = customer_repository
-
-    def login_customer_by_cpf(self, dto: AuthByCpfDTO) -> TokenDTO:
-        customer: Customer = self.customer_repository.get_by_cpf(dto.cpf)
-        if not customer:
-            raise EntityNotFoundException(entity_name="Customer")
-        
-        if customer.is_deleted():
-            raise InvalidCredentialsException()
-
-        customer_profile = self.profile_repository.get_by_name("customer")
-        if not customer_profile:
-            raise EntityNotFoundException(entity_name="Customer profile")
-
-        permissions = [permission.name for permission in customer_profile.permissions]
-        if not permissions:
-            raise EntityNotFoundException(entity_name="Customer permissions")
-
-        token_payload = {
-            "person": {
-                "id": str(customer.id),
-                "name": customer.person.name,
-                "cpf": customer.person.cpf,
-                "email": customer.person.email,
-            },
-            "profile": {
-                "name": customer_profile.name,
-                "permissions": permissions,
-            },
-        }
-
-        token = JWTUtil.create_token(token_payload)
-        return TokenDTO(access_token=token, token_type="bearer")
     
     def login_anonymous(self) -> TokenDTO:
         customer_profile = self.profile_repository.get_by_name("customer")
