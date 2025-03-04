@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Optional, List
 
 from src.core.ports.person.i_person_repository import IPersonRepository
 from src.adapters.driven.repositories.person_repository import PersonRepository
@@ -8,6 +9,7 @@ from src.application.usecases.person_usecase.create_person_usecase import Create
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.person_usecase.get_person_by_cpf_usecase import GetPersonByCpfUsecase
 from src.application.usecases.person_usecase.get_person_by_id_usecase import GetPersonByIdUsecase
+from src.application.usecases.person_usecase.get_all_persons_usecase import GetAllPersonsUsecase
 
 
 class PersonController:
@@ -28,3 +30,8 @@ class PersonController:
         person_by_id_usecase = GetPersonByIdUsecase.build(self.person_gateway)
         person = person_by_id_usecase.execute(person_id)
         return DTOPresenter.transform(person, PersonDTO)
+    
+    def get_all_persons(self, include_deleted: Optional[bool] = False) -> List[PersonDTO]:
+        all_persons_usecase = GetAllPersonsUsecase.build(self.person_gateway)
+        persons = all_persons_usecase.execute(include_deleted)
+        return DTOPresenter.transform_list(persons, PersonDTO)

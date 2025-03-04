@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
 
@@ -76,10 +76,11 @@ def get_person_by_id(
     dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_VIEW_PERSONS])]
 )
 def get_all_person(
-    service: IPersonService = Depends(_get_person_service),
+    include_deleted: Optional[bool] = False,
+    controller: PersonController = Depends(_get_person_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_persons()
+    return controller.get_all_persons(include_deleted)
 
 
 @router.put(
