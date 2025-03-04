@@ -49,10 +49,10 @@ def create_person(
 )
 def get_person_by_cpf(
     cpf: str,
-    service: IPersonService = Depends(_get_person_service),
+    controller: PersonController = Depends(_get_person_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_person_by_cpf(cpf)
+    return controller.get_person_by_cpf(cpf)
 
 
 @router.get(
