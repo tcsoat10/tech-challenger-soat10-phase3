@@ -1,24 +1,27 @@
-import uuid
-from src.core.domain.entities.person import Person
+
+from typing import Any, Dict
+
+from src.core.domain.dtos.auth.auth_dto import LoginDTO
 from src.core.domain.entities.employee import Employee
-from src.core.ports.employee.i_employee_repository import IEmployeeRepository
-from src.core.domain.entities.customer import Customer
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.core.ports.auth.i_auth_service import IAuthService
-from src.core.domain.dtos.auth.auth_dto import AuthByCpfDTO, LoginDTO, TokenDTO
-from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
+from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
+from src.core.ports.employee.i_employee_repository import IEmployeeRepository
+from src.core.ports.profile.i_profile_repository import IProfileRepository
 from src.core.utils.jwt_util import JWTUtil
 
-class AuthService(IAuthService):
-    def __init__(self, customer_repository, profile_repository, employee_repository):
-        self.profile_repository: IProfileRepository = profile_repository
-        self.employee_repository: IEmployeeRepository = employee_repository
-        self.customer_repository: ICustomerRepository = customer_repository
 
-    def login_employee(self, login_dto: LoginDTO) -> TokenDTO:
-        employee: Employee = self.employee_repository.get_by_username(login_dto.username)
+class LoginEmployeeUseCase:
+    
+    def __init__(self, employee_gateway: IEmployeeRepository, profile_gateway: IProfileRepository):
+        self.employee_gateway = employee_gateway
+        self.profile_gateway = profile_gateway
+        
+    @classmethod
+    def build(cls, employee_gateway: IEmployeeRepository, profile_gateway: IProfileRepository) -> "LoginEmployeeUseCase":
+        return cls(employee_gateway, profile_gateway)
+    
+    def execute(self, login_dto: LoginDTO) -> Dict[str, Any]:
+        employee: Employee = self.employee_gateway.get_by_username(login_dto.username)
         if not employee or not employee.user.verify_password(login_dto.password):
             raise InvalidCredentialsException()
         
@@ -29,7 +32,7 @@ class AuthService(IAuthService):
         if employee.role.name == 'manager':
             profile_name = 'manager'
 
-        employee_profile = self.profile_repository.get_by_name(profile_name)
+        employee_profile = self.profile_gateway.get_by_name(profile_name)
         if not employee_profile:
             raise EntityNotFoundException(entity_name="Employee profile")
  
@@ -51,4 +54,7 @@ class AuthService(IAuthService):
         }
 
         token = JWTUtil.create_token(token_payload)
-        return TokenDTO(access_token=token, token_type="bearer")
+        return {
+            "token_type": "bearer",
+            "access_token": token
+        }
