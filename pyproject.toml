@@ -18,7 +18,7 @@ pymysql = "^1.1.1"
 cryptography = "^44.0.0"
 alembic = "^1.14.0"
 bcrypt = "^4.2.1"
-python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+python-jose = {version = "^3.4.0", extras = ["cryptography"]}
 python-multipart = "^0.0.20"
 pycpfcnpj = "^1.8"
 requests = "^2.32.3"
