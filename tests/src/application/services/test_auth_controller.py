@@ -1,4 +1,3 @@
-from unittest.mock import patch
 import pytest
 from src.adapters.driver.api.v1.controllers.auth_controller import AuthController
 from src.core.domain.entities.customer import Customer
@@ -8,7 +7,6 @@ from src.core.domain.entities.profile import Profile
 from src.core.domain.dtos.auth.auth_dto import AuthByCpfDTO, LoginDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
-from src.application.services.auth_service import AuthService
 from tests.factories.role_factory import RoleFactory
 
 @pytest.fixture
@@ -22,20 +20,11 @@ def mock_profile_repository(mocker):
 @pytest.fixture
 def mock_employee_repository(mocker):
     return mocker.Mock()
-
-
-
-@pytest.fixture
-def auth_service(mock_customer_repository, mock_profile_repository, mock_employee_repository):
-    return AuthService(
-        customer_repository=mock_customer_repository,
-        profile_repository=mock_profile_repository,
-        employee_repository=mock_employee_repository,
-    )
     
 @pytest.fixture
-def auth_controller(mock_customer_repository, mock_profile_repository, db_session):
+def auth_controller(mock_customer_repository, mock_profile_repository, mock_employee_repository, db_session):
     controller = AuthController(db_session)
+    controller.employee_gateway = mock_employee_repository
     controller.customer_gateway = mock_customer_repository
     controller.profile_gateway = mock_profile_repository
     return controller
@@ -73,7 +62,7 @@ def test_login_anonymous(auth_controller, mock_profile_repository):
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-def test_login_employee(auth_service, mock_employee_repository, mock_profile_repository):
+def test_login_employee(auth_controller, mock_employee_repository, mock_profile_repository):
     role = RoleFactory(name="employee")
     employee = Employee(
         id=1,
@@ -87,14 +76,14 @@ def test_login_employee(auth_service, mock_employee_repository, mock_profile_rep
     mock_profile_repository.get_by_name.return_value = profile
 
     login_dto = LoginDTO(username="janedoe", password="password123")
-    token_dto =auth_service.login_employee(login_dto)
+    token_dto =auth_controller.login_employee(login_dto)
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-def test_login_employee_invalid_credentials(auth_service, mock_employee_repository):
+def test_login_employee_invalid_credentials(auth_controller, mock_employee_repository):
     mock_employee_repository.get_by_username.return_value = None
     login_dto = LoginDTO(username="janedoe", password="wrongpassword")
 
     with pytest.raises(InvalidCredentialsException, match="Usuário ou senha inválidos."):
-       auth_service.login_employee(login_dto)
+       auth_controller.login_employee(login_dto)
