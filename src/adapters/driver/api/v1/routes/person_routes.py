@@ -6,21 +6,12 @@ from config.database import get_db
 from src.constants.permissions import PersonPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.person.update_person_dto import UpdatePersonDTO
-from src.adapters.driven.repositories.person_repository import PersonRepository
-from src.application.services.person_service import PersonService
 from src.core.domain.dtos.person.person_dto import PersonDTO
 from src.core.domain.dtos.person.create_person_dto import CreatePersonDTO
-from src.core.ports.person.i_person_repository import IPersonRepository
-from src.core.ports.person.i_person_service import IPersonService
 from src.adapters.driver.api.v1.controllers.person_controller import PersonController
 
 
 router = APIRouter()
-
-# Substituir por lib DI.
-def _get_person_service(db_session: Session = Depends(get_db)) -> IPersonService:
-    repository: IPersonRepository = PersonRepository(db_session)
-    return PersonService(repository)
 
 
 def _get_person_controller(db_session: Session = Depends(get_db)) -> PersonController:
