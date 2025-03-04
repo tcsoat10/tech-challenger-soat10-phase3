@@ -150,15 +150,15 @@ def test_update_person_and_return_success(client):
         "birth_date": "1999-01-01"
     }
 
-# def test_delete_person_and_return_success(client):
-#     person = PersonFactory()
+def test_delete_person_and_return_success(client):
+    person = PersonFactory()
 
-#     response = client.delete(f"/api/v1/person/{person.id}", permissions=[PersonPermissions.CAN_DELETE_PERSON])
-#     assert response.status_code == status.HTTP_204_NO_CONTENT
+    response = client.delete(f"/api/v1/person/{person.id}", permissions=[PersonPermissions.CAN_DELETE_PERSON])
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
-#     response = client.get("/api/v1/person", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
-#     assert response.status_code == status.HTTP_200_OK
-#     data = response.json()
+    response = client.get("/api/v1/person", permissions=[PersonPermissions.CAN_VIEW_PERSONS])
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
 
-#     assert len(data) == 0
-#     assert data == []
+    assert len(data) == 0
+    assert data == []

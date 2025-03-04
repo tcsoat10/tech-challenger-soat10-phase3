@@ -92,20 +92,20 @@ def get_all_person(
 def update_person(
     person_id: int,
     dto: UpdatePersonDTO,
-    service: IPersonService = Depends(_get_person_service),
+    controller: PersonController = Depends(_get_person_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_person(person_id, dto)
+    return controller.update_person(person_id, dto)
 
 
-# @router.delete(
-#     "/person/{person_id}",
-#     status_code=status.HTTP_204_NO_CONTENT,
-#     dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_DELETE_PERSON])]
-# )
-# def delete_person(
-#     person_id: int,
-#     service: IPersonService = Depends(_get_person_service),
-#     user=Depends(get_current_user)
-# ):
-#     service.delete_person(person_id)
+@router.delete(
+    "/person/{person_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_DELETE_PERSON])]
+)
+def delete_person(
+    person_id: int,
+    controller: PersonController = Depends(_get_person_controller),
+    user=Depends(get_current_user)
+):
+    controller.delete_person(person_id)

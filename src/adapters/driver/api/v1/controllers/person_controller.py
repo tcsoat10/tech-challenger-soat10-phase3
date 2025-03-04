@@ -10,6 +10,9 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.person_usecase.get_person_by_cpf_usecase import GetPersonByCpfUsecase
 from src.application.usecases.person_usecase.get_person_by_id_usecase import GetPersonByIdUsecase
 from src.application.usecases.person_usecase.get_all_persons_usecase import GetAllPersonsUsecase
+from src.core.domain.dtos.person.update_person_dto import UpdatePersonDTO
+from src.application.usecases.person_usecase.update_person_usecase import UpdatePersonUsecase
+from src.application.usecases.person_usecase.delete_person_usecase import DeletePersonUsecase
 
 
 class PersonController:
@@ -35,3 +38,12 @@ class PersonController:
         all_persons_usecase = GetAllPersonsUsecase.build(self.person_gateway)
         persons = all_persons_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(persons, PersonDTO)
+    
+    def update_person(self, person_id: int, dto: UpdatePersonDTO) -> PersonDTO:
+        update_person_usecase = UpdatePersonUsecase.build(self.person_gateway)
+        person = update_person_usecase.execute(person_id, dto)
+        return DTOPresenter.transform(person, PersonDTO)
+    
+    def delete_person(self, person_id: int) -> None:
+        delete_person_usecase = DeletePersonUsecase.build(self.person_gateway)
+        delete_person_usecase.execute(person_id)
