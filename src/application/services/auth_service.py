@@ -16,29 +16,6 @@ class AuthService(IAuthService):
         self.profile_repository: IProfileRepository = profile_repository
         self.employee_repository: IEmployeeRepository = employee_repository
         self.customer_repository: ICustomerRepository = customer_repository
-    
-    def login_anonymous(self) -> TokenDTO:
-        customer_profile = self.profile_repository.get_by_name("customer")
-        if not customer_profile:
-            raise EntityNotFoundException(entity_name="Customer profile")
-        
-        anonymous_person = Person(name=f"Anonymous User - {uuid.uuid4().hex}")
-        customer = Customer(person=anonymous_person)
-        self.customer_repository.create(customer)
-
-        token_payload = {
-            "person": {
-                "id": customer.id,
-                "name": customer.person.name,
-            },
-            "profile": {
-                "name": customer_profile.name,
-                "permissions": [permission.name for permission in customer_profile.permissions],
-            },
-        }
-
-        token = JWTUtil.create_token(token_payload)
-        return TokenDTO(access_token=token, token_type="bearer")
 
     def login_employee(self, login_dto: LoginDTO) -> TokenDTO:
         employee: Employee = self.employee_repository.get_by_username(login_dto.username)

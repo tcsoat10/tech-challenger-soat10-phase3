@@ -64,11 +64,11 @@ def test_login_customer_by_cpf_not_found(auth_controller, mock_customer_reposito
     with pytest.raises(EntityNotFoundException, match="Customer not found."):
         auth_controller.login_customer_by_cpf(auth_dto)
 
-def test_login_anonymous(auth_service, mock_profile_repository):
+def test_login_anonymous(auth_controller, mock_profile_repository):
     profile = Profile(name="Customer", permissions=[Permission(name="view_orders")])
     mock_profile_repository.get_by_name.return_value = profile
 
-    token_dto = auth_service.login_anonymous()
+    token_dto = auth_controller.login_customer_anonymous()
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
