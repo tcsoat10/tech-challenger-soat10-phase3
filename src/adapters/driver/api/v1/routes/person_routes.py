@@ -63,10 +63,10 @@ def get_person_by_cpf(
 )
 def get_person_by_id(
     person_id: int,
-    service: IPersonService = Depends(_get_person_service),
+    controller: PersonController = Depends(_get_person_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_person_by_id(person_id=person_id)
+    return controller.get_person_by_id(person_id=person_id)
 
 
 @router.get(
