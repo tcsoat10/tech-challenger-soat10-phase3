@@ -21,18 +21,18 @@ def _get_person_service(db_session: Session = Depends(get_db)) -> IPersonService
     return PersonService(repository)
 
 
-# @router.post(
-#     "/person",
-#     response_model=PersonDTO,
-#     status_code=status.HTTP_201_CREATED,
-#     dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_CREATE_PERSON])]
-# )
-# def create_person(
-#     dto: CreatePersonDTO,
-#     service: IPersonService = Depends(_get_person_service),
-#     user=Depends(get_current_user)
-# ):
-#     return service.create_person(dto)
+@router.post(
+    "/person",
+    response_model=PersonDTO,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_CREATE_PERSON])]
+)
+def create_person(
+    dto: CreatePersonDTO,
+    service: IPersonService = Depends(_get_person_service),
+    user=Depends(get_current_user)
+):
+    return service.create_person(dto)
 
 
 @router.get(

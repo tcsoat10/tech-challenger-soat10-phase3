@@ -1,72 +1,75 @@
 from fastapi import status
+import pytest
+from datetime import datetime
 
+from src.core.exceptions.utils import ErrorCode
 from src.constants.permissions import PersonPermissions
 from tests.factories.person_factory import PersonFactory
 from pycpfcnpj import gen
 
 
-# @pytest.mark.parametrize("payload", [
-#     {"cpf": gen.cpf(), "name": "JOÃO", "email": "joao@gmail.com", "birth_date": "1999-01-01"},
-#     {"cpf": gen.cpf(), "name": "PAULO", "email": "paulo@outlook.com", "birth_date": "1999-02-02"}
-# ])
-# def test_create_person_success(client, payload):
-#     response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
+@pytest.mark.parametrize("payload", [
+    {"cpf": gen.cpf(), "name": "JOÃO", "email": "joao@gmail.com", "birth_date": "1999-01-01"},
+    {"cpf": gen.cpf(), "name": "PAULO", "email": "paulo@outlook.com", "birth_date": "1999-02-02"}
+])
+def test_create_person_success(client, payload):
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])     
 
-#     assert response.status_code == status.HTTP_201_CREATED
+    assert response.status_code == status.HTTP_201_CREATED
 
-#     data = response.json()
+    data = response.json()
 
-#     assert "id" in data
-#     assert data["cpf"] == payload["cpf"]
-#     assert data["name"] == payload["name"]
-#     assert data["email"] == payload["email"]
+    assert "id" in data
+    assert data["cpf"] == payload["cpf"]
+    assert data["name"] == payload["name"]
+    assert data["email"] == payload["email"]
 
-# def test_create_person_duplicate_cpf_and_return_error(client, db_session):
-#     person = PersonFactory()
+def test_create_person_duplicate_cpf_and_return_error(client, db_session):
+    person = PersonFactory()
 
-#     payload = {
-#          "cpf": person.cpf,
-#          "name": "JOÃO",
-#          "email": "joao@gmail.com",
-#          "birth_date": "1999-01-01"
-#      }
+    payload = {
+         "cpf": person.cpf,
+         "name": "JOÃO",
+         "email": "joao@gmail.com",
+         "birth_date": "1999-01-01"
+     }
     
-#     response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
 
-#     assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.status_code == status.HTTP_409_CONFLICT
 
-#     data = response.json()
+    data = response.json()
 
-#     assert data == {
-#         'detail': {
-#             'code': str(ErrorCode.DUPLICATED_ENTITY),
-#             'message': 'Person already exists.',
-#             'details': None,
-#         }
-#     }
-
-
-# def test_reactivate_person_return_success(client):
-#     person = PersonFactory(inactivated_at=datetime.now())
-
-#     payload = {'name': person.name, 'cpf': person.cpf, 'email': person.email, 'birth_date': person.birth_date.strftime('%Y-%m-%d')}
-#     response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
-
-#     assert response.status_code == status.HTTP_201_CREATED
-
-#     data = response.json()
-
-#     assert 'id' in data
-#     assert data['name'] == person.name
-#     assert data['cpf'] == person.cpf
-#     assert data['email'] == person.email
+    assert data == {
+        'detail': {
+            'code': str(ErrorCode.DUPLICATED_ENTITY),
+            'message': 'Person already exists.',
+            'details': None,
+        }
+    }
 
 
-# def test_create_person_send_unexpected_param_return_error(client):
-#     payload = {'name': 'test', 'cpf': '12345678901', 'email': 'abc@gmail.com', 'birth_date': "1999-01-01", 'fubar': 'fubar'}
-#     response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
+def test_reactivate_person_return_success(client):
+    person = PersonFactory(inactivated_at=datetime.now())
 
-#     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    payload = {'name': person.name, 'cpf': person.cpf, 'email': person.email, 'birth_date': person.birth_date.strftime('%Y-%m-%d')}
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data = response.json()
+
+    assert 'id' in data
+    assert data['name'] == person.name
+    assert data['cpf'] == person.cpf
+    assert data['email'] == person.email
+
+
+def test_create_person_send_unexpected_param_return_error(client):
+    payload = {'name': 'test', 'cpf': '12345678901', 'email': 'abc@gmail.com', 'birth_date': "1999-01-01", 'fubar': 'fubar'}
+    response = client.post("/api/v1/person", json=payload, permissions=[PersonPermissions.CAN_CREATE_PERSON])
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_get_person_by_cpf_and_return_success(client):
