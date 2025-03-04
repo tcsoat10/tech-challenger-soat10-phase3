@@ -1,4 +1,6 @@
+from unittest.mock import patch
 import pytest
+from src.adapters.driver.api.v1.controllers.auth_controller import AuthController
 from src.core.domain.entities.customer import Customer
 from src.core.domain.entities.employee import Employee
 from src.core.domain.entities.permission import Permission
@@ -21,6 +23,8 @@ def mock_profile_repository(mocker):
 def mock_employee_repository(mocker):
     return mocker.Mock()
 
+
+
 @pytest.fixture
 def auth_service(mock_customer_repository, mock_profile_repository, mock_employee_repository):
     return AuthService(
@@ -28,8 +32,15 @@ def auth_service(mock_customer_repository, mock_profile_repository, mock_employe
         profile_repository=mock_profile_repository,
         employee_repository=mock_employee_repository,
     )
+    
+@pytest.fixture
+def auth_controller(mock_customer_repository, mock_profile_repository, db_session):
+    controller = AuthController(db_session)
+    controller.customer_gateway = mock_customer_repository
+    controller.profile_gateway = mock_profile_repository
+    return controller
 
-def test_login_customer_by_cpf(auth_service, mock_customer_repository, mock_profile_repository):
+def test_login_customer_by_cpf(auth_controller, mock_customer_repository, mock_profile_repository):
     customer = Customer(
         id=1,
         person=type('Person', (), {"name": "John Doe", "cpf": "12345678900", "email": "john@example.com"})
@@ -41,17 +52,17 @@ def test_login_customer_by_cpf(auth_service, mock_customer_repository, mock_prof
 
     auth_dto = AuthByCpfDTO(cpf="12345678900")
 
-    token_dto = auth_service.login_customer_by_cpf(auth_dto)
+    token_dto = auth_controller.login_customer_by_cpf(auth_dto)
 
     assert token_dto.access_token is not None
     assert token_dto.token_type == "bearer"
 
-def test_login_customer_by_cpf_not_found(auth_service, mock_customer_repository):
+def test_login_customer_by_cpf_not_found(auth_controller, mock_customer_repository):
     mock_customer_repository.get_by_cpf.return_value = None
     auth_dto = AuthByCpfDTO(cpf="12345678900")
 
     with pytest.raises(EntityNotFoundException, match="Customer not found."):
-        auth_service.login_customer_by_cpf(auth_dto)
+        auth_controller.login_customer_by_cpf(auth_dto)
 
 def test_login_anonymous(auth_service, mock_profile_repository):
     profile = Profile(name="Customer", permissions=[Permission(name="view_orders")])
