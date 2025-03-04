@@ -37,4 +37,4 @@ def get_oauth_token(
     elif form_data.username:
         return auth_controller.login_customer_by_cpf(AuthByCpfDTO(cpf=form_data.username))
    
-    return auth_service.login_anonymous()
+    return auth_controller.login_customer_anonymous()
