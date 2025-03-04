@@ -12,6 +12,8 @@ from src.core.domain.dtos.person.person_dto import PersonDTO
 from src.core.domain.dtos.person.create_person_dto import CreatePersonDTO
 from src.core.ports.person.i_person_repository import IPersonRepository
 from src.core.ports.person.i_person_service import IPersonService
+from src.adapters.driver.api.v1.controllers.person_controller import PersonController
+
 
 router = APIRouter()
 
@@ -19,6 +21,10 @@ router = APIRouter()
 def _get_person_service(db_session: Session = Depends(get_db)) -> IPersonService:
     repository: IPersonRepository = PersonRepository(db_session)
     return PersonService(repository)
+
+
+def _get_person_controller(db_session: Session = Depends(get_db)) -> PersonController:
+    return PersonController(db_session)
 
 
 @router.post(
@@ -29,10 +35,10 @@ def _get_person_service(db_session: Session = Depends(get_db)) -> IPersonService
 )
 def create_person(
     dto: CreatePersonDTO,
-    service: IPersonService = Depends(_get_person_service),
+    controller: PersonController = Depends(_get_person_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_person(dto)
+    return controller.create_person(dto)
 
 
 @router.get(
