@@ -8,7 +8,7 @@ from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.domain.entities.payment import Payment
 from src.core.ports.payment.i_payment_service import IPaymentService
-from src.core.ports.payment.i_payment_gateway import IPaymentGateway
+from src.core.ports.payment.i_payment_provider_gateway import IPaymentProviderGateway
 from src.core.ports.payment.i_payment_repository import IPaymentRepository
 from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
@@ -24,7 +24,7 @@ class PaymentService(IPaymentService):
 
     def __init__(
         self,
-        gateway: IPaymentGateway,
+        gateway: IPaymentProviderGateway,
         repository: IPaymentRepository,
         payment_status_repository: IPaymentStatusRepository,
         payment_method_repository: IPaymentMethodRepository,
@@ -46,6 +46,7 @@ class PaymentService(IPaymentService):
         :param current_user: Usuário autenticado.
         :return: Detalhes do pagamento.
         """
+        
         order: Order = self.order_repository.get_by_id(order_id)
         
         if not order:

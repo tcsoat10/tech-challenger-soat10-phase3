@@ -12,7 +12,7 @@ from src.adapters.driven.payment_providers.mercado_pago_gateway import MercadoPa
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from config.database import get_db
-from src.core.ports.payment.i_payment_gateway import IPaymentGateway
+from src.core.ports.payment.i_payment_provider_gateway import IPaymentProviderGateway
 from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
 from src.application.services.payment_service import PaymentService
@@ -28,7 +28,7 @@ def _get_payment_service(db_session: Session = Depends(get_db)) -> IPaymentServi
     repository: IPaymentRepository = PaymentRepository(db_session)
     payment_method_repository: IPaymentMethodRepository = PaymentMethodRepository(db_session)
     payment_status_repository: IPaymentStatusRepository = PaymentStatusRepository(db_session)
-    payment_gateway: IPaymentGateway = MercadoPagoGateway()
+    payment_gateway: IPaymentProviderGateway = MercadoPagoGateway()
     order_repository: IOrderRepository = OrderRepository(db_session)
     order_status_repository: IOrderStatusRepository = OrderStatusRepository(db_session)
 

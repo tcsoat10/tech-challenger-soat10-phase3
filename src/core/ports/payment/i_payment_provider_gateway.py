@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
-from src.constants.payment_status import PaymentStatusEnum
 
-
-class IPaymentGateway(ABC):
+class IPaymentProviderGateway(ABC):
     """
     Interface para gateways de pagamento. Define os métodos necessários para integrar diferentes
     provedores de pagamento, como Mercado Pago ou gateways simulados.
