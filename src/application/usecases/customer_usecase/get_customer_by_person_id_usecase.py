@@ -16,4 +16,8 @@ class GetCustomerByPersonIdUsecase:
         customer = self.customer_gateway.get_by_person_id(person_id)
         if not customer:
             raise EntityNotFoundException(entity_name='Customer')
+        
+        if IsCustomerUsecase.is_customer(current_user) and int(current_user['person']['id']) != customer.id:
+            raise EntityNotFoundException(entity_name='Customer')
+
         return customer
