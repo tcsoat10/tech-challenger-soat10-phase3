@@ -52,10 +52,10 @@ def create_customer(
 )
 def get_customer_by_id(
     customer_id: int,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_customer_by_id(customer_id, user)
+    return controller.get_customer_by_id(customer_id, user)
 
 
 @router.get(
