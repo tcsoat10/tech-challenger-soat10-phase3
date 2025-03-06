@@ -4,26 +4,20 @@ from typing import List, Optional
 
 from src.adapters.driver.api.v1.decorators.bypass_auth import bypass_auth
 from config.database import get_db
-from src.core.ports.customer.i_customer_service import ICustomerService
-from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.adapters.driven.repositories.customer_repository import CustomerRepository
-from src.core.ports.person.i_person_repository import IPersonRepository
-from src.adapters.driven.repositories.person_repository import PersonRepository
-from src.application.services.customer_service import CustomerService
 from src.core.domain.dtos.customer.customer_dto import CustomerDTO
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
 from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import CustomerPermissions
+from src.adapters.driver.api.v1.controllers.customer_controller import CustomerController
 
 
 router = APIRouter()
 
 
-def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerService:
-    customer_repository: ICustomerRepository = CustomerRepository(db_session)
-    person_repository: IPersonRepository = PersonRepository(db_session)
-    return CustomerService(customer_repository, person_repository)
+def _get_customer_controller(db_session: Session = Depends(get_db)) -> CustomerController:
+    return CustomerController(db_session)
+
 
 @router.post(
     '/customers',
@@ -33,9 +27,9 @@ def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerSer
 @bypass_auth()
 def create_customer(
     dto: CreateCustomerDTO,
-    service: ICustomerService = Depends(_get_customer_service)
+    controller: CustomerController = Depends(_get_customer_controller),
 ):
-    return service.create_customer(dto)
+    return controller.create_customer(dto)
 
 
 @router.get(
@@ -46,10 +40,10 @@ def create_customer(
 )
 def get_customer_by_id(
     customer_id: int,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_customer_by_id(customer_id, user)
+    return controller.get_customer_by_id(customer_id, user)
 
 
 @router.get(
@@ -60,10 +54,10 @@ def get_customer_by_id(
 )
 def get_customer_by_person_id(
     person_id: int,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_customer_by_person_id(person_id, user)
+    return controller.get_customer_by_person_id(person_id, user)
 
 
 @router.get(
@@ -74,10 +68,10 @@ def get_customer_by_person_id(
 )
 def get_all_customers(
     include_deleted: Optional[bool] = False,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_customers(user, include_deleted=include_deleted)
+    return controller.get_all_customers(user, include_deleted=include_deleted)
 
 
 @router.put(
@@ -89,10 +83,10 @@ def get_all_customers(
 def update_customer(
     customer_id: int,
     dto: UpdateCustomerDTO,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_customer(customer_id, dto, user)
+    return controller.update_customer(customer_id, dto, user)
 
 
 @router.delete(
@@ -102,7 +96,7 @@ def update_customer(
 )
 def delete_customer(
     customer_id: int,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_customer(customer_id, user)
+    controller.delete_customer(customer_id, user)
