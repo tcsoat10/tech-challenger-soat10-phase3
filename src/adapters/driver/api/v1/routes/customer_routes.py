@@ -15,6 +15,7 @@ from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
 from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import CustomerPermissions
+from src.adapters.driver.api.v1.controllers.customer_controller import CustomerController
 
 
 router = APIRouter()
@@ -25,6 +26,11 @@ def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerSer
     person_repository: IPersonRepository = PersonRepository(db_session)
     return CustomerService(customer_repository, person_repository)
 
+
+def _get_customer_controller(db_session: Session = Depends(get_db)) -> CustomerController:
+    return CustomerController(db_session)
+
+
 @router.post(
     '/customers',
     response_model=CustomerDTO,
@@ -33,9 +39,9 @@ def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerSer
 @bypass_auth()
 def create_customer(
     dto: CreateCustomerDTO,
-    service: ICustomerService = Depends(_get_customer_service)
+    controller: CustomerController = Depends(_get_customer_controller),
 ):
-    return service.create_customer(dto)
+    return controller.create_customer(dto)
 
 
 @router.get(
