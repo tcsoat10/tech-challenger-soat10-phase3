@@ -10,6 +10,7 @@ from src.core.domain.dtos.customer.customer_dto import CustomerDTO
 from src.application.usecases.customer_usecase.create_customer_usecase import CreateCustomerUsecase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.customer_usecase.get_customer_by_id_usecase import GetCustomerByIdUsecase
+from src.application.usecases.customer_usecase.get_customer_by_person_id_usecase import GetCustomerByPersonIdUsecase
 
 
 class CustomerController:
@@ -25,4 +26,9 @@ class CustomerController:
     def get_customer_by_id(self, customer_id: int, current_user: dict) -> CustomerDTO:
         customer_by_id_usecase = GetCustomerByIdUsecase.build(self.customer_gateway)
         customer = customer_by_id_usecase.execute(customer_id, current_user)
+        return DTOPresenter.transform(customer, CustomerDTO)
+
+    def get_customer_by_person_id(self, person_id: int, current_user: dict) -> CustomerDTO:
+        customer_by_person_id_usecase = GetCustomerByPersonIdUsecase.build(self.customer_gateway)
+        customer = customer_by_person_id_usecase.execute(person_id, current_user)
         return DTOPresenter.transform(customer, CustomerDTO)
