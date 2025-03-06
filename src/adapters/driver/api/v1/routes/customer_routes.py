@@ -95,10 +95,10 @@ def get_all_customers(
 def update_customer(
     customer_id: int,
     dto: UpdateCustomerDTO,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_customer(customer_id, dto, user)
+    return controller.update_customer(customer_id, dto, user)
 
 
 @router.delete(

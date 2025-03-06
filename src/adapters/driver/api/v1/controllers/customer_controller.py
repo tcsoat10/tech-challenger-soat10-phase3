@@ -13,6 +13,8 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.customer_usecase.get_customer_by_id_usecase import GetCustomerByIdUsecase
 from src.application.usecases.customer_usecase.get_customer_by_person_id_usecase import GetCustomerByPersonIdUsecase
 from src.application.usecases.customer_usecase.get_all_customers_usecase import GetAllCustomersUsecase
+from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
+from src.application.usecases.customer_usecase.update_customer_usecase import UpdateCustomerUsecase
 
 
 class CustomerController:
@@ -39,3 +41,8 @@ class CustomerController:
         all_customers_usecase = GetAllCustomersUsecase.build(self.customer_gateway)
         customers = all_customers_usecase.execute(current_user, include_deleted)
         return DTOPresenter.transform_list(customers, CustomerDTO)
+    
+    def update_customer(self, customer_id: int, dto: UpdateCustomerDTO, current_user: dict) -> CustomerDTO:
+        update_customer_usecase = UpdateCustomerUsecase.build(self.customer_gateway, self.person_gateway)
+        customer = update_customer_usecase.execute(customer_id, dto, current_user)
+        return DTOPresenter.transform(customer, CustomerDTO)
