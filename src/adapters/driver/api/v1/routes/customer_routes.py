@@ -108,7 +108,7 @@ def update_customer(
 )
 def delete_customer(
     customer_id: int,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    service.delete_customer(customer_id, user)
+    controller.delete_customer(customer_id, user)

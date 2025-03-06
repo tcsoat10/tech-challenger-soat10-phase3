@@ -15,6 +15,7 @@ from src.application.usecases.customer_usecase.get_customer_by_person_id_usecase
 from src.application.usecases.customer_usecase.get_all_customers_usecase import GetAllCustomersUsecase
 from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
 from src.application.usecases.customer_usecase.update_customer_usecase import UpdateCustomerUsecase
+from src.application.usecases.customer_usecase.delete_customer_usecase import DeleteCustomerUsecase
 
 
 class CustomerController:
@@ -46,3 +47,7 @@ class CustomerController:
         update_customer_usecase = UpdateCustomerUsecase.build(self.customer_gateway, self.person_gateway)
         customer = update_customer_usecase.execute(customer_id, dto, current_user)
         return DTOPresenter.transform(customer, CustomerDTO)
+    
+    def delete_customer(self, customer_id: int, current_user: dict) -> None:
+        delete_customer_usecase = DeleteCustomerUsecase.build(self.customer_gateway)
+        delete_customer_usecase.execute(customer_id, current_user)
