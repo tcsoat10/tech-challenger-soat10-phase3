@@ -80,10 +80,10 @@ def get_customer_by_person_id(
 )
 def get_all_customers(
     include_deleted: Optional[bool] = False,
-    service: ICustomerService = Depends(_get_customer_service),
+    controller: CustomerController = Depends(_get_customer_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_customers(user, include_deleted=include_deleted)
+    return controller.get_all_customers(user, include_deleted=include_deleted)
 
 
 @router.put(

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Optional, List
 
 
 from src.core.ports.person.i_person_repository import IPersonRepository
@@ -11,6 +12,7 @@ from src.application.usecases.customer_usecase.create_customer_usecase import Cr
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.customer_usecase.get_customer_by_id_usecase import GetCustomerByIdUsecase
 from src.application.usecases.customer_usecase.get_customer_by_person_id_usecase import GetCustomerByPersonIdUsecase
+from src.application.usecases.customer_usecase.get_all_customers_usecase import GetAllCustomersUsecase
 
 
 class CustomerController:
@@ -32,3 +34,8 @@ class CustomerController:
         customer_by_person_id_usecase = GetCustomerByPersonIdUsecase.build(self.customer_gateway)
         customer = customer_by_person_id_usecase.execute(person_id, current_user)
         return DTOPresenter.transform(customer, CustomerDTO)
+    
+    def get_all_customers(self, current_user: dict, include_deleted: Optional[bool] = False) -> List[CustomerDTO]:
+        all_customers_usecase = GetAllCustomersUsecase.build(self.customer_gateway)
+        customers = all_customers_usecase.execute(current_user, include_deleted)
+        return DTOPresenter.transform_list(customers, CustomerDTO)
