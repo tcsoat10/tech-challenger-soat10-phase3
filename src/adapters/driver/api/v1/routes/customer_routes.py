@@ -4,12 +4,6 @@ from typing import List, Optional
 
 from src.adapters.driver.api.v1.decorators.bypass_auth import bypass_auth
 from config.database import get_db
-from src.core.ports.customer.i_customer_service import ICustomerService
-from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.adapters.driven.repositories.customer_repository import CustomerRepository
-from src.core.ports.person.i_person_repository import IPersonRepository
-from src.adapters.driven.repositories.person_repository import PersonRepository
-from src.application.services.customer_service import CustomerService
 from src.core.domain.dtos.customer.customer_dto import CustomerDTO
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
 from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
@@ -19,12 +13,6 @@ from src.adapters.driver.api.v1.controllers.customer_controller import CustomerC
 
 
 router = APIRouter()
-
-
-def _get_customer_service(db_session: Session = Depends(get_db)) -> ICustomerService:
-    customer_repository: ICustomerRepository = CustomerRepository(db_session)
-    person_repository: IPersonRepository = PersonRepository(db_session)
-    return CustomerService(customer_repository, person_repository)
 
 
 def _get_customer_controller(db_session: Session = Depends(get_db)) -> CustomerController:
