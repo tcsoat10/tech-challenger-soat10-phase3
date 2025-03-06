@@ -400,22 +400,38 @@ class Order(BaseEntity):
             self.set_status_ready_to_place(order_status_repository, movement_owner)
         else:
             raise BadRequestException(f"Transição de status não suportada: {previous_status.status}")
+    
+    def is_customer_owner(self, customer_id: int):
+        return self.id_customer == customer_id
         
-    def validate_payment(self, current_user: dict) -> Dict[str, Any]:
-        if self.id_customer != int(current_user["person"]["id"]):
-            raise BadRequestException("Você não tem permissão para acessar este pedido.")
-        
-        if self.payment and (
-            self.payment.is_pending() or self.payment.is_completed()
-        ):
-            return {
-                "payment_id": self.payment.id,
-                "transaction_id": self.payment.transaction_id,
-                "qr_code_link": self.payment.qr_code
-            }
+    def has_payment(self) -> bool:
+        return self.payment is not None
 
-        if self.order_status.status != OrderStatusEnum.ORDER_PLACED.status:
+    def is_in_placed_status(self):
+        return self.order_status.status == OrderStatusEnum.ORDER_PLACED.status
+    
+    def validate_payment(self, current_user: dict) -> Optional[Dict[str, Any]]:
+        """
+        Validates if the order is eligible for payment processing.
+        Returns payment data if a payment already exists and is pending or completed.
+        Raises exceptions if validation fails.
+        """
+        current_user_id = int(current_user["person"]["id"])    
+        if not self.is_customer_owner(current_user_id):
+            raise BadRequestException("Você não tem permissão para acessar este pedido.")
+
+        if self.has_payment():
+            if self.payment.is_pending() or self.payment.is_completed():
+                return {
+                    "payment_id": self.payment.id,
+                    "transaction_id": self.payment.transaction_id,
+                    "qr_code_link": self.payment.qr_code,
+                }
+
+        if not self.is_in_placed_status():
             raise BadRequestException("Não é possível processar o pagamento neste momento.")
+
+        return None
 
     def prepare_payment_data(self, webhook_url: str) -> Dict[str, Any]:
         return {
