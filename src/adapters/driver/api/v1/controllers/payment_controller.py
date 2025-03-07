@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from src.application.usecases.payment_usecase.payment_provider_webhook_handler_use_case import PaymentProviderWebhookHandlerUseCase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.core.domain.dtos.payment.qr_code_payment_dto import QrCodePaymentDTO
 from src.adapters.driven.payment_providers.mercado_pago_gateway import MercadoPagoGateway
@@ -38,3 +39,14 @@ class PaymentController:
         )
         payment = process_payment_use_case.execute(order_id, method_payment, current_user)
         return DTOPresenter.transform_from_dict(payment, QrCodePaymentDTO)
+
+    def payment_provider_webhook(self, payload: dict) -> dict:
+        payment_provider_webhook_use_case = PaymentProviderWebhookHandlerUseCase.build(
+            self.payment_provider_gateway,
+            self.payment_gateway,
+            self.payment_status_gateway,
+            self.order_gateway,
+            self.order_status_gateway
+        )
+        return payment_provider_webhook_use_case.execute(payload)
+            

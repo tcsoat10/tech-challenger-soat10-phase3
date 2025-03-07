@@ -1,7 +1,6 @@
 import pytest
 
 from src.adapters.driven.repositories.payment_repository import PaymentRepository
-from src.application.services.payment_service import PaymentService
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.exceptions.bad_request_exception import BadRequestException
