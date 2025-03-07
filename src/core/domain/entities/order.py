@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+import uuid
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
 from src.constants.order_transition import PRODUCT_CATEGORY_TO_ORDER_STATUS, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES_ALLOWING_REVERSAL_TRANSITIONS
-from src.constants.payment_status import PaymentStatusEnum
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.entities.employee import Employee
@@ -73,7 +73,7 @@ class Order(BaseEntity):
     @property
     def is_paid(self) -> bool:
         if self.payment:
-            return self.payment.payment_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status
+            return self.payment.is_completed()
         return False
 
 
@@ -400,7 +400,59 @@ class Order(BaseEntity):
             self.set_status_ready_to_place(order_status_repository, movement_owner)
         else:
             raise BadRequestException(f"Transição de status não suportada: {previous_status.status}")
+    
+    def is_customer_owner(self, customer_id: int):
+        return self.id_customer == customer_id
         
+    def has_payment(self) -> bool:
+        return self.payment is not None
+
+    def is_in_placed_status(self):
+        return self.order_status.status == OrderStatusEnum.ORDER_PLACED.status
+    
+    def validate_payment(self, current_user: dict) -> Optional[Dict[str, Any]]:
+        """
+        Validates if the order is eligible for payment processing.
+        Returns payment data if a payment already exists and is pending or completed.
+        Raises exceptions if validation fails.
+        """
+        current_user_id = int(current_user["person"]["id"])    
+        if not self.is_customer_owner(current_user_id):
+            raise BadRequestException("Você não tem permissão para acessar este pedido.")
+
+        if self.has_payment():
+            if self.payment.is_pending() or self.payment.is_completed():
+                return {
+                    "payment_id": self.payment.id,
+                    "transaction_id": self.payment.transaction_id,
+                    "qr_code_link": self.payment.qr_code,
+                }
+
+        if not self.is_in_placed_status():
+            raise BadRequestException("Não é possível processar o pagamento neste momento.")
+
+        return None
+
+    def prepare_payment_data(self, webhook_url: str) -> Dict[str, Any]:
+        return {
+            "external_reference": f"order-{self.id}-{uuid.uuid4()}",
+            "notification_url": f"{webhook_url}/api/v1/webhook/payment",
+            "total_amount": self.total,
+            "items": [
+                {
+                    "category": order_item.product.category.name,
+                    "title": order_item.product.name,
+                    "description": order_item.product.description,
+                    "quantity": order_item.quantity,
+                    "unit_measure": "unit",
+                    "unit_price": order_item.product.price,
+                    "total_amount": order_item.total
+                }
+                for order_item in self.order_items
+            ],
+            "title": f"Compra do pedido {self.id}",
+            "description": f"Compra do pedido {self.id}"
+        }
 
 class OrderStatusMovement(BaseEntity):
     __tablename__ = 'order_status_movements'

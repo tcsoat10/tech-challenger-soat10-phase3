@@ -4,10 +4,10 @@ from typing import Dict, Any
 from config.settings import MERCADO_PAGO_ACCESS_TOKEN, MERCADO_PAGO_USER_ID, MERCADO_PAGO_POS_ID
 from src.constants.payment_status import PaymentStatusEnum
 from src.core.exceptions.bad_request_exception import BadRequestException
-from src.core.ports.payment.i_payment_gateway import IPaymentGateway
+from src.core.ports.payment.i_payment_provider_gateway import IPaymentProviderGateway
 
 
-class MercadoPagoGateway(IPaymentGateway):
+class MercadoPagoGateway(IPaymentProviderGateway):
     """
     Implementação do gateway de pagamento usando a API oficial do Mercado Pago.
     """

@@ -20,3 +20,7 @@ class PaymentFactory(SQLAlchemyModelFactory):
     payment_method_id = factory.SelfAttribute('payment_method.id')
     payment_status = factory.SubFactory(PaymentStatusFactory)
     payment_status_id = factory.SelfAttribute('payment_status.id')
+    amount = factory.Faker('pyfloat', positive=True, min_value=1, max_value=1000)
+    external_reference = factory.Faker('uuid4')
+    qr_code = factory.LazyAttribute(lambda _: fake.url())
+    transaction_id = factory.Faker('uuid4')
