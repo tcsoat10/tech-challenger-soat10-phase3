@@ -55,10 +55,10 @@ def create_employee(
 )
 def get_employee_by_id(
     employee_id: int,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_employee_by_id(employee_id)
+    return controller.get_employee_by_id(employee_id)
 
 
 @router.get(
