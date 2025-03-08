@@ -25,34 +25,6 @@ class EmployeeService(IEmployeeService):
         self.role_repository = role_repository
         self.user_repository = user_repository
     
-    def update_employee(self, employee_id: int, dto: UpdateEmployeeDTO) -> EmployeeDTO:
-        employee = self.repository.get_by_id(employee_id)
-        if not employee:
-            raise EntityNotFoundException(entity_name='Employee')
-        
-        if employee.is_deleted():
-            raise EntityNotFoundException(entity_name='Employee')
-        
-        person = self.person_repository.get_by_id(dto.person_id)
-        if not person:
-            raise EntityNotFoundException(entity_name='Person')
-        
-        role = self.role_repository.get_by_id(dto.role_id)
-        if not role:
-            raise EntityNotFoundException(entity_name='Role')
-        
-        user = self.user_repository.get_by_id(dto.user_id)
-        if not user:
-            raise EntityNotFoundException(entity_name='User')
-        
-        employee.person = person
-        employee.role = role
-        employee.user = user
-
-        employee = self.repository.update(employee)
-
-        return EmployeeDTO.from_entity(employee)
-    
     def delete_employee(self, employee_id: int) -> None:
         employee = self.repository.get_by_id(employee_id)
         if not employee:

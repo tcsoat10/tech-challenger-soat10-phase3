@@ -126,10 +126,10 @@ def get_all_employees(
 def update_employee(
     employee_id: int,
     dto: UpdateEmployeeDTO,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.update_employee(employee_id, dto)
+    return controller.update_employee(employee_id, dto)
 
 
 @router.delete(
