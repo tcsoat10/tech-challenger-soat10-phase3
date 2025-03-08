@@ -12,6 +12,7 @@ from src.application.services.role_service import RoleService
 from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
+from src.adapters.driver.api.v1.controllers.role_controller import RoleController
 
 
 router = APIRouter()
@@ -22,6 +23,10 @@ def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
     return RoleService(repository)
 
 
+def _get_role_controller(db_session: Session = Depends(get_db)) -> RoleController:
+    return RoleController(db_session)
+
+
 @router.post(
     '/roles',
     response_model=RoleDTO,
@@ -30,10 +35,10 @@ def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
 )
 def create_role(
     dto: CreateRoleDTO,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_role(dto)
+    return controller.create_role(dto)
 
 
 @router.get(
