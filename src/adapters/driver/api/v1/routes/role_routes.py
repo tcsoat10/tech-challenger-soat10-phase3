@@ -1,25 +1,21 @@
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import RolePermissions
-from src.core.ports.role.i_role_service import IRoleService
-from src.core.ports.role.i_role_repository import IRoleRepository
-from src.adapters.driven.repositories.role_repository import RoleRepository
-from src.application.services.role_service import RoleService
 from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
+from src.adapters.driver.api.v1.controllers.role_controller import RoleController
 
 
 router = APIRouter()
 
 
-def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
-    repository: IRoleRepository = RoleRepository(db_session)
-    return RoleService(repository)
+def _get_role_controller(db_session: Session = Depends(get_db)) -> RoleController:
+    return RoleController(db_session)
 
 
 @router.post(
@@ -30,10 +26,10 @@ def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
 )
 def create_role(
     dto: CreateRoleDTO,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.create_role(dto)
+    return controller.create_role(dto)
 
 
 @router.get(
@@ -44,10 +40,10 @@ def create_role(
 )
 def get_role_by_name(
     role_name: str,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_role_by_name(role_name)
+    return controller.get_role_by_name(role_name)
 
 
 @router.get(
@@ -58,10 +54,10 @@ def get_role_by_name(
 )
 def get_role_by_id(
     role_id: str,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_role_by_id(role_id)
+    return controller.get_role_by_id(role_id)
 
 
 @router.get(
@@ -71,10 +67,11 @@ def get_role_by_id(
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
 def get_all_roles(
-    service: IRoleService = Depends(_get_role_service),
+    include_deleted: Optional[bool] = Query(False),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_roles()
+    return controller.get_all_roles(include_deleted)
 
 
 @router.put(
@@ -86,10 +83,10 @@ def get_all_roles(
 def update_role(
     role_id: int,
     dto: UpdateRoleDTO,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_role(role_id, dto)
+    return controller.update_role(role_id, dto)
 
 
 @router.delete(
@@ -99,7 +96,7 @@ def update_role(
 )
 def delete_role(
     role_id: int,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_role(role_id)
+    controller.delete_role(role_id)
