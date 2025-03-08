@@ -111,10 +111,10 @@ def list_employees_by_role_id(
 )
 def get_all_employees(
     include_deleted: Optional[bool] = False,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_all_employees(include_deleted=include_deleted)
+    return controller.get_all_employees(include_deleted=include_deleted)
 
 
 @router.put(

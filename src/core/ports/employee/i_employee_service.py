@@ -7,10 +7,6 @@ from src.core.domain.dtos.employee.update_employee_dto import UpdateEmployeeDTO
 
 
 class IEmployeeService(ABC):
-
-    @abstractmethod
-    def get_all_employees(self, include_deleted: bool = False) -> List[EmployeeDTO]:
-        pass
     
     @abstractmethod
     def update_employee(self, employee_id: int, dto: UpdateEmployeeDTO) -> EmployeeDTO:

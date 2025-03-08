@@ -25,10 +25,6 @@ class EmployeeService(IEmployeeService):
         self.role_repository = role_repository
         self.user_repository = user_repository
     
-    def get_all_employees(self, include_deleted: bool = False) -> List[EmployeeDTO]:
-        employees = self.repository.get_all(include_deleted=include_deleted)
-        return [EmployeeDTO.from_entity(employee) for employee in employees]
-    
     def update_employee(self, employee_id: int, dto: UpdateEmployeeDTO) -> EmployeeDTO:
         employee = self.repository.get_by_id(employee_id)
         if not employee:

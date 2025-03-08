@@ -1,6 +1,8 @@
 
+from typing import Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.employee_usecase.get_all_employees_usecase import GetAllEmployeesUseCase
 from src.application.usecases.employee_usecase.list_employees_by_role_id import ListEmployeesByRoleIdUseCase
 from src.application.usecases.employee_usecase.get_employee_by_user_id_usecase import GetEmployeeByUserIdUseCase
 from src.application.usecases.employee_usecase.get_employee_by_person_id_usecase import GetEmployeeByPersonIdUseCase
@@ -54,4 +56,9 @@ class EmployeeController:
     def list_employees_by_role_id(self, role_id: int) -> list[EmployeeDTO]:
         list_employees_by_role_id_use_case = ListEmployeesByRoleIdUseCase.build(self.employee_gateway)
         employees = list_employees_by_role_id_use_case.execute(role_id)
+        return DTOPresenter.transform_list(employees, EmployeeDTO)
+
+    def get_all_employees(self, include_deleted: Optional[bool] = False) -> list[EmployeeDTO]:
+        get_all_employees_use_case = GetAllEmployeesUseCase.build(self.employee_gateway)
+        employees = get_all_employees_use_case.execute(include_deleted=include_deleted)
         return DTOPresenter.transform_list(employees, EmployeeDTO)
