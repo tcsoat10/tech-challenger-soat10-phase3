@@ -63,10 +63,10 @@ def get_role_by_name(
 )
 def get_role_by_id(
     role_id: str,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_role_by_id(role_id)
+    return controller.get_role_by_id(role_id)
 
 
 @router.get(
