@@ -69,10 +69,10 @@ def get_employee_by_id(
 )
 def get_employee_by_person_id(
     person_id: int,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_employee_by_person_id(person_id)
+    return controller.get_employee_by_person_id(person_id)
 
 
 @router.get(

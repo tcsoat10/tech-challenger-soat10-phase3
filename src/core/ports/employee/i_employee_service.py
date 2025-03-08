@@ -9,10 +9,6 @@ from src.core.domain.dtos.employee.update_employee_dto import UpdateEmployeeDTO
 class IEmployeeService(ABC):
 
     @abstractmethod
-    def get_employee_by_person_id(self, person_id: int) -> EmployeeDTO:
-        pass
-
-    @abstractmethod
     def get_employee_by_user_id(self, user_id: int) -> EmployeeDTO:
         pass
 
