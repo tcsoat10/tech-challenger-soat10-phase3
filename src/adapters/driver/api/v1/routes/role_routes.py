@@ -5,10 +5,6 @@ from typing import List, Optional
 from config.database import get_db
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import RolePermissions
-from src.core.ports.role.i_role_service import IRoleService
-from src.core.ports.role.i_role_repository import IRoleRepository
-from src.adapters.driven.repositories.role_repository import RoleRepository
-from src.application.services.role_service import RoleService
 from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
@@ -16,11 +12,6 @@ from src.adapters.driver.api.v1.controllers.role_controller import RoleControlle
 
 
 router = APIRouter()
-
-
-def _get_role_service(db_session: Session = Depends(get_db)) -> IRoleService:
-    repository: IRoleRepository = RoleRepository(db_session)
-    return RoleService(repository)
 
 
 def _get_role_controller(db_session: Session = Depends(get_db)) -> RoleController:
