@@ -18,7 +18,7 @@ class IRoleRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self) -> List[Role]:
+    def get_all(self, include_deleted: bool = False) -> List[Role]:
         pass
 
     @abstractmethod

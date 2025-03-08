@@ -22,8 +22,11 @@ class RoleRepository(IRoleRepository):
     def get_by_id(self, role_id: int) -> Role:
         return self.db_session.query(Role).filter(Role.id == role_id).first()
     
-    def get_all(self) -> List[Role]:
-        return self.db_session.query(Role).all()
+    def get_all(self, include_deleted: bool = False) -> List[Role]:
+        query = self.db_session.query(Role)
+        if not include_deleted:
+            query = query.filter(Role.inactivated_at.is_(None))
+        return query.all()
     
     def update(self, role: Role) -> Role:
         self.db_session.merge(role)
