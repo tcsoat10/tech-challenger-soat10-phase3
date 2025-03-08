@@ -25,12 +25,6 @@ class EmployeeService(IEmployeeService):
         self.role_repository = role_repository
         self.user_repository = user_repository
     
-    def get_employee_by_user_id(self, user_id: int) -> EmployeeDTO:
-        employee = self.repository.get_by_user_id(user_id)
-        if not employee:
-            raise EntityNotFoundException(entity_name='Employee')
-        return EmployeeDTO.from_entity(employee)
-    
     def get_employees_by_role_id(self, role_id: int) -> List[EmployeeDTO]:
         employees = self.repository.get_by_role_id(role_id)
         return [EmployeeDTO.from_entity(employee) for employee in employees]
