@@ -11,6 +11,8 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.role_usecase.get_role_by_name_usecase import GetRoleByNameUsecase
 from src.application.usecases.role_usecase.get_role_by_id_usecase import GetRoleByIdUsecase
 from src.application.usecases.role_usecase.get_all_roles_usecase import GetAllRolesUsecase
+from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
+from src.application.usecases.role_usecase.update_role_usecase import UpdateRoleUsecase
 
 
 class RoleController:
@@ -36,3 +38,8 @@ class RoleController:
         all_roles_usecase = GetAllRolesUsecase.build(self.role_gateway)
         roles = all_roles_usecase.execute()
         return DTOPresenter.transform_list(roles, RoleDTO)
+    
+    def update_role(self, role_id: int, dto: UpdateRoleDTO) -> RoleDTO:
+        update_role_usecase = UpdateRoleUsecase.build(self.role_gateway)
+        role = update_role_usecase.execute(role_id, dto)
+        return DTOPresenter.transform(role, RoleDTO)

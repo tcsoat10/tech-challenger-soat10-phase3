@@ -91,10 +91,10 @@ def get_all_roles(
 def update_role(
     role_id: int,
     dto: UpdateRoleDTO,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.update_role(role_id, dto)
+    return controller.update_role(role_id, dto)
 
 
 @router.delete(
