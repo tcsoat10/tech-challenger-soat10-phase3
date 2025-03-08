@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from config.database import get_db
 from src.core.auth.dependencies import get_current_user
@@ -76,10 +76,11 @@ def get_role_by_id(
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
 def get_all_roles(
+    include_deleted: Optional[bool] = Query(False),
     controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return controller.get_all_roles()
+    return controller.get_all_roles(include_deleted)
 
 
 @router.put(
@@ -104,7 +105,7 @@ def update_role(
 )
 def delete_role(
     role_id: int,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    service.delete_role(role_id)
+    controller.delete_role(role_id)

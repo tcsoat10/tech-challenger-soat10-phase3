@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 
 from src.core.ports.role.i_role_repository import IRoleRepository
@@ -13,6 +13,7 @@ from src.application.usecases.role_usecase.get_role_by_id_usecase import GetRole
 from src.application.usecases.role_usecase.get_all_roles_usecase import GetAllRolesUsecase
 from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
 from src.application.usecases.role_usecase.update_role_usecase import UpdateRoleUsecase
+from src.application.usecases.role_usecase.delete_role_usecase import DeleteRoleUsecase
 
 
 class RoleController:
@@ -34,12 +35,16 @@ class RoleController:
         role = role_by_id_usecase.exexute(role_id)
         return DTOPresenter.transform(role, RoleDTO)
     
-    def get_all_roles(self) -> List[RoleDTO]:
+    def get_all_roles(self, include_deleted: Optional[bool] = False) -> List[RoleDTO]:
         all_roles_usecase = GetAllRolesUsecase.build(self.role_gateway)
-        roles = all_roles_usecase.execute()
+        roles = all_roles_usecase.execute(include_deleted)
         return DTOPresenter.transform_list(roles, RoleDTO)
     
     def update_role(self, role_id: int, dto: UpdateRoleDTO) -> RoleDTO:
         update_role_usecase = UpdateRoleUsecase.build(self.role_gateway)
         role = update_role_usecase.execute(role_id, dto)
         return DTOPresenter.transform(role, RoleDTO)
+    
+    def delete_role(self, role_id: int) -> None:
+        delete_role_usecase = DeleteRoleUsecase.build(self.role_gateway)
+        delete_role_usecase.execute(role_id)
