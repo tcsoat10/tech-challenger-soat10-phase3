@@ -95,12 +95,12 @@ def get_employee_by_user_id(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[EmployeePermissions.CAN_VIEW_EMPLOYEES])]
 )
-def get_employees_by_role_id(
+def list_employees_by_role_id(
     role_id: int,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.get_employees_by_role_id(role_id)
+    return controller.list_employees_by_role_id(role_id)
 
 
 @router.get(

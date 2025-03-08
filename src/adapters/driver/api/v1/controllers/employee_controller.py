@@ -1,6 +1,7 @@
 
 from sqlalchemy.orm import Session
 
+from src.application.usecases.employee_usecase.list_employees_by_role_id import ListEmployeesByRoleIdUseCase
 from src.application.usecases.employee_usecase.get_employee_by_user_id_usecase import GetEmployeeByUserIdUseCase
 from src.application.usecases.employee_usecase.get_employee_by_person_id_usecase import GetEmployeeByPersonIdUseCase
 from src.application.usecases.employee_usecase.get_employee_by_id_usecase import GetEmployeeByIdUseCase
@@ -49,3 +50,8 @@ class EmployeeController:
         get_employee_by_user_id_use_case = GetEmployeeByUserIdUseCase.build(self.employee_gateway)
         employee = get_employee_by_user_id_use_case.execute(user_id)
         return DTOPresenter.transform(employee, EmployeeDTO)
+
+    def list_employees_by_role_id(self, role_id: int) -> list[EmployeeDTO]:
+        list_employees_by_role_id_use_case = ListEmployeesByRoleIdUseCase.build(self.employee_gateway)
+        employees = list_employees_by_role_id_use_case.execute(role_id)
+        return DTOPresenter.transform_list(employees, EmployeeDTO)
