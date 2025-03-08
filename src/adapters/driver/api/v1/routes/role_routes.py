@@ -76,10 +76,10 @@ def get_role_by_id(
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
 def get_all_roles(
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_all_roles()
+    return controller.get_all_roles()
 
 
 @router.put(

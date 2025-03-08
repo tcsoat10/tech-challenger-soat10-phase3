@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import List
 
 
 from src.core.ports.role.i_role_repository import IRoleRepository
@@ -9,6 +10,7 @@ from src.application.usecases.role_usecase.create_role_usecase import CreateRole
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.role_usecase.get_role_by_name_usecase import GetRoleByNameUsecase
 from src.application.usecases.role_usecase.get_role_by_id_usecase import GetRoleByIdUsecase
+from src.application.usecases.role_usecase.get_all_roles_usecase import GetAllRolesUsecase
 
 
 class RoleController:
@@ -29,3 +31,8 @@ class RoleController:
         role_by_id_usecase = GetRoleByIdUsecase.build(self.role_gateway)
         role = role_by_id_usecase.exexute(role_id)
         return DTOPresenter.transform(role, RoleDTO)
+    
+    def get_all_roles(self) -> List[RoleDTO]:
+        all_roles_usecase = GetAllRolesUsecase.build(self.role_gateway)
+        roles = all_roles_usecase.execute()
+        return DTOPresenter.transform_list(roles, RoleDTO)
