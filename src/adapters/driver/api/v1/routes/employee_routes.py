@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from config.database import get_db
+from src.adapters.driver.api.v1.controllers.employee_controller import EmployeeController
 from src.core.ports.employee.i_employee_service import IEmployeeService
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
@@ -20,9 +21,7 @@ from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import EmployeePermissions
 
 
-
 router = APIRouter()
-
 
 def _get_employee_service(db_session: Session = Depends(get_db)) -> IEmployeeService:
     employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
@@ -31,6 +30,8 @@ def _get_employee_service(db_session: Session = Depends(get_db)) -> IEmployeeSer
     user_repository: IUserRepository = UserRepository(db_session)
     return EmployeeService(employee_repository, person_repository, role_repository, user_repository)
 
+def _get_employee_controller(db_session: Session = Depends(get_db)) -> EmployeeController:
+    return EmployeeController(db_session)
 
 @router.post(
         '/employees',
@@ -40,10 +41,10 @@ def _get_employee_service(db_session: Session = Depends(get_db)) -> IEmployeeSer
 )
 def create_employee(
     dto: CreateEmployeeDTO,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.create_employee(dto)
+    return controller.create_employee(dto)
 
 
 @router.get(
