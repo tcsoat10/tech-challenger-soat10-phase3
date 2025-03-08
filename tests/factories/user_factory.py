@@ -14,5 +14,5 @@ class UserFactory(SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = 'commit'
     
     id = factory.Sequence(lambda n: n + 1)
-    name = factory.LazyAttribute(lambda _: fake.unique.word())
+    name = factory.LazyAttribute(lambda _: fake.name())
     password = factory.LazyAttribute(lambda _: fake.unique.word())
