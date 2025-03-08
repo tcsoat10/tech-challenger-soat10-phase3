@@ -2,6 +2,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 
+from src.application.usecases.employee_usecase.delete_employee_usecase import DeleteEmployeeUseCase
 from src.application.usecases.employee_usecase.update_employee_usecase import UpdateEmployeeUseCase
 from src.core.domain.dtos.employee.update_employee_dto import UpdateEmployeeDTO
 from src.application.usecases.employee_usecase.get_all_employees_usecase import GetAllEmployeesUseCase
@@ -74,3 +75,8 @@ class EmployeeController:
         )
         employee = update_employee_use_case.execute(employee_id, dto)
         return DTOPresenter.transform(employee, EmployeeDTO)
+    
+    def delete_employee(self, employee_id: int) -> None:
+        delete_employee_use_case = DeleteEmployeeUseCase.build(self.employee_gateway)
+        delete_employee_use_case.execute(employee_id)
+        return None

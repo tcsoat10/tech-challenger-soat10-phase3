@@ -4,16 +4,6 @@ from typing import List, Optional
 
 from config.database import get_db
 from src.adapters.driver.api.v1.controllers.employee_controller import EmployeeController
-from src.core.ports.employee.i_employee_service import IEmployeeService
-from src.core.ports.employee.i_employee_repository import IEmployeeRepository
-from src.adapters.driven.repositories.employee_repository import EmployeeRepository
-from src.core.ports.person.i_person_repository import IPersonRepository
-from src.adapters.driven.repositories.person_repository import PersonRepository
-from src.core.ports.role.i_role_repository import IRoleRepository
-from src.adapters.driven.repositories.role_repository import RoleRepository
-from src.core.ports.user.i_user_repository import IUserRepository
-from src.adapters.driven.repositories.user_repository import UserRepository
-from src.application.services.employee_service import EmployeeService
 from src.core.domain.dtos.employee.employee_dto import EmployeeDTO
 from src.core.domain.dtos.employee.create_employee_dto import CreateEmployeeDTO
 from src.core.domain.dtos.employee.update_employee_dto import UpdateEmployeeDTO
@@ -22,13 +12,6 @@ from src.constants.permissions import EmployeePermissions
 
 
 router = APIRouter()
-
-def _get_employee_service(db_session: Session = Depends(get_db)) -> IEmployeeService:
-    employee_repository: IEmployeeRepository = EmployeeRepository(db_session)
-    person_repository: IPersonRepository = PersonRepository(db_session)
-    role_repository: IRoleRepository = RoleRepository(db_session)
-    user_repository: IUserRepository = UserRepository(db_session)
-    return EmployeeService(employee_repository, person_repository, role_repository, user_repository)
 
 def _get_employee_controller(db_session: Session = Depends(get_db)) -> EmployeeController:
     return EmployeeController(db_session)
@@ -139,7 +122,7 @@ def update_employee(
 )
 def delete_employee(
     employee_id: int,
-    service: IEmployeeService = Depends(_get_employee_service),
+    controller: EmployeeController = Depends(_get_employee_controller),
     user: dict = Security(get_current_user)
 ):
-    return service.delete_employee(employee_id)
+    return controller.delete_employee(employee_id)
