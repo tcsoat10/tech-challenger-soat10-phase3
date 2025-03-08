@@ -7,6 +7,7 @@ from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.application.usecases.role_usecase.create_role_usecase import CreateRoleUsecase
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
+from src.application.usecases.role_usecase.get_role_by_name_usecase import GetRoleByNameUsecase
 
 
 class RoleController:
@@ -16,4 +17,9 @@ class RoleController:
     def create_role(self, dto: CreateRoleDTO) -> RoleDTO:
         create_role_usecase = CreateRoleUsecase.build(self.role_gateway)
         role = create_role_usecase.execute(dto)
+        return DTOPresenter.transform(role, RoleDTO)
+    
+    def get_role_by_name(self, name: str) -> RoleDTO:
+        role_by_name_usecase = GetRoleByNameUsecase.build(self.role_gateway)
+        role = role_by_name_usecase.exexute(name)
         return DTOPresenter.transform(role, RoleDTO)

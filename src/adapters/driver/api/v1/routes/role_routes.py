@@ -49,10 +49,10 @@ def create_role(
 )
 def get_role_by_name(
     role_name: str,
-    service: IRoleService = Depends(_get_role_service),
+    controller: RoleController = Depends(_get_role_controller),
     user=Depends(get_current_user)
 ):
-    return service.get_role_by_name(role_name)
+    return controller.get_role_by_name(role_name)
 
 
 @router.get(
