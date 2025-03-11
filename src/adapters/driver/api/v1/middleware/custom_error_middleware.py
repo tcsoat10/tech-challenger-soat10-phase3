@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from src.core.exceptions.bad_request_exception import BadRequestException
-from src.core.exceptions.base_exception import BaseAppException
+from src.core.exceptions.base_exception import BaseDomainException
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.forbidden_exception import ForbiddenException
@@ -22,7 +22,7 @@ class CustomErrorMiddleware:
             return
         try:
             await self.app(scope, receive, send)
-        except BaseAppException as exc:
+        except BaseDomainException as exc:
             logging.warning(f"Middleware capturou exceção: {exc}")
             response = self._create_json_response(exc)
             await response(scope, receive, send)

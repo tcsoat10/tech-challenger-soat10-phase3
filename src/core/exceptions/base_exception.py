@@ -3,7 +3,7 @@ from typing import Optional
 
 from src.core.exceptions.utils import ErrorCode
 
-class BaseAppException(Exception):
+class BaseDomainException(Exception):
     def __init__(self, message: str = None, status_code: int = 400, error_code: Optional[ErrorCode] = None, details: Optional[dict] = None, headers: Optional[dict] = None):
         logging.error(f"Error {error_code}: {message} - Details: {details}")
         self.status_code = status_code
@@ -15,4 +15,4 @@ class BaseAppException(Exception):
         }
         super().__init__(message)
 
-__all__ = ["BaseAppException"]
+__all__ = ["BaseDomainException"]

@@ -1,9 +1,9 @@
 from fastapi import status
 
 from .utils import ErrorCode
-from .base_exception import BaseAppException
+from .base_exception import BaseDomainException
 
-class ValidationException(BaseAppException):
+class ValidationException(BaseDomainException):
     def __init__(self, field: str, expected_format: str, **kwargs):
         super().__init__(
             message=f"Invalid input for field {field}",

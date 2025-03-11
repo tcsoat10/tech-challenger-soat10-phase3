@@ -1,10 +1,10 @@
 from typing import Optional
 from fastapi import status
 from src.core.exceptions.utils import ErrorCode
-from src.core.exceptions.base_exception import BaseAppException
+from src.core.exceptions.base_exception import BaseDomainException
 
 
-class UnauthorizedAccessException(BaseAppException):
+class UnauthorizedAccessException(BaseDomainException):
     def __init__(self, message: Optional[str] = "Unauthorized", **kwargs):
         super().__init__(
             message=message,

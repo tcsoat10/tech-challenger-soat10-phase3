@@ -1,9 +1,9 @@
 from fastapi import status
 
-from src.core.exceptions.base_exception import BaseAppException
+from src.core.exceptions.base_exception import BaseDomainException
 from src.core.exceptions.utils import ErrorCode
 
-class InvalidTokenException(BaseAppException):
+class InvalidTokenException(BaseDomainException):
     def __init__(self, **kwargs):
         message = kwargs.pop("message")
         super().__init__(

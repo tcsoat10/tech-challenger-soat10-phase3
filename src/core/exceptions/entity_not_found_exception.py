@@ -2,9 +2,9 @@ from typing import Optional
 from fastapi import status
 
 from src.core.exceptions.utils import ErrorCode
-from .base_exception import BaseAppException
+from .base_exception import BaseDomainException
 
-class EntityNotFoundException(BaseAppException):
+class EntityNotFoundException(BaseDomainException):
 
     def __init__(self, entity_name: Optional[str] = None, message: Optional[str] = None, **kwargs):
         if not message:

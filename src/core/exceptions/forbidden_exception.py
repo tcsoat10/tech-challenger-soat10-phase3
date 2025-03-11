@@ -2,9 +2,9 @@ from typing import Optional
 from fastapi import status
 
 from .utils import ErrorCode
-from .base_exception import BaseAppException
+from .base_exception import BaseDomainException
 
-class ForbiddenException(BaseAppException):
+class ForbiddenException(BaseDomainException):
     def __init__(self, message: Optional[str] = "Forbidden", **kwargs):
         super().__init__(
             message=message,

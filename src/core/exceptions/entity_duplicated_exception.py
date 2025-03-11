@@ -1,9 +1,9 @@
 from fastapi import status
 
 from src.core.exceptions.utils import ErrorCode
-from .base_exception import BaseAppException
+from .base_exception import BaseDomainException
 
-class EntityDuplicatedException(BaseAppException):
+class EntityDuplicatedException(BaseDomainException):
 
     def __init__(self, entity_name: str, **kwargs):
         super().__init__(

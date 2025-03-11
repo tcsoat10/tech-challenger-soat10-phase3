@@ -1,9 +1,9 @@
 from fastapi import status
 
 from .utils import ErrorCode
-from .base_exception import BaseAppException
+from .base_exception import BaseDomainException
 
-class InvalidCredentialsException(BaseAppException):
+class InvalidCredentialsException(BaseDomainException):
 
     def __init__(self, **kwargs):
         super().__init__(
