@@ -1,14 +1,12 @@
-from fastapi import status
 
-from .utils import ErrorCode
-from .base_exception import BaseDomainException
+from src.core.exceptions.utils import ErrorCode
+from src.core.exceptions.base_exception import BaseDomainException
 
 class InvalidCredentialsException(BaseDomainException):
 
     def __init__(self, **kwargs):
         super().__init__(
             message="Usuário ou senha inválidos.",
-            status_code=status.HTTP_401_UNAUTHORIZED,
             error_code=ErrorCode.INVALID_CREDENTIALS,
             **kwargs
         )
