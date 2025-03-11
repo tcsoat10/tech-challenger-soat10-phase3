@@ -6,7 +6,7 @@ from src.core.domain.entities.permission import Permission
 from src.core.domain.entities.profile import Profile
 from src.core.domain.dtos.auth.auth_dto import AuthByCpfDTO, LoginDTO
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
-from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
+from src.core.exceptions.invalid_credentials_exception import InvalidCredentialsException
 from tests.factories.role_factory import RoleFactory
 
 @pytest.fixture

@@ -4,7 +4,7 @@ from typing import Any, Dict
 from src.core.domain.dtos.auth.auth_dto import LoginDTO
 from src.core.domain.entities.employee import Employee
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
-from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
+from src.core.exceptions.invalid_credentials_exception import InvalidCredentialsException
 from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.ports.profile.i_profile_repository import IProfileRepository
 from src.core.utils.jwt_util import JWTUtil

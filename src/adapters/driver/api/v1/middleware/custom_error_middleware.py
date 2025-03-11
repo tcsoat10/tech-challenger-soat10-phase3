@@ -7,7 +7,7 @@ from src.core.exceptions.base_exception import BaseDomainException
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.forbidden_exception import ForbiddenException
-from src.core.exceptions.invalid_credeitals_exception import InvalidCredentialsException
+from src.core.exceptions.invalid_credentials_exception import InvalidCredentialsException
 from src.core.exceptions.invalid_token_exception import InvalidTokenException
 from src.core.exceptions.unauthorized_access_exception import UnauthorizedAccessException
 from src.core.exceptions.validation_exception import ValidationException
