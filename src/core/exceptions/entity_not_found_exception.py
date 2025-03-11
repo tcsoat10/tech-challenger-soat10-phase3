@@ -1,10 +1,9 @@
 from typing import Optional
-from fastapi import status
 
 from src.core.exceptions.utils import ErrorCode
-from .base_exception import BaseAppException
+from src.core.exceptions.base_exception import BaseDomainException
 
-class EntityNotFoundException(BaseAppException):
+class EntityNotFoundException(BaseDomainException):
 
     def __init__(self, entity_name: Optional[str] = None, message: Optional[str] = None, **kwargs):
         if not message:
@@ -12,7 +11,6 @@ class EntityNotFoundException(BaseAppException):
         
         super().__init__(
             message=message,
-            status_code=status.HTTP_404_NOT_FOUND,
             error_code=ErrorCode.ENTITY_NOT_FOUND,
             **kwargs            
         )

@@ -1,18 +1,16 @@
 from typing import Optional
-from fastapi import status
+
 from src.core.exceptions.utils import ErrorCode
-from src.core.exceptions.base_exception import BaseAppException
+from src.core.exceptions.base_exception import BaseDomainException
 
 
-class BadRequestException(BaseAppException):
+class BadRequestException(BaseDomainException):
     def __init__(self, message: Optional[str] = "Bad Request", **kwargs):
         super().__init__(
             message=message,
-            status_code=status.HTTP_400_BAD_REQUEST,
             error_code=ErrorCode.BAD_REQUEST,
             **kwargs
         )
-
 
 __all__ = ["BadRequestException"]
     
