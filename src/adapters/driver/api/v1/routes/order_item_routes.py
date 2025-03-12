@@ -19,7 +19,10 @@ from src.constants.permissions import OrderItemPermissions
 router = APIRouter()
 
 def _get_order_item_controller(db_session: Session = Depends(get_db)):
-    return OrderItemController(db_session)
+    order_gateway: IOrderRepository = OrderRepository(db_session)
+    product_gateway: IProductRepository = ProductRepository(db_session)
+    order_item_gateway: IOrderItemRepository = OrderItemRepository(db_session)
+    return OrderItemController(order_item_gateway, product_gateway, order_gateway)
 
 @router.post(
         "/order-items",
