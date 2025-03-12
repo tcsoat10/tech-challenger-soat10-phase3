@@ -2,6 +2,16 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 
+from src.adapters.driven.repositories.customer_repository import CustomerRepository
+from src.adapters.driven.repositories.employee_repository import EmployeeRepository
+from src.adapters.driven.repositories.order_repository import OrderRepository
+from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
+from src.adapters.driven.repositories.product_repository import ProductRepository
+from src.core.ports.customer.i_customer_repository import ICustomerRepository
+from src.core.ports.employee.i_employee_repository import IEmployeeRepository
+from src.core.ports.order.i_order_repository import IOrderRepository
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
+from src.core.ports.product.i_product_repository import IProductRepository
 from src.adapters.driver.api.v1.controllers.order_controller import OrderController
 from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
@@ -16,7 +26,12 @@ from src.core.auth.dependencies import get_current_user
 router = APIRouter()
 
 def _get_order_controller(db_session: Session = Depends(get_db)) -> OrderController:
-    return OrderController(db_session)
+    customer_gateway: ICustomerRepository = CustomerRepository(db_session)
+    order_status_gateway: IOrderStatusRepository = OrderStatusRepository(db_session)
+    employee_gateway: IEmployeeRepository = EmployeeRepository(db_session)
+    product_gateway: IProductRepository = ProductRepository(db_session)
+    order_gateway: IOrderRepository = OrderRepository(db_session)
+    return OrderController(customer_gateway, order_status_gateway, employee_gateway, product_gateway, order_gateway)
 
 # Criar um pedido
 @router.post(

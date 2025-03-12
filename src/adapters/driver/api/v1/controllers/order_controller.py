@@ -1,5 +1,4 @@
 from typing import List
-from sqlalchemy.orm import Session
 
 from src.application.usecases.order_usecase.revert_order_status_usecase import RevertOrderStatusUseCase
 from src.application.usecases.order_usecase.advance_order_status_usecase import AdvanceOrderStatusUseCase
@@ -15,11 +14,6 @@ from src.application.usecases.order_usecase.add_order_item_in_order_usecase impo
 from src.application.usecases.order_usecase.get_order_by_id_usecase import GetOrderByIdUseCase
 from src.application.usecases.order_usecase.list_products_by_order_status_usecase import ListProductsByOrderStatusUseCase
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.adapters.driven.repositories.customer_repository import CustomerRepository
-from src.adapters.driven.repositories.employee_repository import EmployeeRepository
-from src.adapters.driven.repositories.order_repository import OrderRepository
-from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
-from src.adapters.driven.repositories.product_repository import ProductRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.order_usecase.create_order_usecase import CreateOrderUseCase
 from src.core.domain.dtos.order.order_dto import OrderDTO
@@ -32,12 +26,19 @@ from src.core.ports.product.i_product_repository import IProductRepository
 
 class OrderController:
 
-    def __init__(self, db_session: Session):
-        self.customer_gateway: ICustomerRepository = CustomerRepository(db_session)
-        self.order_status_gateway: IOrderStatusRepository = OrderStatusRepository(db_session)
-        self.employee_gateway: IEmployeeRepository = EmployeeRepository(db_session)
-        self.product_gateway: IProductRepository = ProductRepository(db_session)
-        self.order_gateway: IOrderRepository = OrderRepository(db_session)
+    def __init__(
+        self, 
+        customer_gateway: ICustomerRepository, 
+        order_status_gateway: IOrderStatusRepository, 
+        employee_gateway: IEmployeeRepository, 
+        product_gateway: IProductRepository, 
+        order_gateway: IOrderRepository
+    ):
+        self.customer_gateway: ICustomerRepository = customer_gateway
+        self.order_status_gateway: IOrderStatusRepository = order_status_gateway
+        self.employee_gateway: IEmployeeRepository = employee_gateway
+        self.product_gateway: IProductRepository = product_gateway
+        self.order_gateway: IOrderRepository = order_gateway
         
     def create_order(self, current_user: dict) -> OrderDTO:
         create_order_usecase = CreateOrderUseCase.build(self.order_gateway, self.order_status_gateway, self.customer_gateway)
