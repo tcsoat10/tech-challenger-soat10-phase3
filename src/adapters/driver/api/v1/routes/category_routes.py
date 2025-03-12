@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query, Security
 from sqlalchemy.orm import Session
 
+from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.adapters.driver.api.v1.controllers.category_controller import CategoryController
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import CategoryPermissions
@@ -14,7 +15,8 @@ from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 router = APIRouter()
 
 def _get_category_controller(db_session: Session = Depends(get_db)) -> CategoryController:
-    return CategoryController(db_session)
+    category_gateway: ICategoryRepository = CategoryRepository(db_session)
+    return CategoryController(category_gateway)
 
 @router.post(
     "/categories",
