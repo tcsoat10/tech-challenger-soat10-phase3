@@ -1,6 +1,5 @@
 
 from typing import Optional
-from sqlalchemy.orm import Session
 
 from src.application.usecases.payment_method_usecase.delete_payment_method_usecase import DeletePaymentMethodUseCase
 from src.application.usecases.payment_method_usecase.update_payment_method_usecase import UpdatePaymentMethodUseCase
@@ -9,7 +8,6 @@ from src.application.usecases.payment_method_usecase.get_all_payment_methods_use
 from src.application.usecases.payment_method_usecase.get_payment_method_by_id_usecase import GetPaymentMethodByIdUseCase
 from src.application.usecases.payment_method_usecase.get_payment_method_by_name_usecase import GetPaymentMethodByNameUseCase
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
-from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.payment_method_usecase.create_payment_method_usecase import CreatePaymentMethodUseCase
 from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
@@ -18,8 +16,8 @@ from src.core.ports.payment_method.i_payment_method_repository import IPaymentMe
 
 class PaymentMethodController:
     
-    def __init__(self, db_connection: Session):
-        self.payment_method_gateway: IPaymentMethodRepository = PaymentMethodRepository(db_connection)
+    def __init__(self, payment_method_gateway: IPaymentMethodRepository):
+        self.payment_method_gateway: IPaymentMethodRepository = payment_method_gateway
 
     def create_payment_method(self, dto: CreatePaymentMethodDTO) -> PaymentMethodDTO:
         create_payment_method_use_case = CreatePaymentMethodUseCase.build(self.payment_method_gateway)
