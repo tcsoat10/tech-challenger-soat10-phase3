@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.core.ports.profile.i_profile_repository import IProfileRepository
+from src.adapters.driven.repositories.profile_repository import ProfileRepository
 from config.database import get_db
 from src.constants.permissions import ProfilePermissions
 from src.core.auth.dependencies import get_current_user
@@ -15,7 +17,8 @@ router = APIRouter()
 
 
 def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileController:
-    return ProfileController(db_session)
+    profile_gateway: IProfileRepository = ProfileRepository(db_session)
+    return ProfileController(profile_gateway)
 
 
 @router.post(

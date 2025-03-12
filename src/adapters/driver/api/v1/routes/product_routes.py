@@ -2,6 +2,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.orm import Session
 
+from src.adapters.driven.repositories.category_repository import CategoryRepository
+from src.adapters.driven.repositories.product_repository import ProductRepository
+from src.core.ports.category.i_category_repository import ICategoryRepository
+from src.core.ports.product.i_product_repository import IProductRepository
 from src.adapters.driver.api.v1.controllers.product_controller import ProductController
 from config.database import get_db
 from src.constants.permissions import ProductPermissions
@@ -13,7 +17,10 @@ from src.core.domain.dtos.product.product_dto import ProductDTO
 router = APIRouter()
 
 def _get_product_controller(db_session: Session = Depends(get_db)):
-    return ProductController(db_session)
+    product_gateway: IProductRepository = ProductRepository(db_session)
+    category_gateway: ICategoryRepository = CategoryRepository(db_session)
+    return ProductController(product_gateway, category_gateway)
+
 
 @router.post(
     "/products",
