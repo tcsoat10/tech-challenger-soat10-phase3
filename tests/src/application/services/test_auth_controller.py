@@ -23,10 +23,11 @@ def mock_employee_repository(mocker):
     
 @pytest.fixture
 def auth_controller(mock_customer_repository, mock_profile_repository, mock_employee_repository, db_session):
-    controller = AuthController(db_session)
-    controller.employee_gateway = mock_employee_repository
-    controller.customer_gateway = mock_customer_repository
-    controller.profile_gateway = mock_profile_repository
+    employee_gateway = mock_employee_repository
+    customer_gateway = mock_customer_repository
+    profile_gateway = mock_profile_repository
+    
+    controller = AuthController(profile_gateway, employee_gateway, customer_gateway)
     return controller
 
 def test_login_customer_by_cpf(auth_controller, mock_customer_repository, mock_profile_repository):
