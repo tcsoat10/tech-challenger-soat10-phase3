@@ -2,7 +2,15 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driven.repositories.employee_repository import EmployeeRepository
+from src.adapters.driven.repositories.person_repository import PersonRepository
+from src.adapters.driven.repositories.role_repository import RoleRepository
+from src.adapters.driven.repositories.user_repository import UserRepository
 from config.database import get_db
+from src.core.ports.employee.i_employee_repository import IEmployeeRepository
+from src.core.ports.person.i_person_repository import IPersonRepository
+from src.core.ports.role.i_role_repository import IRoleRepository
+from src.core.ports.user.i_user_repository import IUserRepository
 from src.adapters.driver.api.v1.controllers.employee_controller import EmployeeController
 from src.core.domain.dtos.employee.employee_dto import EmployeeDTO
 from src.core.domain.dtos.employee.create_employee_dto import CreateEmployeeDTO
@@ -14,7 +22,11 @@ from src.constants.permissions import EmployeePermissions
 router = APIRouter()
 
 def _get_employee_controller(db_session: Session = Depends(get_db)) -> EmployeeController:
-    return EmployeeController(db_session)
+    employee_gateway: IEmployeeRepository = EmployeeRepository(db_session)
+    person_gateway: IPersonRepository = PersonRepository(db_session)
+    role_gateway: IRoleRepository = RoleRepository(db_session)
+    user_gateway: IUserRepository = UserRepository(db_session)
+    return EmployeeController(employee_gateway, person_gateway, role_gateway, user_gateway)
 
 @router.post(
         '/employees',
