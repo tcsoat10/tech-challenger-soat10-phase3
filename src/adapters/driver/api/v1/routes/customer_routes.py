@@ -2,6 +2,10 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driven.repositories.customer_repository import CustomerRepository
+from src.adapters.driven.repositories.person_repository import PersonRepository
+from src.core.ports.customer.i_customer_repository import ICustomerRepository
+from src.core.ports.person.i_person_repository import IPersonRepository
 from src.adapters.driver.api.v1.decorators.bypass_auth import bypass_auth
 from config.database import get_db
 from src.core.domain.dtos.customer.customer_dto import CustomerDTO
@@ -16,7 +20,9 @@ router = APIRouter()
 
 
 def _get_customer_controller(db_session: Session = Depends(get_db)) -> CustomerController:
-    return CustomerController(db_session)
+    customer_gateway: ICustomerRepository = CustomerRepository(db_session)
+    person_gateway: IPersonRepository = PersonRepository(db_session)
+    return CustomerController(customer_gateway, person_gateway)
 
 
 @router.post(
