@@ -2,7 +2,6 @@
 from typing import Optional
 from src.application.usecases.category_usecase.get_all_categories_usecase import GetAllCategoriesUseCase
 from src.application.usecases.category_usecase.get_category_by_id_usecase import GetCategoryByIdUseCase
-from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.category_usecase.get_category_by_name_usecase import GetCategoryByNameUseCase
 from src.application.usecases.category_usecase.create_category_usecase import CreateCategoryUseCase
@@ -12,11 +11,9 @@ from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 from src.core.ports.category.i_category_repository import ICategoryRepository
 
-from sqlalchemy.orm import Session
-
 class CategoryController:
-    def __init__(self, db_connection: Session):
-        self.category_gateway: ICategoryRepository = CategoryRepository(db_connection)
+    def __init__(self, category_gateway: ICategoryRepository):
+        self.category_gateway: ICategoryRepository = category_gateway
 
     def create_category(self, dto: CreateCategoryDTO) -> CategoryDTO:
         create_category_usecase = CreateCategoryUseCase.build(self.category_gateway)
