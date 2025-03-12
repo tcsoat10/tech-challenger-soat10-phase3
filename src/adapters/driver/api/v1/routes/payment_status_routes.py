@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, status, Security
 from sqlalchemy.orm import Session
 from config.database import get_db
 
+from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
+from src.core.ports.payment_status.i_payment_status_repository import IPaymentStatusRepository
 from src.adapters.driver.api.v1.controllers.payment_status_controller import PaymentStatusController
 from src.core.domain.dtos.payment_status.update_payment_status_dto import UpdatePaymentStatusDTO
 from src.core.domain.dtos.payment_status.create_payment_status_dto import CreatePaymentStatusDTO
@@ -14,7 +16,8 @@ from src.constants.permissions import PaymentStatusPermissions
 router = APIRouter()
 
 def _get_payment_status_controller(db_session: Session = Depends(get_db)) -> PaymentStatusController:
-    return PaymentStatusController(db_session)
+    payment_status_gateway: IPaymentStatusRepository = PaymentStatusRepository(db_session)
+    return PaymentStatusController(payment_status_gateway)
 
 @router.post(
         "/payment-status",

@@ -1,6 +1,5 @@
 
 from typing import List
-from sqlalchemy.orm import Session
 
 from src.application.usecases.payment_status_usecase.delete_payment_status_usecase import DeletePaymentStatusUseCase
 from src.application.usecases.payment_status_usecase.update_payment_status_usecase import UpdatePaymentStatusUseCase
@@ -8,7 +7,6 @@ from src.core.domain.dtos.payment_status.update_payment_status_dto import Update
 from src.application.usecases.payment_status_usecase.get_all_payment_status_usecase import GetAllPaymentStatusUsecase
 from src.application.usecases.payment_status_usecase.get_payment_status_by_id_usecase import GetPaymentStatusByIdUseCase
 from src.application.usecases.payment_status_usecase.get_payment_status_by_name_usecase import GetPaymentStatusByNameUseCase
-from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.payment_status_usecase.create_payment_status_usecase import CreatePaymentStatusUseCase
 from src.core.domain.dtos.payment_status.create_payment_status_dto import CreatePaymentStatusDTO
@@ -18,8 +16,8 @@ from src.core.ports.payment_status.i_payment_status_repository import IPaymentSt
 
 class PaymentStatusController:
     
-    def __init__(self, db_session: Session):
-        self.payment_status_gateway: IPaymentStatusRepository = PaymentStatusRepository(db_session)
+    def __init__(self, payment_status_gateway: IPaymentStatusRepository):
+        self.payment_status_gateway: IPaymentStatusRepository = payment_status_gateway
 
     def create_payment_status(self, dto: CreatePaymentStatusDTO) -> PaymentStatusDTO:
         create_payment_status_use_case = CreatePaymentStatusUseCase.build(self.payment_status_gateway)
