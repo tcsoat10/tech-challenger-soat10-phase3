@@ -2,7 +2,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Security, Query
 from sqlalchemy.orm import Session
 
+from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from config.database import get_db
+from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.adapters.driver.api.v1.controllers.order_status_controller import OrderStatusController
 from src.core.domain.dtos.order_status.update_order_status_dto import UpdateOrderStatusDTO
 from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
@@ -13,7 +15,8 @@ from src.constants.permissions import OrderStatusPermissions
 router = APIRouter()
 
 def _get_order_status_controller(db_session: Session = Depends(get_db)) -> OrderStatusController:
-    return OrderStatusController(db_session)
+    order_status_gateway: IOrderStatusRepository = OrderStatusRepository(db_session)
+    return OrderStatusController(order_status_gateway)
 
 @router.post(
         "/order_status",
