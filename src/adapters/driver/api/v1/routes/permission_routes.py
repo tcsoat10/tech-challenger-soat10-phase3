@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driven.repositories.permission_repository import PermissionRepository
 from config.database import get_db
+from src.core.ports.permission.i_permission_repository import IPermissionRepository
 from src.constants.permissions import PermissionPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
@@ -15,7 +17,8 @@ router = APIRouter()
 
 
 def _get_permission_controller(db_session: Session = Depends(get_db)) -> PermissionController:
-    return PermissionController(db_session)
+    permission_gateway: IPermissionRepository = PermissionRepository(db_session)
+    return PermissionController(permission_gateway)
 
 
 @router.post(
