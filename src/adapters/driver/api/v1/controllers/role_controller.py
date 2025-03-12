@@ -1,9 +1,6 @@
-from sqlalchemy.orm import Session
 from typing import List, Optional
 
-
 from src.core.ports.role.i_role_repository import IRoleRepository
-from src.adapters.driven.repositories.role_repository import RoleRepository
 from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.application.usecases.role_usecase.create_role_usecase import CreateRoleUsecase
@@ -17,8 +14,9 @@ from src.application.usecases.role_usecase.delete_role_usecase import DeleteRole
 
 
 class RoleController:
-    def __init__(self, db_connection: Session):
-        self.role_gateway: IRoleRepository = RoleRepository(db_connection)
+    
+    def __init__(self, role_gateway: IRoleRepository):
+        self.role_gateway: IRoleRepository = role_gateway
 
     def create_role(self, dto: CreateRoleDTO) -> RoleDTO:
         create_role_usecase = CreateRoleUsecase.build(self.role_gateway)

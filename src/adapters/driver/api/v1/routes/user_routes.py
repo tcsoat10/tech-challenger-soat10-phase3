@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.adapters.driven.repositories.user_repository import UserRepository
 from config.database import get_db
+from src.core.ports.user.i_user_repository import IUserRepository
 from src.constants.permissions import UserPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.user.user_dto import UserDTO
@@ -15,7 +17,8 @@ router = APIRouter()
 
 
 def _get_user_controller(db_session: Session = Depends(get_db)) -> UserController:
-    return UserController(db_session)
+    user_gateway: IUserRepository = UserRepository(db_session)
+    return UserController(user_gateway)
 
 
 @router.post(

@@ -1,6 +1,5 @@
-
-
 from typing import List, Optional
+
 from src.application.usecases.product_usecase.delete_product_usecase import DeleteProductUseCase
 from src.application.usecases.product_usecase.update_product_usecase import UpdateProductUsecase
 from src.application.usecases.product_usecase.get_all_products_usecase import GetAllProductsUseCase
@@ -9,18 +8,14 @@ from src.adapters.driver.api.v1.presenters.dto_presenter import DTOPresenter
 from src.application.usecases.product_usecase.create_product_usecase import CreateProductUsecase
 from src.core.domain.dtos.product.create_product_dto import CreateProductDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from src.adapters.driven.repositories.category_repository import CategoryRepository
-from src.adapters.driven.repositories.product_repository import ProductRepository
 from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.core.ports.product.i_product_repository import IProductRepository
 from src.application.usecases.product_usecase.get_product_by_name_usecase import GetProductByNameUseCase
 
-from sqlalchemy.orm import Session
-
 class ProductController:
-    def __init__(self, db_connection: Session):
-        self.product_gateway: IProductRepository = ProductRepository(db_connection)
-        self.category_gateway: ICategoryRepository = CategoryRepository(db_connection)
+    def __init__(self, product_gateway: IProductRepository, category_gateway: ICategoryRepository):
+        self.product_gateway: IProductRepository = product_gateway
+        self.category_gateway: ICategoryRepository = category_gateway
 
     def create_product(self, dto: CreateProductDTO) -> ProductDTO:
         create_product_usecase = CreateProductUsecase.build(self.product_gateway, self.category_gateway)
