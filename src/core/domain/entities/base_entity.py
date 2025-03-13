@@ -1,38 +1,53 @@
 from datetime import datetime
 from typing import Any, Dict, Type, TypeVar
-from sqlalchemy import Column, DateTime, Integer, func
-from sqlalchemy.orm import DeclarativeBase, Mapped
 
 T = TypeVar("T", bound="BaseEntity")
 
-class BaseEntity(DeclarativeBase):
-    """
-    Base class for all entities in the application.
+class BaseEntity:
+    
+    def __init__(self, id: int, created_at: datetime, updated_at: datetime, inactivated_at: datetime) -> None:
+        self._id = id
+        self._created_at = created_at
+        self._updated_at = updated_at
+        self._inactivated_at = inactivated_at
+        
+    # getters and setters
+    @property
+    def id(self) -> int:
+        return self._id
 
-    This abstract class provides common fields such as ID, timestamps for creation and updates.
-    All other database models should inherit from this base class.
-    """
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
 
-    __abstract__ = True
+    @property
+    def created_at(self) -> datetime:
+        return self._created_at
 
-    # Primary Key: Auto-incrementing integer ID
-    id: Mapped[int] = Column(Integer, primary_key=True, autoincrement=True)
+    @created_at.setter
+    def created_at(self, value: datetime) -> None:
+        self._created_at = value
 
-    # Timestamp: Record creation time (default: current UTC time)
-    created_at: Mapped[datetime] = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    @property
+    def updated_at(self) -> datetime:
+        return self._updated_at
 
-    # Timestamp: Record last update time (auto-updated on modification)
-    updated_at: Mapped[datetime] = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
+    @updated_at.setter
+    def updated_at(self, value: datetime) -> None:
+        self._updated_at = value
 
-    # Timestamp: Record inactivation time
-    inactivated_at: Mapped[datetime] = Column(
-        DateTime(timezone=True), nullable=True
-    )
+    @property
+    def inactivated_at(self) -> datetime:
+        return self._inactivated_at
 
+    @inactivated_at.setter
+    def inactivated_at(self, value: datetime) -> None:
+        self._inactivated_at = value
+
+    @property
+    def is_new(self) -> bool:
+        return self.id is None
+    
     def to_json(self) -> Dict[str, Any]:
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 

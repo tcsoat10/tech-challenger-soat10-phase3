@@ -1,5 +1,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from src.adapters.driven.repositories.models.category_model import CategoryModel
+from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.core.domain.entities.category import Category
 from tests.factories.category_factory import CategoryFactory
@@ -11,12 +13,12 @@ class TestCategoryRepository:
     """
     @pytest.fixture(autouse=True)
     def setup(self, db_session):
-        self.repository = CategoryRepository(db_session)
+        self.repository: ICategoryRepository = CategoryRepository(db_session)
         self.db_session = db_session
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Category).delete()
+        self.db_session.query(CategoryModel).delete()
         self.db_session.commit()
 
     def test_create_category_success(self):
@@ -37,12 +39,12 @@ class TestCategoryRepository:
         assert created_burgers_category.description == "Fast food category"
 
         # Verifica se a categoria Drinks foi persistida no banco
-        db_category = self.db_session.query(Category).filter_by(name="Drinks").first()
+        db_category = self.db_session.query(CategoryModel).filter_by(name="Drinks").first()
         assert db_category is not None
         assert db_category.name == "Drinks"
 
         # Verifica se a categoria Burgers foi persistida no banco
-        db_category = self.db_session.query(Category).filter_by(name="Burgers").first()
+        db_category = self.db_session.query(CategoryModel).filter_by(name="Burgers").first()
         assert db_category is not None
         assert db_category.name == "Burgers"
 
@@ -158,19 +160,23 @@ class TestCategoryRepository:
         """
         Testa a remoção de uma categoria.
         """
-        category = CategoryFactory(name="Drinks", description="Beverages category")
+        CategoryFactory(name="Drinks", description="Beverages category")
+        category = self.repository.get_by_name("Drinks")
         self.repository.delete(category)
 
         assert len(self.repository.get_all()) == 0
 
     def test_delete_category_with_inexistent_id(self):
-        category = CategoryFactory(name="Soft Drinks")
+        category_model = CategoryFactory(name="Soft Drinks")
 
         product_not_registered = Category(name="Drinks", description="Beverages category")
 
         with pytest.raises(InvalidRequestError):
             self.repository.delete(product_not_registered)
+            
 
         categories = self.repository.get_all()
         assert len(categories) == 1
-        assert categories[0] == category
+        assert categories[0].id == category_model.id
+        assert categories[0].name == category_model.name
+        assert categories[0].description == category_model.description

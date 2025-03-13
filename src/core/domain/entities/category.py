@@ -1,9 +1,38 @@
-from sqlalchemy import Column, String
 from src.core.domain.entities.base_entity import BaseEntity
-
+from datetime import datetime
+from typing import Optional
 
 class Category(BaseEntity):
-    __tablename__ = "categories"
 
-    name = Column(String(100), nullable=False, unique=True)
-    description = Column(String(300))
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        id: Optional[int] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        inactivated_at: Optional[datetime] = None
+    ) -> None:
+        super().__init__(id, created_at, updated_at, inactivated_at)
+        self._name = name
+        self._description = description
+
+    @classmethod
+    def build(cls, name: str, description: str) -> "Category":
+        return cls(name, description)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, name: str) -> None:
+        self._name = name
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @description.setter
+    def description(self, description: str) -> None:
+        self._description = description

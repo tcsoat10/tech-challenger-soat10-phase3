@@ -2,14 +2,14 @@ import factory
 from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 
-from src.core.domain.entities.category import Category
+from src.adapters.driven.repositories.models.category_model import CategoryModel
 
 fake = Faker()
 
 class CategoryFactory(SQLAlchemyModelFactory):
 
     class Meta:
-        model = Category
+        model = CategoryModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)
