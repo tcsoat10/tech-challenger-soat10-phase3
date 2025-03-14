@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
+from src.adapters.driven.repositories.models.person_model import PersonModel
 from src.core.domain.entities.person import Person
 from src.core.ports.person.i_person_repository import IPersonRepository
 
@@ -11,36 +12,45 @@ class PersonRepository(IPersonRepository):
         self.db_session = db_session
 
     def create(self, person: Person) -> Person:
-        self.db_session.add(person)
+        person_model = PersonModel.from_entity(person)
+        self.db_session.add(person_model)
         self.db_session.commit()
-        self.db_session.refresh(person)
-        return person
+        self.db_session.refresh(person_model)
+        return person_model.to_entity()
 
     def exists_by_cpf(self, cpf: str) -> bool:
-        return self.db_session.query(exists().where(Person.cpf == cpf)).scalar()
+        return self.db_session.query(exists().where(PersonModel.cpf == cpf)).scalar()
     
     def exists_by_email(self, email: str) -> bool:
-        return self.db_session.query(exists().where(Person.email == email)).scalar()
+        return self.db_session.query(exists().where(PersonModel.email == email)).scalar()
 
     def get_by_cpf(self, cpf: str) -> Person:
-        return self.db_session.query(Person).filter(Person.cpf == cpf).first()
+        person_model = self.db_session.query(PersonModel).filter(PersonModel.cpf == cpf).first()
+        if person_model is None:
+            return None
+        return person_model.to_entity()
 
     def get_by_id(self, person_id: int) -> Person:
-        return self.db_session.query(Person).filter(Person.id == person_id).first()
+        person_model = self.db_session.query(PersonModel).filter(PersonModel.id == person_id).first()
+        if person_model is None:
+            return None
+        return person_model.to_entity()
 
     def get_all(self, include_deleted: bool = False) -> List[Person]:
-        query = self.db_session.query(Person)
+        query = self.db_session.query(PersonModel)
         if not include_deleted:
-            query = query.filter(Person.inactivated_at.is_(None))
-        return query.all()
+            query = query.filter(PersonModel.inactivated_at.is_(None))
+        persons_models = query.all()
+        return [person_model.to_entity() for person_model in persons_models]
 
     def update(self, person: Person) -> Person:
-        self.db_session.merge(person)
+        person_model = PersonModel.from_entity(person)
+        self.db_session.merge(person_model)
         self.db_session.commit()
-        return person
+        return person_model.to_entity()
 
     def delete(self, person_id: int) -> None:
-        person = self.get_by_id(person_id)
-        if person:
-            self.db_session.delete(person)
+        person_model = self.db_session.query(PersonModel).filter(PersonModel.id == person_id).first()
+        if person_model is not None:
+            self.db_session.delete(person_model)
             self.db_session.commit()

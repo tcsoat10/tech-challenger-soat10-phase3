@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from src.adapters.driven.repositories.models.person_model import PersonModel
 from src.adapters.driven.repositories.person_repository import PersonRepository
 from src.core.domain.entities.person import Person
 from tests.factories.person_factory import PersonFactory
@@ -17,7 +18,7 @@ class TestPersonRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Person).delete()
+        self.db_session.query(PersonModel).delete()
         self.db_session.commit()
 
     def test_create_person_success(self):
@@ -36,8 +37,8 @@ class TestPersonRepository:
         assert db_person is not None
         assert db_person.cpf == "12345678901"
         assert db_person.name == "JOÃO"
-        assert db_person.email == "joao@gmail.com"'''
-#        assert db_person.birth_date == birth
+        assert db_person.email == "joao@gmail.com"
+        assert db_person.birth_date == birth'''
 
     def test_exists_by_cpf_success(self):
         person = PersonFactory()
