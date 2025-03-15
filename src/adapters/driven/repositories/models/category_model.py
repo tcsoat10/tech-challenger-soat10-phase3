@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String
 
+from src.core.shared.identity_map import IdentityMap
 from src.adapters.driven.repositories.models.base_model import BaseModel
 from src.core.domain.entities.category import Category
 
@@ -22,6 +23,12 @@ class CategoryModel(BaseModel[Category]):
         )
         
     def to_entity(self) -> Category:
+        identity_map = IdentityMap.get_instance()
+
+        existing = identity_map.get(Category, self.id)
+        if existing:
+            return existing
+        
         return Category(
             id=self.id,
             created_at=self.created_at,

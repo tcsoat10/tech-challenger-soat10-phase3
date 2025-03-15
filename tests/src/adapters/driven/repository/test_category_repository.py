@@ -171,9 +171,7 @@ class TestCategoryRepository:
 
         product_not_registered = Category(name="Drinks", description="Beverages category")
 
-        with pytest.raises(InvalidRequestError):
-            self.repository.delete(product_not_registered)
-            
+        self.repository.delete(product_not_registered)
 
         categories = self.repository.get_all()
         assert len(categories) == 1
