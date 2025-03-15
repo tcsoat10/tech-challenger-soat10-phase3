@@ -48,9 +48,6 @@ class BaseEntity:
     def is_new(self) -> bool:
         return self.id is None
     
-    def to_json(self) -> Dict[str, Any]:
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
     @classmethod
     def from_json(cls: Type[T], json_data: Dict[str, Any]) -> T:
         return cls(**json_data)
