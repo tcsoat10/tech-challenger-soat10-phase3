@@ -1,5 +1,6 @@
 import pytest
 
+from src.adapters.driven.repositories.models.customer_model import CustomerModel
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
 from src.core.domain.entities.customer import Customer
 from tests.factories.person_factory import PersonFactory
@@ -14,17 +15,16 @@ class TestCustomerRepository:
         self.clean_database()
     
     def clean_database(self):
-        self.db_session.query(Customer).delete()
+        self.db_session.query(CustomerModel).delete()
         self.db_session.commit()
 
     def test_create_customer_success(self):
-        person = PersonFactory()
-        customer = Customer(person_id=person.id)
-
+        person_model = PersonFactory()
+        customer = Customer(person=person_model.to_entity())
         created_customer = self.repository.create(customer)
 
         assert created_customer.id is not None
-        assert created_customer.person_id == person.id
+        assert created_customer.person.id == person_model.id
     
     def test_get_customer_by_id_success(self):
         customer = CustomerFactory()
@@ -33,7 +33,7 @@ class TestCustomerRepository:
 
         assert customer_response is not None
         assert customer_response.id == customer.id
-        assert customer_response.person_id == customer.person_id
+        assert customer_response.person.id == customer.person_id
     
     def test_get_customer_by_id_returns_none_for_unregistered_id(self):
         customer = CustomerFactory()
@@ -49,7 +49,7 @@ class TestCustomerRepository:
 
         assert customer_response is not None
         assert customer_response.id == customer.id
-        assert customer_response.person_id == customer.person_id
+        assert customer_response.person.id == customer.person_id
 
     def test_get_by_cpf_returns_none_for_unregistered_cpf(self):
         customer = CustomerFactory()
@@ -65,7 +65,7 @@ class TestCustomerRepository:
 
         assert customer_response is not None
         assert customer_response.id == customer.id
-        assert customer_response.person_id == customer.person_id
+        assert customer_response.person.id == customer.person_id
     
     def test_get_customer_by_person_id_returns_none_for_unregistered_id(self):
         customer = CustomerFactory()
@@ -81,7 +81,11 @@ class TestCustomerRepository:
         customers = self.repository.get_all()
 
         assert len(customers) == 2
-        assert customers == [customer1, customer2]
+        assert customers[0].id == customer1.id
+        assert customers[0].person.id == customer1.person_id
+        
+        assert customers[1].id == customer2.id
+        assert customers[1].person.id == customer2.person_id
 
     def test_get_all_customers_empty_db(self):
         customers = self.repository.get_all()
@@ -90,19 +94,19 @@ class TestCustomerRepository:
         assert customers == []
 
     def test_update_customer(self):
-        customer = CustomerFactory()
-        person = PersonFactory()
+        customer_model = CustomerFactory()
+        customer = customer_model.to_entity()
+        customer.person.email = "new_email@example.com"
 
-        customer.person_id = person.id
+        updated_customer = self.repository.update(customer)
 
-        data = self.repository.update(customer)
-
-        assert data.id == customer.id
-        assert data.person_id == person.id
+        assert updated_customer.id == customer_model.id
+        assert updated_customer.person.id == customer_model.person_id
+        assert updated_customer.person.email == "new_email@example.com"
 
     def test_delete_customer_success(self):
         customer = CustomerFactory()
-
+        
         self.repository.delete(customer.id)
 
         customers = self.repository.get_all()
@@ -118,6 +122,10 @@ class TestCustomerRepository:
         customers = self.repository.get_all()
 
         assert len(customers) == 1
-        assert customers == [customer]
-
+        assert customers[0].id == customer.id
+        assert customers[0].person.id == customer.person_id
+        assert customers[0].person.name == customer.person.name
+        assert customers[0].person.cpf == customer.person.cpf
+        assert customers[0].person.email == customer.person.email
+        assert customers[0].person.birth_date == customer.person.birth_date
     
