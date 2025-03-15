@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
+from src.core.shared.identity_map import IdentityMap
 from src.adapters.driven.repositories.models.person_model import PersonModel
 from src.core.domain.entities.person import Person
 from src.core.ports.person.i_person_repository import IPersonRepository
@@ -10,8 +11,14 @@ class PersonRepository(IPersonRepository):
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
+        self.identity_map = IdentityMap.get_instance()
 
     def create(self, person: Person) -> Person:
+        if person.id is not None:
+            existing = self.identity_map.get(Person, person.id)
+            if existing:
+                self.identity_map.remove(existing)
+        
         person_model = PersonModel.from_entity(person)
         self.db_session.add(person_model)
         self.db_session.commit()
@@ -44,6 +51,9 @@ class PersonRepository(IPersonRepository):
         return [person_model.to_entity() for person_model in persons_models]
 
     def update(self, person: Person) -> Person:
+        existing = self.identity_map.get(Person, person.id)
+        if existing:
+            self.identity_map.remove(existing)
         person_model = PersonModel.from_entity(person)
         self.db_session.merge(person_model)
         self.db_session.commit()
@@ -54,3 +64,4 @@ class PersonRepository(IPersonRepository):
         if person_model is not None:
             self.db_session.delete(person_model)
             self.db_session.commit()
+            self.identity_map.remove(person_model.to_entity())

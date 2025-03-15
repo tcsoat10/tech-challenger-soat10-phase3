@@ -1,3 +1,4 @@
+from src.core.shared.identity_map import IdentityMap
 from src.adapters.driven.repositories.models.base_model import BaseModel
 from src.core.domain.entities.person import Person
 from sqlalchemy import Column, String, Date
@@ -25,6 +26,12 @@ class PersonModel(BaseModel):
         )
         
     def to_entity(self):
+        identity_map = IdentityMap.get_instance()
+
+        existing = identity_map.get(Person, self.id)
+        if existing:
+            return existing
+        
         return Person(
             id=self.id,
             created_at=self.created_at,
