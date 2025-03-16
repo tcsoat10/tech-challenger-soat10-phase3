@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Security, Query
 from sqlalchemy.orm import Session
+from dependency_injector.wiring import inject, Provide
 
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from config.database import get_db
@@ -11,6 +12,7 @@ from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
 from src.core.domain.dtos.order_status.create_order_status_dto import CreateOrderStatusDTO
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import OrderStatusPermissions
+from src.core.containers import Container
 
 router = APIRouter()
 
@@ -24,9 +26,10 @@ def _get_order_status_controller(db_session: Session = Depends(get_db)) -> Order
         status_code=status.HTTP_201_CREATED,
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_CREATE_ORDER_STATUS])]
 )
+@inject
 def create_order_status(
     dto: CreateOrderStatusDTO,
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.create_order_status(dto)
@@ -37,9 +40,10 @@ def create_order_status(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
 )
+@inject
 def get_order_status_by_status(
     order_status: str,
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_order_status_by_status(status=order_status)
@@ -50,9 +54,10 @@ def get_order_status_by_status(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
 )
+@inject
 def get_order_status_by_id(
     order_status_id: int,
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_order_status_by_id(order_status_id=order_status_id)
@@ -62,9 +67,10 @@ def get_order_status_by_id(
         response_model=List[OrderStatusDTO],
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_VIEW_ORDER_STATUSES])]
 )
+@inject
 def get_all_order_status(
     include_deleted: Optional[bool] = Query(False),
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_all_orders_status(include_deleted=include_deleted)
@@ -74,10 +80,11 @@ def get_all_order_status(
         response_model=OrderStatusDTO,
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_UPDATE_ORDER_STATUS])]
 )
+@inject
 def update_order_status(
     order_status_id: int,
     dto: UpdateOrderStatusDTO,
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.update_order_status(order_status_id, dto)
@@ -87,9 +94,10 @@ def update_order_status(
         status_code=status.HTTP_204_NO_CONTENT,
         dependencies=[Security(get_current_user, scopes=[OrderStatusPermissions.CAN_DELETE_ORDER_STATUS])]
 )
+@inject
 def delete_order_status(
     order_status_id: int,
-    controller: OrderStatusController = Depends(_get_order_status_controller),
+    controller: OrderStatusController = Depends(Provide[Container.order_status_controller]),
     user: dict = Security(get_current_user)
 ):
     controller.delete_order_status(order_status_id)

@@ -22,7 +22,8 @@ from src.adapters.driven.repositories.role_repository import RoleRepository
 from src.adapters.driver.api.v1.controllers.role_controller import RoleController
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
 from src.adapters.driver.api.v1.controllers.employee_controller import EmployeeController
-
+from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
+from src.adapters.driver.api.v1.controllers.order_status_controller import OrderStatusController
 
 
 class Container(containers.DeclarativeContainer):
@@ -50,6 +51,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.role_routes",
         "src.adapters.driver.api.v1.controllers.employee_controller",
         "src.adapters.driver.api.v1.routes.employee_routes",
+        "src.adapters.driver.api.v1.controllers.order_status_controller",
+        "src.adapters.driver.api.v1.routes.order_status_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -113,3 +116,6 @@ class Container(containers.DeclarativeContainer):
         role_gateway=role_gateway,
         user_gateway=user_gateway
     )
+
+    order_status_gateway = providers.Factory(OrderStatusRepository, db_session=db_session)
+    order_status_controller = providers.Factory(OrderStatusController, order_status_gateway=order_status_gateway)
