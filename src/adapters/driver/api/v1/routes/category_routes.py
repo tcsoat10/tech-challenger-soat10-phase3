@@ -1,22 +1,17 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query, Security
-from sqlalchemy.orm import Session
+from dependency_injector.wiring import inject, Provide
 
-from src.core.ports.category.i_category_repository import ICategoryRepository
 from src.adapters.driver.api.v1.controllers.category_controller import CategoryController
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import CategoryPermissions
-from config.database import get_db
 from src.core.domain.dtos.category.update_category_dto import UpdateCategoryDTO
 from src.adapters.driven.repositories.category_repository import CategoryRepository
 from src.core.domain.dtos.category.category_dto import CategoryDTO
 from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
+from src.core.containers import Container
 
 router = APIRouter()
-
-def _get_category_controller(db_session: Session = Depends(get_db)) -> CategoryController:
-    category_gateway: ICategoryRepository = CategoryRepository(db_session)
-    return CategoryController(category_gateway)
 
 @router.post(
     "/categories",
@@ -24,9 +19,10 @@ def _get_category_controller(db_session: Session = Depends(get_db)) -> CategoryC
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_CREATE_CATEGORY])]
 )
+@inject
 def create_category(
     dto: CreateCategoryDTO,
-    controller: CategoryController = Depends(_get_category_controller),
+    controller: CategoryController = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.create_category(dto)
@@ -37,9 +33,10 @@ def create_category(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_VIEW_CATEGORIES])]
 )
+@inject
 def get_category_by_name(
     category_name: str,
-    controller: CategoryController = Depends(_get_category_controller),
+    controller: CategoryController = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_category_by_name(name=category_name)
@@ -50,9 +47,10 @@ def get_category_by_name(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_VIEW_CATEGORIES])]
 )
+@inject
 def get_category_by_id(
     category_id: int,
-    controller: CategoryRepository = Depends(_get_category_controller),
+    controller: CategoryRepository = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_category_by_id(category_id=category_id)
@@ -62,9 +60,10 @@ def get_category_by_id(
     response_model=List[CategoryDTO],
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_VIEW_CATEGORIES])]
 )
+@inject
 def get_all_categories(
     include_deleted: Optional[bool] = Query(False),
-    controller: CategoryController = Depends(_get_category_controller),
+    controller: CategoryController = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_all_categories(include_deleted=include_deleted)
@@ -74,10 +73,11 @@ def get_all_categories(
     response_model=CategoryDTO,
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_UPDATE_CATEGORY])]
 )
+@inject
 def update_category(
     category_id: int,
     dto: UpdateCategoryDTO,
-    controller: CategoryController = Depends(_get_category_controller),
+    controller: CategoryController = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.update_category(category_id, dto)
@@ -87,9 +87,10 @@ def update_category(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_DELETE_CATEGORY])]
 )
+@inject
 def delete_category(
     category_id: int,
-    controller: CategoryController = Depends(_get_category_controller),
+    controller: CategoryController = Depends(Provide[Container.category_controller]),
     user: dict = Security(get_current_user)
 ):
     controller.delete_category(category_id)
