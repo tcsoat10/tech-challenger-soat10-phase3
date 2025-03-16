@@ -26,6 +26,8 @@ from src.adapters.driven.repositories.order_status_repository import OrderStatus
 from src.adapters.driver.api.v1.controllers.order_status_controller import OrderStatusController
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.adapters.driver.api.v1.controllers.order_controller import OrderController
+from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
+from src.adapters.driver.api.v1.controllers.order_item_controller import OrderItemController
 
 
 class Container(containers.DeclarativeContainer):
@@ -57,6 +59,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.order_status_routes",
         "src.adapters.driver.api.v1.controllers.order_controller",
         "src.adapters.driver.api.v1.routes.order_routes",
+        "src.adapters.driver.api.v1.controllers.order_item_controller",
+        "src.adapters.driver.api.v1.routes.order_item_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -131,5 +135,13 @@ class Container(containers.DeclarativeContainer):
         customer_gateway=customer_gateway,
         employee_gateway=employee_gateway,
         order_status_gateway=order_status_gateway,
+        product_gateway=product_gateway
+    )
+
+    order_item_gateway = providers.Factory(OrderItemRepository, db_session=db_session)
+    order_item_controller = providers.Factory(
+        OrderItemController,
+        order_item_gateway=order_item_gateway,
+        order_gateway=order_gateway,
         product_gateway=product_gateway
     )
