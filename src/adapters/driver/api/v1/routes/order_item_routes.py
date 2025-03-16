@@ -1,18 +1,11 @@
 from fastapi import APIRouter, Depends, status, Security
-from sqlalchemy.orm import Session
 from dependency_injector.wiring import inject, Provide
 
 from src.adapters.driver.api.v1.controllers.order_item_controller import OrderItemController
-from src.adapters.driven.repositories.order_repository import OrderRepository
-from src.core.ports.order.i_order_repository import IOrderRepository
-from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
-from src.adapters.driven.repositories.product_repository import ProductRepository
 from config.database import get_db
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.order_item.update_order_item_dto import UpdateOrderItemDTO
-from src.core.ports.order_item.i_order_item_repository import IOrderItemRepository
-from src.core.ports.product.i_product_repository import IProductRepository
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import OrderItemPermissions
 from src.core.containers import Container
@@ -20,11 +13,6 @@ from src.core.containers import Container
 
 router = APIRouter()
 
-def _get_order_item_controller(db_session: Session = Depends(get_db)):
-    order_gateway: IOrderRepository = OrderRepository(db_session)
-    product_gateway: IProductRepository = ProductRepository(db_session)
-    order_item_gateway: IOrderItemRepository = OrderItemRepository(db_session)
-    return OrderItemController(order_item_gateway, product_gateway, order_gateway)
 
 @router.post(
         "/order-items",
