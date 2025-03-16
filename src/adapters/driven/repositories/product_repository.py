@@ -1,7 +1,9 @@
 from typing import List, Optional
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import Session
-from src.core.domain.entities.category import Category
+from src.adapters.driven.repositories.models.category_model import CategoryModel
+from src.adapters.driven.repositories.models.product_model import ProductModel
+from src.core.shared.identity_map import IdentityMap
 from src.core.domain.entities.product import Product
 from src.core.ports.product.i_product_repository import IProductRepository
 
@@ -9,38 +11,61 @@ class ProductRepository(IProductRepository):
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
+        self.identity_map = IdentityMap.get_instance()
 
     def create(self, product: Product) -> Product:
-        self.db_session.add(product)
+        existing = self.identity_map.get(Product, product.id)
+        if existing:
+            self.identity_map.remove(existing)
+        
+        product_model = ProductModel.from_entity(product)
+        self.db_session.add(product_model)
         self.db_session.commit()
-        self.db_session.refresh(product)
-        return product
+        self.db_session.refresh(product_model)
+        return product_model.to_entity()
 
     def exists_by_name(self, name: str) -> bool:
-        return self.db_session.query(exists().where(Product.name == name)).scalar()
+        return self.db_session.query(exists().where(ProductModel.name == name)).scalar()
 
     def get_by_name(self, name: str) -> Product:
-        return self.db_session.query(Product).filter(Product.name == name).first()
+        product_model = self.db_session.query(ProductModel).filter(ProductModel.name == name).first()
+        if not product_model:
+            return None
+        return product_model.to_entity()
 
     def get_by_id(self, product_id: int) -> Product:
-        return self.db_session.query(Product).filter(Product.id == product_id).first()
+        product_model = self.db_session.query(ProductModel).filter(ProductModel.id == product_id).first()
+        if not product_model:
+            return None
+        return product_model.to_entity()
 
     def get_all(self, categories: Optional[List[str]] = None, include_deleted: Optional[bool] = False) -> List[Product]:
-        query = self.db_session.query(Product)
+        query = self.db_session.query(ProductModel)
 
         if not include_deleted:
-            query = query.filter(Product.inactivated_at.is_(None))
+            query = query.filter(ProductModel.inactivated_at.is_(None))
 
         if categories:
-            query = query.filter(Product.category.has(Category.name.in_(categories)))
+            query = query.filter(ProductModel.category.has(CategoryModel.name.in_(categories)))
 
-        return query.all()
+        product_models = query.all()
+        return [product_model.to_entity() for product_model in product_models]
 
     def update(self, product: Product) -> Product:
-        self.db_session.merge(product)
+        existing = self.identity_map.get(Product, product.id)
+        if existing:
+            self.identity_map.remove(existing)
+        
+        product_model = ProductModel.from_entity(product)
+        product_model.category = CategoryModel.from_entity(product.category)
+        self.db_session.merge(product_model)
         self.db_session.commit()
-        return product
+
+        return product_model.to_entity()
 
     def delete(self, product: Product) -> None:
-        self.db_session.delete(product)
-        self.db_session.commit()
+        product_model = self.db_session.query(ProductModel).filter(ProductModel.id == product.id).first()
+        if product_model:
+            self.db_session.delete(product)
+            self.db_session.commit()
+            self.identity_map.remove(product_model.to_entity())

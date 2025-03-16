@@ -71,6 +71,7 @@ class CustomerRepository(ICustomerRepository):
         
         customer_model = CustomerModel.from_entity(customer)
         customer_model.person = PersonModel.from_entity(customer.person)
+
         self.db_session.merge(customer_model)
         self.db_session.commit()
         return self.get_by_id(customer_model.id)

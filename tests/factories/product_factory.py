@@ -3,7 +3,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyFloat
 from faker import Faker
 
-from src.core.domain.entities.product import Product
+from src.adapters.driven.repositories.models.product_model import ProductModel
 from tests.factories.category_factory import CategoryFactory
 
 fake = Faker()
@@ -11,7 +11,7 @@ fake = Faker()
 class ProductFactory(SQLAlchemyModelFactory):
 
     class Meta:
-        model = Product
+        model = ProductModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)
