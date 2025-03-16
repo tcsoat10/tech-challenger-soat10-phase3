@@ -1,24 +1,17 @@
 from fastapi import APIRouter, Depends, Query, Security, status
-from sqlalchemy.orm import Session
 from typing import List, Optional
+from dependency_injector.wiring import inject, Provide
 
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from config.database import get_db
 from src.constants.permissions import ProfilePermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.profile.profile_dto import ProfileDTO
 from src.core.domain.dtos.profile.create_profile_dto import CreateProfileDTO
 from src.core.domain.dtos.profile.update_profile_dto import UpdateProfileDTO
 from src.adapters.driver.api.v1.controllers.profile_controller import ProfileController
+from src.core.containers import Container
 
 
 router = APIRouter()
-
-
-def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileController:
-    profile_gateway: IProfileRepository = ProfileRepository(db_session)
-    return ProfileController(profile_gateway)
 
 
 @router.post(
@@ -27,9 +20,10 @@ def _get_profile_controller(db_session: Session = Depends(get_db)) -> ProfileCon
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_CREATE_PROFILE])]
 )
+@inject
 def create_profile(
     dto: CreateProfileDTO,
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     return controller.create_profile(dto)
@@ -41,9 +35,10 @@ def create_profile(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_VIEW_PROFILES])]
 )
+@inject
 def get_profile_by_name(
     profile_name: str,
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_profile_by_name(name=profile_name)
@@ -55,9 +50,10 @@ def get_profile_by_name(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_VIEW_PROFILES])]
 )
+@inject
 def get_profile_by_id(
     profile_id: int,
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_profile_by_id(profile_id)
@@ -69,9 +65,10 @@ def get_profile_by_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_VIEW_PROFILES])]
 )
+@inject
 def get_all_profiles(
     include_deleted: Optional[bool] = Query(False),
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_all_profiles(include_deleted)
@@ -83,10 +80,11 @@ def get_all_profiles(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_UPDATE_PROFILE])]
 )
+@inject
 def update_profile(
     profile_id: int,
     dto: UpdateProfileDTO,
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     return controller.update_profile(profile_id, dto)
@@ -97,9 +95,10 @@ def update_profile(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_DELETE_PROFILE])]
 )
+@inject
 def delete_profile(
     profile_id: int,
-    controller: ProfileController = Depends(_get_profile_controller),
+    controller: ProfileController = Depends(Provide[Container.profile_controller]),
     user=Depends(get_current_user)
 ):
     controller.delete_profile(profile_id)

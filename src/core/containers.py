@@ -6,6 +6,8 @@ from src.adapters.driver.api.v1.controllers.product_controller import ProductCon
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from src.adapters.driven.repositories.permission_repository import PermissionRepository
 from src.adapters.driver.api.v1.controllers.permission_controller import PermissionController
+from src.adapters.driven.repositories.profile_repository import ProfileRepository
+from src.adapters.driver.api.v1.controllers.profile_controller import ProfileController
 
 
 class Container(containers.DeclarativeContainer):
@@ -17,6 +19,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.product_routes",
         "src.adapters.driver.api.v1.controllers.permission_controller",
         "src.adapters.driver.api.v1.routes.permission_routes",
+        "src.adapters.driver.api.v1.controllers.profile_controller",
+        "src.adapters.driver.api.v1.routes.profile_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -38,3 +42,6 @@ class Container(containers.DeclarativeContainer):
 
     permission_gateway = providers.Factory(PermissionRepository, db_session=db_session)
     permission_controller = providers.Factory(PermissionController, permission_gateway=permission_gateway)
+
+    profile_gateway = providers.Factory(ProfileRepository, db_session=db_session)
+    profile_controller = providers.Factory(ProfileController, profile_gateway=profile_gateway)
