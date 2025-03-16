@@ -1,29 +1,17 @@
 from fastapi import APIRouter, Depends, Security, status
-from sqlalchemy.orm import Session
 from typing import List, Optional
+from dependency_injector.wiring import inject, Provide
 
-from src.adapters.driven.repositories.permission_repository import PermissionRepository
-from src.adapters.driven.repositories.profile_permission_repository import ProfilePermissionRepository
-from src.core.ports.permission.i_permission_repository import IPermissionRepository
-from src.core.ports.profile_permission.i_profile_permission_repository import IProfilePermissionRepository
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.core.ports.profile.i_profile_repository import IProfileRepository
 from src.adapters.driver.api.v1.controllers.profile_permission_controller import ProfilePermissionController
-from config.database import get_db
 from src.constants.permissions import ProfilePermissionPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.profile_permission.profile_permission_dto import ProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.create_profile_permission_dto import CreateProfilePermissionDTO
 from src.core.domain.dtos.profile_permission.update_profile_permission_dto import UpdateProfilePermissionDTO
+from src.core.containers import Container
 
 
 router = APIRouter()
-
-def _get_profile_permission_controller(db_session: Session = Depends(get_db)) -> ProfilePermissionController:
-    profile_permission_gateway: IProfilePermissionRepository = ProfilePermissionRepository(db_session)
-    profile_gateway: IProfileRepository = ProfileRepository(db_session)
-    permission_gateway: IPermissionRepository = PermissionRepository(db_session)
-    return ProfilePermissionController(profile_permission_gateway, permission_gateway, profile_gateway)
 
 
 @router.post(
@@ -32,9 +20,10 @@ def _get_profile_permission_controller(db_session: Session = Depends(get_db)) ->
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])]
 )
+@inject
 def create_profile_permission(
     dto: CreateProfilePermissionDTO,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.create_profile_permission(dto)
@@ -46,9 +35,10 @@ def create_profile_permission(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])]
 )
+@inject
 def get_profile_permission_by_id(
     profile_permission_id: int,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_profile_permission_by_id(profile_permission_id)
@@ -60,9 +50,10 @@ def get_profile_permission_by_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])]
 )
+@inject
 def get_profile_permission_by_permission_id(
     permission_id: int,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_profile_permission_by_permission_id(permission_id)
@@ -74,9 +65,10 @@ def get_profile_permission_by_permission_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])]
 )
+@inject
 def get_profile_permission_by_profile_id(
     profile_id: int,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_profile_permission_by_profile_id(profile_id)
@@ -88,9 +80,10 @@ def get_profile_permission_by_profile_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_VIEW_PROFILE_PERMISSIONS])]
 )
+@inject
 def get_all_profile_permissions(
     include_deleted: Optional[bool] = False,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_all_profile_permissions(include_deleted=include_deleted)
@@ -102,10 +95,11 @@ def get_all_profile_permissions(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_UPDATE_PROFILE_PERMISSION])]
 )
+@inject
 def update_profile_permission(
     profile_permission_id: int,
     dto: UpdateProfilePermissionDTO,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.update_profile_permission(profile_permission_id, dto)
@@ -116,9 +110,10 @@ def update_profile_permission(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_DELETE_PROFILE_PERMISSION])]
 )
+@inject
 def delete_profile_permission(
     profile_permission_id: int,
-    controller: ProfilePermissionController = Depends(_get_profile_permission_controller),
+    controller: ProfilePermissionController = Depends(Provide[Container.profile_permission_controller]),
     user=Depends(get_current_user)
 ):
     controller.delete_profile_permission(profile_permission_id)
