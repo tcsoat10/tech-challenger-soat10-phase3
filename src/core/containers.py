@@ -20,6 +20,9 @@ from src.adapters.driven.repositories.customer_repository import CustomerReposit
 from src.adapters.driver.api.v1.controllers.customer_controller import CustomerController
 from src.adapters.driven.repositories.role_repository import RoleRepository
 from src.adapters.driver.api.v1.controllers.role_controller import RoleController
+from src.adapters.driven.repositories.employee_repository import EmployeeRepository
+from src.adapters.driver.api.v1.controllers.employee_controller import EmployeeController
+
 
 
 class Container(containers.DeclarativeContainer):
@@ -45,6 +48,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.customer_routes",
         "src.adapters.driver.api.v1.controllers.role_controller",
         "src.adapters.driver.api.v1.routes.role_routes",
+        "src.adapters.driver.api.v1.controllers.employee_controller",
+        "src.adapters.driver.api.v1.routes.employee_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -99,3 +104,12 @@ class Container(containers.DeclarativeContainer):
 
     role_gateway = providers.Factory(RoleRepository, db_session=db_session)
     role_controller = providers.Factory(RoleController, role_gateway=role_gateway)
+
+    employee_gateway = providers.Factory(EmployeeRepository, db_session=db_session)
+    employee_controller = providers.Factory(
+        EmployeeController,
+        employee_gateway=employee_gateway,
+        person_gateway=person_gateway,
+        role_gateway=role_gateway,
+        user_gateway=user_gateway
+    )
