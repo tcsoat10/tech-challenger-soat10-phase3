@@ -12,6 +12,8 @@ from src.adapters.driven.repositories.profile_permission_repository import Profi
 from src.adapters.driver.api.v1.controllers.profile_permission_controller import ProfilePermissionController
 from src.adapters.driven.repositories.user_repository import UserRepository
 from src.adapters.driver.api.v1.controllers.user_controller import UserController
+from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
+from src.adapters.driver.api.v1.controllers.user_profile_controller import UserProfileController
 
 
 class Container(containers.DeclarativeContainer):
@@ -29,6 +31,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.profile_permission_routes",
         "src.adapters.driver.api.v1.controllers.user_controller",
         "src.adapters.driver.api.v1.routes.user_routes",
+        "src.adapters.driver.api.v1.controllers.user_profile_controller",
+        "src.adapters.driver.api.v1.routes.user_profile_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -64,3 +68,11 @@ class Container(containers.DeclarativeContainer):
 
     user_gateway = providers.Factory(UserRepository, db_session=db_session)
     user_controller = providers.Factory(UserController, user_gateway=user_gateway)
+
+    user_profile_gateway = providers.Factory(UserProfileRepository, db_session=db_session)
+    user_profile_controller = providers.Factory(
+        UserProfileController,
+        user_profile_gateway=user_profile_gateway,
+        profile_gateway=profile_gateway,
+        user_gateway=user_gateway
+    )
