@@ -30,6 +30,8 @@ from src.adapters.driven.repositories.order_item_repository import OrderItemRepo
 from src.adapters.driver.api.v1.controllers.order_item_controller import OrderItemController
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from src.adapters.driver.api.v1.controllers.payment_status_controller import PaymentStatusController
+from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
+from src.adapters.driver.api.v1.controllers.payment_method_controller import PaymentMethodController
 
 
 class Container(containers.DeclarativeContainer):
@@ -65,6 +67,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.order_item_routes",
         "src.adapters.driver.api.v1.controllers.payment_status_controller",
         "src.adapters.driver.api.v1.routes.payment_status_routes",
+        "src.adapters.driver.api.v1.controllers.payment_method_controller",
+        "src.adapters.driver.api.v1.routes.payment_method_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -153,4 +157,9 @@ class Container(containers.DeclarativeContainer):
     payment_status_gateway = providers.Factory(PaymentStatusRepository, session=db_session)
     payment_status_controller = providers.Factory(
         PaymentStatusController, payment_status_gateway=payment_status_gateway
+    )
+
+    payment_method_gateway = providers.Factory(PaymentMethodRepository, db_session=db_session)
+    payment_method_controller = providers.Factory(
+        PaymentMethodController, payment_method_gateway=payment_method_gateway
     )
