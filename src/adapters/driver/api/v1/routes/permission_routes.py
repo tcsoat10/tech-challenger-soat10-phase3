@@ -1,24 +1,17 @@
 from fastapi import APIRouter, Depends, Security, status, Query
-from sqlalchemy.orm import Session
 from typing import List, Optional
+from dependency_injector.wiring import inject, Provide
 
-from src.adapters.driven.repositories.permission_repository import PermissionRepository
-from config.database import get_db
-from src.core.ports.permission.i_permission_repository import IPermissionRepository
 from src.constants.permissions import PermissionPermissions
 from src.core.auth.dependencies import get_current_user
 from src.core.domain.dtos.permission.permission_dto import PermissionDTO
 from src.core.domain.dtos.permission.create_permission_dto import CreatePermissionDTO
 from src.core.domain.dtos.permission.update_permission_dto import UpdatePermissionDTO
 from src.adapters.driver.api.v1.controllers.permission_controller import PermissionController
+from src.core.containers import Container
 
 
 router = APIRouter()
-
-
-def _get_permission_controller(db_session: Session = Depends(get_db)) -> PermissionController:
-    permission_gateway: IPermissionRepository = PermissionRepository(db_session)
-    return PermissionController(permission_gateway)
 
 
 @router.post(
@@ -27,9 +20,10 @@ def _get_permission_controller(db_session: Session = Depends(get_db)) -> Permiss
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_CREATE_PERMISSION])]
 )
+@inject
 def create_permission(
     dto: CreatePermissionDTO,
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.create_permission(dto)
@@ -41,9 +35,10 @@ def create_permission(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_VIEW_PERMISSIONS])]
 )
+@inject
 def get_permission_by_name(
     permission_name: str,
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_permission_by_name(name=permission_name)
@@ -55,9 +50,10 @@ def get_permission_by_name(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_VIEW_PERMISSIONS])]
 )
+@inject
 def get_permission_by_id(
     permission_id: int,
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_permission_by_id(permission_id)
@@ -69,9 +65,10 @@ def get_permission_by_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_VIEW_PERMISSIONS])]
 )
+@inject
 def get_all_permissions(
     include_deleted: Optional[bool] = Query(False),
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_all_permissions(include_deleted)
@@ -83,10 +80,11 @@ def get_all_permissions(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_UPDATE_PERMISSION])]
 )
+@inject
 def update_permission(
     permission_id: int,
     dto: UpdatePermissionDTO,
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     return controller.update_permission(permission_id, dto)
@@ -97,9 +95,10 @@ def update_permission(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_DELETE_PERMISSION])]
 )
+@inject
 def delete_permission(
     permission_id: int,
-    controller: PermissionController = Depends(_get_permission_controller),
+    controller: PermissionController = Depends(Provide[Container.permission_controller]),
     user=Depends(get_current_user)
 ):
     controller.delete_permission(permission_id)

@@ -1,24 +1,18 @@
 from fastapi import APIRouter, Depends, status, Security
+from dependency_injector.wiring import inject, Provide
 
-from sqlalchemy.orm import Session
-from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from config.database import get_db
-from src.core.ports.payment_method.i_payment_method_repository import IPaymentMethodRepository
 from src.adapters.driver.api.v1.controllers.payment_method_controller import PaymentMethodController
 from src.core.domain.dtos.payment_method.create_payment_method_dto import CreatePaymentMethodDTO
 from src.core.domain.dtos.payment_method.payment_method_dto import PaymentMethodDTO
 from src.core.domain.dtos.payment_method.update_payment_method_dto import UpdatePaymentMethodDTO
 from src.constants.permissions import PaymentMethodPermissions
 from src.core.auth.dependencies import get_current_user
+from src.core.containers import Container
 
 
 router = APIRouter()
 
-
-def _get_payment_method_controller(db_session: Session = Depends(get_db)) -> PaymentMethodController:
-    payment_method_gateway: IPaymentMethodRepository = PaymentMethodRepository(db_session)
-    return PaymentMethodController(payment_method_gateway)
-    
 
 @router.post(
         "/payment-methods",
@@ -26,9 +20,10 @@ def _get_payment_method_controller(db_session: Session = Depends(get_db)) -> Pay
         status_code=status.HTTP_201_CREATED,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_CREATE_PAYMENT_METHOD])]
 )
+@inject
 def create_payment_method(
     dto: CreatePaymentMethodDTO,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.create_payment_method(dto)
@@ -39,9 +34,10 @@ def create_payment_method(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_VIEW_PAYMENT_METHODS])]
 )
+@inject
 def get_payment_method_by_name(
     payment_method_name: str,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_payment_method_by_name(name=payment_method_name)
@@ -52,9 +48,10 @@ def get_payment_method_by_name(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_VIEW_PAYMENT_METHODS])]
 )
+@inject
 def get_payment_method_by_id(
     payment_method_id: int,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_payment_method_by_id(payment_method_id)
@@ -65,9 +62,10 @@ def get_payment_method_by_id(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_VIEW_PAYMENT_METHODS])]
 )
+@inject
 def get_all_payment_methods(
     include_deleted: bool = False,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.get_all_payment_methods(include_deleted=include_deleted)
@@ -78,10 +76,11 @@ def get_all_payment_methods(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_UPDATE_PAYMENT_METHOD])]
 )
+@inject
 def update_payment_method(
     payment_method_id: int,
     dto: UpdatePaymentMethodDTO,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.update_payment_method(payment_method_id, dto)
@@ -91,9 +90,10 @@ def update_payment_method(
         status_code=status.HTTP_204_NO_CONTENT,
         dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_DELETE_PAYMENT_METHOD])]
 )
+@inject
 def delete_payment_method(
     payment_method_id: int,
-    controller: PaymentMethodController = Depends(_get_payment_method_controller),
+    controller: PaymentMethodController = Depends(Provide[Container.payment_method_controller]),
     user: dict = Security(get_current_user)
 ):
     return controller.delete_payment_method(payment_method_id)

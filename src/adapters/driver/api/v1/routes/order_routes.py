@@ -1,37 +1,19 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
-from sqlalchemy.orm import Session
+from dependency_injector.wiring import inject, Provide
 
-from src.adapters.driven.repositories.customer_repository import CustomerRepository
-from src.adapters.driven.repositories.employee_repository import EmployeeRepository
-from src.adapters.driven.repositories.order_repository import OrderRepository
-from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
-from src.adapters.driven.repositories.product_repository import ProductRepository
-from src.core.ports.customer.i_customer_repository import ICustomerRepository
-from src.core.ports.employee.i_employee_repository import IEmployeeRepository
-from src.core.ports.order.i_order_repository import IOrderRepository
-from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
-from src.core.ports.product.i_product_repository import IProductRepository
 from src.adapters.driver.api.v1.controllers.order_controller import OrderController
 from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
-from config.database import get_db
 from src.core.domain.dtos.order.order_dto import OrderDTO
-
 from src.core.auth.dependencies import get_current_user
+from src.core.containers import Container
 
 
 router = APIRouter()
 
-def _get_order_controller(db_session: Session = Depends(get_db)) -> OrderController:
-    customer_gateway: ICustomerRepository = CustomerRepository(db_session)
-    order_status_gateway: IOrderStatusRepository = OrderStatusRepository(db_session)
-    employee_gateway: IEmployeeRepository = EmployeeRepository(db_session)
-    product_gateway: IProductRepository = ProductRepository(db_session)
-    order_gateway: IOrderRepository = OrderRepository(db_session)
-    return OrderController(customer_gateway, order_status_gateway, employee_gateway, product_gateway, order_gateway)
 
 # Criar um pedido
 @router.post(
@@ -40,9 +22,10 @@ def _get_order_controller(db_session: Session = Depends(get_db)) -> OrderControl
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CREATE_ORDER])],
 )
+@inject
 async def create_order(
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.create_order(current_user)
 
@@ -53,10 +36,11 @@ async def create_order(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_PRODUCTS_BY_ORDER_STATUS])],
 )
+@inject
 async def list_products_by_order_status(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.list_products_by_order_status(order_id, current_user)
 
@@ -66,10 +50,11 @@ async def list_products_by_order_status(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDER])],
 )
+@inject
 async def get_order_by_id(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.get_order_by_id(order_id, current_user)
 
@@ -79,11 +64,12 @@ async def get_order_by_id(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_ADD_ITEM])],
     status_code=status.HTTP_201_CREATED,
 )
+@inject
 async def add_item(
     order_id: int,
     dto: CreateOrderItemDTO,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.add_item(order_id, dto, current_user)
     return {"detail": "Item adicionado com sucesso."}
@@ -94,11 +80,12 @@ async def add_item(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_REMOVE_ITEM])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def remove_item(
     order_id: int,
     item_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.remove_item(order_id, item_id, current_user)
     return {"detail": "Item removido com sucesso."}
@@ -109,12 +96,13 @@ async def remove_item(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CHANGE_ITEM_QUANTITY])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def change_item_quantity(
     order_id: int,
     order_item_id: int,
     new_quantity: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.change_item_quantity(order_id, order_item_id, new_quantity, current_user)
     return {"detail": "Quantidade atualizada com sucesso."}
@@ -125,12 +113,13 @@ async def change_item_quantity(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CHANGE_ITEM_OBSERVATION])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def change_item_observation(
     order_id: int,
     item_id: int,
     new_observation: str,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.change_item_observation(order_id, item_id, new_observation, current_user)
     return {"detail": "Observação atualizada com sucesso."}
@@ -140,10 +129,11 @@ async def change_item_observation(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CLEAR_ORDER])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def clear_order(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.clear_order(order_id, current_user)
     return {"detail": "Pedido limpo com sucesso."}
@@ -155,10 +145,11 @@ async def clear_order(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_ORDER_ITEMS])],
 )
+@inject
 async def list_order_items(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.list_order_items(order_id, current_user)
 
@@ -168,20 +159,22 @@ async def list_order_items(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_CANCEL_ORDER])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def cancel_order(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     controller.cancel_order(order_id, current_user)
     return {"detail": "Pedido cancelado com sucesso."}
 
 # Avançar para o próximo passo no pedido
 @router.post("/orders/{order_id}/advance")
+@inject
 async def advance_order_status(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.advance_order_status(order_id, current_user)
 
@@ -191,10 +184,11 @@ async def advance_order_status(
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_GO_BACK])],
     status_code=status.HTTP_200_OK,
 )
+@inject
 async def go_back(
     order_id: int,
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.revert_order_status(order_id, current_user)
 
@@ -205,12 +199,13 @@ async def go_back(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_LIST_ORDERS])],
 )
+@inject
 async def list_orders(
     status: Optional[List[str]] = Query(
         default=[],
         description="Lista de status dos pedidos para filtrar, por exemplo: ?status=order_pending&status=order_paid"
     ),
     current_user: dict = Depends(get_current_user),
-    controller: OrderController = Depends(_get_order_controller),
+    controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.list_orders(current_user, status)
