@@ -1,11 +1,7 @@
 from fastapi import APIRouter, Depends, Security, status, Query
-from sqlalchemy.orm import Session
 from typing import List, Optional
 from dependency_injector.wiring import inject, Provide
 
-from src.adapters.driven.repositories.role_repository import RoleRepository
-from config.database import get_db
-from src.core.ports.role.i_role_repository import IRoleRepository
 from src.core.auth.dependencies import get_current_user
 from src.constants.permissions import RolePermissions
 from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
@@ -16,11 +12,6 @@ from src.core.containers import Container
 
 
 router = APIRouter()
-
-
-def _get_role_controller(db_session: Session = Depends(get_db)) -> RoleController:
-    role_gateway: IRoleRepository = RoleRepository(db_session)
-    return RoleController(role_gateway)
 
 
 @router.post(

@@ -1,17 +1,9 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
-from sqlalchemy.orm import Session
 from dependency_injector.wiring import inject, Provide
 
-from src.adapters.driven.repositories.profile_repository import ProfileRepository
-from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
-from src.adapters.driven.repositories.user_repository import UserRepository
-from src.core.ports.profile.i_profile_repository import IProfileRepository
-from src.core.ports.user.i_user_repository import IUserRepository
-from src.core.ports.user_profile.i_user_profile_repository import IUserProfileRepository
 from src.constants.permissions import UserProfilePermissions
 from src.core.auth.dependencies import get_current_user
-from config.database import get_db
 from src.core.domain.dtos.user_profile.create_user_profile_dto import CreateUserProfileDTO
 from src.core.domain.dtos.user_profile.update_user_profile_dto import UpdateUserProfileDTO
 from src.core.domain.dtos.user_profile.user_profile_dto import UserProfileDTO
@@ -20,13 +12,6 @@ from src.core.containers import Container
 
 
 router = APIRouter()
-
-
-def _get_user_profile_controller(db_session: Session = Depends(get_db)) -> UserProfileController:
-    user_profile_gateway: IUserProfileRepository = UserProfileRepository(db_session)
-    profile_gateway: IProfileRepository = ProfileRepository(db_session)
-    user_gateway: IUserRepository = UserRepository(db_session)
-    return UserProfileController(user_profile_gateway, profile_gateway, user_gateway)
 
 
 @router.post(
