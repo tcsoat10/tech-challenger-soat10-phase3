@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect, text
 from alembic.config import Config
 from alembic import command
+from src.core.containers import Container
 from src.constants.order_status import OrderStatusEnum
 from src.app import app
 from config.database import DATABASE, get_db
@@ -146,6 +147,10 @@ def db_session(setup_test_database):
             pass
 
     app.dependency_overrides[get_db] = override_get_db
+    
+    container = Container()
+    container.db_session.override(session)
+    app.container = container
 
     try:
         yield session

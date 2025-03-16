@@ -22,6 +22,7 @@ python-jose = {version = "^3.4.0", extras = ["cryptography"]}
 python-multipart = "^0.0.20"
 pycpfcnpj = "^1.8"
 requests = "^2.32.3"
+dependency-injector = "^4.46.0"
 
 [tool.poetry.group.test]
 optional = true

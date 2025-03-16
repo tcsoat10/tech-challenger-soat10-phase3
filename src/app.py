@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.core.containers import Container
 from src.adapters.driver.api.v1.middleware.auth_middleware import AuthMiddleware
 from src.adapters.driver.api.v1.middleware.custom_error_middleware import CustomErrorMiddleware
 from src.adapters.driver.api.v1.routes.health_check import router as health_check_router
@@ -23,6 +24,10 @@ from src.adapters.driver.api.v1.routes.payment_routes import router as payment_r
 from src.adapters.driver.api.v1.routes.webhook_routes import router as webhook_routes
 
 app = FastAPI(title="Tech Challenger SOAT10 - FIAP")
+
+# Inicializando o container de dependências
+container = Container()
+app.container = container
 
 app.add_middleware(CustomErrorMiddleware)
 app.add_middleware(AuthMiddleware)
