@@ -32,6 +32,9 @@ from src.adapters.driven.repositories.payment_status_repository import PaymentSt
 from src.adapters.driver.api.v1.controllers.payment_status_controller import PaymentStatusController
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.adapters.driver.api.v1.controllers.payment_method_controller import PaymentMethodController
+from src.adapters.driven.repositories.payment_repository import PaymentRepository
+from src.adapters.driver.api.v1.controllers.payment_controller import PaymentController
+from src.adapters.driven.payment_providers.mercado_pago_gateway import MercadoPagoGateway
 
 
 class Container(containers.DeclarativeContainer):
@@ -69,6 +72,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.payment_status_routes",
         "src.adapters.driver.api.v1.controllers.payment_method_controller",
         "src.adapters.driver.api.v1.routes.payment_method_routes",
+        "src.adapters.driver.api.v1.controllers.payment_controller",
+        "src.adapters.driver.api.v1.routes.payment_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -162,4 +167,17 @@ class Container(containers.DeclarativeContainer):
     payment_method_gateway = providers.Factory(PaymentMethodRepository, db_session=db_session)
     payment_method_controller = providers.Factory(
         PaymentMethodController, payment_method_gateway=payment_method_gateway
+    )
+
+    payment_provider_gateway = providers.Factory(MercadoPagoGateway)
+
+    payment_gateway = providers.Factory(PaymentRepository, db_session=db_session)
+    payment_controller = providers.Factory(
+        PaymentController,
+        payment_gateway=payment_gateway,
+        payment_provider_gateway=payment_provider_gateway,
+        payment_status_gateway=payment_status_gateway,
+        payment_method_gateway=payment_method_gateway,
+        order_gateway=order_gateway,
+        order_status_gateway=order_status_gateway
     )
