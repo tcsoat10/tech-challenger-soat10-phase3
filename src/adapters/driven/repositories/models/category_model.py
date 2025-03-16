@@ -23,7 +23,7 @@ class CategoryModel(BaseModel[Category]):
         )
         
     def to_entity(self) -> Category:
-        identity_map = IdentityMap.get_instance()
+        identity_map: IdentityMap = IdentityMap.get_instance()
 
         existing = identity_map.get(Category, self.id)
         if existing:

@@ -10,7 +10,7 @@ class CategoryRepository(ICategoryRepository):
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
-        self.identity_map = IdentityMap.get_instance()
+        self.identity_map: IdentityMap = IdentityMap.get_instance()
 
     def create(self, category: Category) -> Category:
         if category.id is not None:

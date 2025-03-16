@@ -16,7 +16,7 @@ database_url = (
 )
 config.set_main_option("sqlalchemy.url", database_url)
 
-# Metadados das tabelas (BaseEntity como base para todas as entidades)
+# Metadados das tabelas (BaseModel como base para todas as entidades)
 target_metadata = BaseModel.metadata
 
 # Modo offline: Gera SQL sem conexão ao banco

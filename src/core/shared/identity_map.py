@@ -5,16 +5,13 @@ from src.core.domain.entities.base_entity import BaseEntity
 # https://martinfowler.com/eaaCatalog/identityMap.html
 class IdentityMap:
     
-    _instance = None
-    
     def __init__(self):
         self._entities = {}
         
     @classmethod
-    def get_instance(cls) -> 'IdentityMap':
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
+    def get_instance(cls) -> "IdentityMap":
+        from src.core.containers import Container
+        return Container.identity_map()
         
     def add(self, entity: BaseEntity):
         key = (entity.__class__, entity.id)
@@ -24,9 +21,9 @@ class IdentityMap:
         key = (entity_class, entity_id)
         return self._entities.get(key)
     
-    def put(self, entity: BaseEntity):
+    def has(self, entity: BaseEntity):
         key = (entity.__class__, entity.id)
-        self._entities[key] = entity
+        return key in self._entities
     
     def remove(self, entity: BaseEntity):
         key = (entity.__class__, entity.id)
