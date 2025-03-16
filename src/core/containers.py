@@ -16,6 +16,9 @@ from src.adapters.driven.repositories.user_profile_repository import UserProfile
 from src.adapters.driver.api.v1.controllers.user_profile_controller import UserProfileController
 from src.adapters.driven.repositories.person_repository import PersonRepository
 from src.adapters.driver.api.v1.controllers.person_controller import PersonController
+from src.adapters.driven.repositories.customer_repository import CustomerRepository
+from src.adapters.driver.api.v1.controllers.customer_controller import CustomerController
+
 
 
 class Container(containers.DeclarativeContainer):
@@ -37,6 +40,8 @@ class Container(containers.DeclarativeContainer):
         "src.adapters.driver.api.v1.routes.user_profile_routes",
         "src.adapters.driver.api.v1.controllers.person_controller",
         "src.adapters.driver.api.v1.routes.person_routes",
+        "src.adapters.driver.api.v1.controllers.customer_controller",
+        "src.adapters.driver.api.v1.routes.customer_routes",
     ])
 
     db_session = providers.Dependency(instance_of=Session)
@@ -83,3 +88,8 @@ class Container(containers.DeclarativeContainer):
 
     person_gateway = providers.Factory(PersonRepository, db_session=db_session)
     person_controller = providers.Factory(PersonController, person_gateway=person_gateway)
+
+    customer_gateway = providers.Factory(CustomerRepository, db_session=db_session)
+    customer_controller = providers.Factory(
+        CustomerController, customer_gateway=customer_gateway, person_gateway=person_gateway
+    )
