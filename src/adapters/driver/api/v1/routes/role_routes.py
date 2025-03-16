@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from dependency_injector.wiring import inject, Provide
 
 from src.adapters.driven.repositories.role_repository import RoleRepository
 from config.database import get_db
@@ -11,6 +12,7 @@ from src.core.domain.dtos.role.create_role_dto import CreateRoleDTO
 from src.core.domain.dtos.role.role_dto import RoleDTO
 from src.core.domain.dtos.role.update_role_dto import UpdateRoleDTO
 from src.adapters.driver.api.v1.controllers.role_controller import RoleController
+from src.core.containers import Container
 
 
 router = APIRouter()
@@ -27,9 +29,10 @@ def _get_role_controller(db_session: Session = Depends(get_db)) -> RoleControlle
     status_code=status.HTTP_201_CREATED,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_CREATE_ROLE])]
 )
+@inject
 def create_role(
     dto: CreateRoleDTO,
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     return controller.create_role(dto)
@@ -41,9 +44,10 @@ def create_role(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
+@inject
 def get_role_by_name(
     role_name: str,
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_role_by_name(role_name)
@@ -55,9 +59,10 @@ def get_role_by_name(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
+@inject
 def get_role_by_id(
     role_id: str,
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_role_by_id(role_id)
@@ -69,9 +74,10 @@ def get_role_by_id(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_VIEW_ROLES])]
 )
+@inject
 def get_all_roles(
     include_deleted: Optional[bool] = Query(False),
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     return controller.get_all_roles(include_deleted)
@@ -83,10 +89,11 @@ def get_all_roles(
     status_code=status.HTTP_200_OK,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_UPDATE_ROLE])]
 )
+@inject
 def update_role(
     role_id: int,
     dto: UpdateRoleDTO,
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     return controller.update_role(role_id, dto)
@@ -97,9 +104,10 @@ def update_role(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_DELETE_ROLE])]
 )
+@inject
 def delete_role(
     role_id: int,
-    controller: RoleController = Depends(_get_role_controller),
+    controller: RoleController = Depends(Provide[Container.role_controller]),
     user=Depends(get_current_user)
 ):
     controller.delete_role(role_id)
