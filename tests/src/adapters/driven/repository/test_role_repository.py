@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from src.adapters.driven.repositories.models.role_model import RoleModel
 from src.adapters.driven.repositories.role_repository import RoleRepository
 from src.core.domain.entities.role import Role
 from tests.factories.role_factory import RoleFactory
@@ -16,7 +17,7 @@ class TestRoleRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Role).delete()
+        self.db_session.query(RoleModel).delete()
         self.db_session.commit()
 
     def test_create_role_success(self):
@@ -47,8 +48,7 @@ class TestRoleRepository:
         assert role.description == new_role.description
     
     def test_get_role_by_name_with_unregistered_name(self):
-        new_role = RoleFactory()
-        self.repository.create(new_role)
+        RoleFactory(name='registered name')
 
         role = self.repository.get_by_name('not a name')
 
@@ -56,7 +56,6 @@ class TestRoleRepository:
 
     def test_get_role_by_id_and_return_success(self):
         new_role = RoleFactory()
-        self.repository.create(new_role)
 
         role = self.repository.get_by_id(new_role.id)
 

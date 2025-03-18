@@ -2,7 +2,7 @@ from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 import factory
 
-from src.core.domain.entities.role import Role
+from src.adapters.driven.repositories.models.role_model import RoleModel
 
 
 fake = Faker()
@@ -10,7 +10,7 @@ fake = Faker()
 
 class RoleFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = Role
+        model = RoleModel
         sqlalchemy_session_persistence = 'commit'
 
     id = factory.Sequence(lambda n: n + 1)
