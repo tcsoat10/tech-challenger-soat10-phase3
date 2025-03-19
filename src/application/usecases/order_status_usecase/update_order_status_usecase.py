@@ -19,7 +19,7 @@ class UpdateOrderStatusUseCase:
         if not order_status:
             raise EntityDuplicatedException(entity_name="OrderStatus")
     
-        order_status.status=dto.status,
+        order_status.status=dto.status
         order_status.description=dto.description
         
         order_status = self.order_status_gateway.update(order_status)
