@@ -28,7 +28,7 @@ class OrderStatusModel(BaseModel):
         if existing:
             return existing
         
-        return OrderStatus(
+        order_status = OrderStatus(
             id=self.id,
             status=self.status,
             description=self.description,
@@ -36,6 +36,8 @@ class OrderStatusModel(BaseModel):
             updated_at=self.updated_at,
             inactivated_at=self.inactivated_at
         )
+        identity_map.add(order_status)
+        return order_status
         
 
 __all__ = ['OrderStatusModel']
