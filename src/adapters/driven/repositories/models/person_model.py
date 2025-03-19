@@ -32,7 +32,7 @@ class PersonModel(BaseModel):
         if existing:
             return existing
         
-        return Person(
+        person = Person(
             id=self.id,
             created_at=self.created_at,
             updated_at=self.updated_at,
@@ -42,3 +42,5 @@ class PersonModel(BaseModel):
             email=self.email,
             birth_date=self.birth_date
         )
+        identity_map.add(person)
+        return person

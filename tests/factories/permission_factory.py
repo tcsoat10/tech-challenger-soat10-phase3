@@ -2,14 +2,14 @@ import factory
 from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 
-from src.core.domain.entities.permission import Permission
+from src.adapters.driven.repositories.models.permission_model import PermissionModel
 
 fake = Faker()
 
 class PermissionFactory(SQLAlchemyModelFactory):
 
     class Meta:
-        model = Permission
+        model = PermissionModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)

@@ -29,7 +29,7 @@ class CategoryModel(BaseModel[Category]):
         if existing:
             return existing
         
-        return Category(
+        category = Category(
             id=self.id,
             created_at=self.created_at,
             updated_at=self.updated_at,
@@ -37,6 +37,8 @@ class CategoryModel(BaseModel[Category]):
             name=self.name,
             description=self.description
         )
+        identity_map.add(category)
+        return category
 
 
 __all__ = ["CategoryModel"]

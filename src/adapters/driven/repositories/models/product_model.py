@@ -39,7 +39,7 @@ class ProductModel(BaseModel):
         if existing:
             return existing
 
-        return Product(
+        product = Product(
             id=self.id,
             created_at=self.created_at,
             updated_at=self.updated_at,
@@ -50,6 +50,8 @@ class ProductModel(BaseModel):
             price=self.price,
             sla_product=self.sla_product,
         )
+        identity_map.add(product)
+        return product
         
 
 __all__ = ["ProductModel"]

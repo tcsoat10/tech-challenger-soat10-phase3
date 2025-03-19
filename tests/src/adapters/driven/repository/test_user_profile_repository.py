@@ -2,6 +2,7 @@
 import pytest
 
 from sqlalchemy.orm import Session
+from src.adapters.driven.repositories.models.user_profile_model import UserProfileModel
 from src.core.domain.entities.user_profile import UserProfile
 from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
 from src.core.ports.user_profile.i_user_profile_repository import IUserProfileRepository
@@ -19,7 +20,7 @@ class TestUserProfileRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(UserProfile).delete()
+        self.db_session.query(UserProfileModel).delete()
         self.db_session.commit()
     
     def test_create_user_profile_success(self):
