@@ -1,10 +1,10 @@
-
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from src.core.domain.entities.order_status import OrderStatus
 from tests.factories.order_status_factory import OrderStatusFactory
+from src.adapters.driven.repositories.models.order_status_model import OrderStatusModel
 
 
 class TestOrderStatusRepository:
@@ -16,7 +16,7 @@ class TestOrderStatusRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(OrderStatus).delete()
+        self.db_session.query(OrderStatusModel).delete()
         self.db_session.commit()
 
     def test_create_order_status_success(self):
@@ -27,7 +27,7 @@ class TestOrderStatusRepository:
         assert created_order_status.status == "PENDING"
         assert created_order_status.description == "Order is pending"
 
-        db_order_status = self.db_session.query(OrderStatus).filter_by(status="PENDING").first()
+        db_order_status = self.db_session.query(OrderStatusModel).filter_by(status="PENDING").first()
         assert db_order_status is not None
         assert db_order_status.status == "PENDING"
         assert db_order_status.description == "Order is pending"
@@ -88,7 +88,7 @@ class TestOrderStatusRepository:
         assert updated_order_status.status == "CONFIRMED"
         assert updated_order_status.description == "Order is confirmed"
 
-        db_order_status = self.db_session.query(OrderStatus).filter_by(status="CONFIRMED").first()
+        db_order_status = self.db_session.query(OrderStatusModel).filter_by(status="CONFIRMED").first()
         assert db_order_status is not None
         assert db_order_status.status == "CONFIRMED"
         assert db_order_status.description == "Order is confirmed"
@@ -98,6 +98,5 @@ class TestOrderStatusRepository:
 
         self.repository.delete(order_status)
 
-        db_order_status = self.db_session.query(OrderStatus).filter_by(status="PENDING").first()
+        db_order_status = self.db_session.query(OrderStatusModel).filter_by(status="PENDING").first()
         assert db_order_status is None
-

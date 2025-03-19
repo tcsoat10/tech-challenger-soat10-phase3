@@ -2,16 +2,19 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
-from src.core.domain.entities.order_status import OrderStatus
+from src.adapters.driven.repositories.models.order_status_model import OrderStatusModel
+
 
 fake = Faker()
+
 
 class OrderStatusFactory(SQLAlchemyModelFactory):
     
     class Meta:
-        model = OrderStatus
+        model = OrderStatusModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)
     status = factory.LazyAttribute(lambda _: fake.sentence(nb_words=2))
     description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))
+    
