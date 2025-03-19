@@ -1,23 +1,72 @@
+from datetime import datetime
+from typing import Optional
+from src.core.domain.entities.person import Person
+from src.core.domain.entities.role import Role
+from src.core.domain.entities.user import User
 from src.core.domain.entities.base_entity import BaseEntity
-
-from sqlalchemy import Column, Date, ForeignKey
-from sqlalchemy.orm import relationship
 
 
 class Employee(BaseEntity):
-    __tablename__ = 'employees'
+    
+    def __init__(
+        self,
+        person: Person,
+        role: Role,
+        user: User,
+        admission_date: Optional[datetime] = None,
+        termination_date: Optional[datetime] = None,
+        id: Optional[int] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        inactivated_at: Optional[datetime] = None,
+    ):
+        super().__init__(id, created_at, updated_at, inactivated_at)
+        self._admission_date = admission_date
+        self._termination_date = termination_date
+        self._person = person
+        self._role = role
+        self._user = user
+    
+    @property
+    def admission_date(self) -> datetime:
+        return self._admission_date
+    
+    @admission_date.setter
+    def admission_date(self, value: datetime):
+        self._admission_date = value
 
-    admission_date = Column(Date)
-    termination_date = Column(Date)
+    @property
+    def termination_date(self) -> datetime:
+        return self._termination_date
+    
+    @termination_date.setter
+    def termination_date(self, value: datetime):
+        self._termination_date = value
 
-    person_id = Column(ForeignKey('persons.id'), nullable=False)
-    person = relationship('Person')
+    @property
+    def person(self) -> Person:
+        return self._person
+    
+    @person.setter
+    def person(self, value: Person):
+        self._person = value
 
-    role_id = Column(ForeignKey('roles.id'), nullable=False)
-    role = relationship('Role')
+    @property
+    def role(self) -> Role:
+        return self._role
+    
+    @role.setter
+    def role(self, value: Role):
+        self._role = value
 
-    user_id = Column(ForeignKey('users.id'), nullable=False)
-    user = relationship('User')
+    @property
+    def user(self) -> User:
+        return self._user
+    
+    @user.setter
+    def user(self, value: User):
+        self._user = value
+    
 
 
 __all__ = ['Employee']
