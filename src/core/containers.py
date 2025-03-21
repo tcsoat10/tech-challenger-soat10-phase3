@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
-from sqlalchemy.orm import Session
 
+from config.database import get_db
 from src.core.shared.identity_map import IdentityMap
 from src.adapters.driver.api.v1.controllers.auth_controller import AuthController
 from src.adapters.driver.api.v1.controllers.category_controller import CategoryController
@@ -83,7 +83,7 @@ class Container(containers.DeclarativeContainer):
     
     identity_map = providers.Singleton(IdentityMap)
 
-    db_session = providers.Dependency(instance_of=Session)
+    db_session = providers.Resource(get_db)
 
     category_gateway = providers.Factory(
         CategoryRepository,
