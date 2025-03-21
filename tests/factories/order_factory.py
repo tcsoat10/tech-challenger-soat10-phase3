@@ -2,7 +2,7 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
-from src.core.domain.entities.order import Order
+from src.adapters.driven.repositories.models.order_model import OrderModel
 from tests.factories.customer_factory import CustomerFactory
 from tests.factories.employee_factory import EmployeeFactory
 from tests.factories.order_item_factory import OrderItemFactory
@@ -13,7 +13,7 @@ fake = Faker()
 class OrderFactory(SQLAlchemyModelFactory):
     
     class Meta:
-        model = Order
+        model = OrderModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)

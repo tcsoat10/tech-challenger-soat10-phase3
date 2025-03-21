@@ -6,7 +6,7 @@ class Profile(BaseEntity):
     def __init__(
         self,
         name: str,
-        description: str,
+        description: Optional[str] = None,
         profile_permissions: Optional[list] = [],
         permissions: Optional[list] = [],
         user_profiles: Optional[list] = [],

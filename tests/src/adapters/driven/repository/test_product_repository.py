@@ -1,5 +1,6 @@
 import pytest
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError
+from src.adapters.driven.repositories.models.category_model import CategoryModel
 from src.adapters.driven.repositories.models.product_model import ProductModel
 from src.core.domain.entities.product import Product
 from src.adapters.driven.repositories.product_repository import ProductRepository
@@ -24,9 +25,9 @@ class TestProductRepository:
         product = Product(
             name="Cheeseburger",
             description="A delicious cheeseburger.",
-            category=category,
+            category=category.to_entity(),
             price=39.90,
-            sla_product="Standard SLA"
+            sla_product="15 minutes"
         )
 
         created_product = self.repository.create(product)
@@ -36,7 +37,7 @@ class TestProductRepository:
         assert created_product.description == "A delicious cheeseburger."
         assert created_product.category.id == category.id
         assert created_product.price == 39.90
-        assert created_product.sla_product == "Standard SLA"
+        assert created_product.sla_product == "15 minutes"
 
     def test_repository_create_category_duplicate_error(self, db_session):
         category = CategoryFactory()

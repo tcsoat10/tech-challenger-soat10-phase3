@@ -3,14 +3,14 @@ from factory.alchemy import SQLAlchemyModelFactory
 from factory.fuzzy import FuzzyInteger
 from faker import Faker
 
-from src.core.domain.entities.order_item import OrderItem
+from src.adapters.driven.repositories.models.order_item_model import OrderItemModel
 from tests.factories.product_factory import ProductFactory
 
 fake = Faker()
 
 class OrderItemFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = OrderItem
+        model = OrderItemModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)

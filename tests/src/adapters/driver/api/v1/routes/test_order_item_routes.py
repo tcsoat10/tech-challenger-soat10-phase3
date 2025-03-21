@@ -52,15 +52,16 @@ def test_create_order_item_with_invalid_product_id(client, db_session):
     }
 
 def test_get_order_item_by_id_success(client, db_session):
-    order_item = OrderItemFactory()
-    response = client.get(f"/api/v1/order-items/{order_item.id}/id", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
+    order_item_model = OrderItemFactory()
+    response = client.get(f"/api/v1/order-items/{order_item_model.id}/id", permissions=[OrderItemPermissions.CAN_VIEW_ORDER_ITEMS])
 
     assert response.status_code == status.HTTP_200_OK
 
+    order_item = order_item_model.to_entity()
     data = response.json()
 
     assert data["id"] == order_item.id
-    assert data["product"]["id"] == order_item.product_id
+    assert data["product"]["id"] == order_item.product.id
     assert data["quantity"] == order_item.quantity
     assert data["observation"] == order_item.observation
     assert data["total"] == order_item.total

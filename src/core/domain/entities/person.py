@@ -9,8 +9,8 @@ class Person(BaseEntity):
     def __init__(
         self,
         name: str,
-        cpf: str,
-        email: str,
+        cpf: Optional[str] = None,
+        email: Optional[str] = None,
         birth_date: Optional[datetime] = None,
         id: Optional[int] = None,
         created_at: Optional[str] = None,

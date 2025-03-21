@@ -20,7 +20,7 @@ class AddOrderItemInOrderUseCase:
         if not order:
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
-        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != int(current_user['person']['id']):
+        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.customer.id != int(current_user['person']['id']):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
         product = self.product_gateway.get_by_id(order_item_dto.product_id)
@@ -35,5 +35,5 @@ class AddOrderItemInOrderUseCase:
         )
         order.add_item(order_item)
 
-        self.order_gateway.update(order)
-        return order
+        updated_order = self.order_gateway.update(order)
+        return updated_order

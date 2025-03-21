@@ -1,46 +1,44 @@
 from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 import uuid
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship, Mapped
 
+from src.core.domain.entities.order_status_movement import OrderStatusMovement
 from src.constants.order_transition import PRODUCT_CATEGORY_TO_ORDER_STATUS, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES_ALLOWING_REVERSAL_TRANSITIONS
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.constants.product_category import ProductCategoryEnum
 from src.core.domain.entities.employee import Employee
 from src.core.domain.entities.order_status import OrderStatus
 from src.core.domain.entities.order_item import OrderItem
+from src.core.domain.entities.customer import Customer
+from src.core.domain.entities.payment import Payment
 from src.core.exceptions.bad_request_exception import BadRequestException
 from src.constants.order_status import OrderStatusEnum
 from .base_entity import BaseEntity
 
 
 class Order(BaseEntity):
-    __tablename__ = 'orders'
-
-    id_customer = Column('id_customer', Integer, ForeignKey('customers.id'), nullable=False)
-    customer = relationship('Customer')
-
-    id_order_status = Column('id_order_status', Integer, ForeignKey('order_status.id'), nullable=False, default=1)
-    order_status = relationship('OrderStatus')
-
-    id_employee = Column('id_employee', Integer, ForeignKey('employees.id'), nullable=True)
-    employee = relationship('Employee')
-
-    id_payment = Column(ForeignKey('payments.id'), nullable=True)
-    payment = relationship('Payment', back_populates='order')
-
-    order_items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
-
-    status_history = relationship(
-        'OrderStatusMovement',
-        back_populates='order',
-        cascade='all, delete-orphan',
-        order_by='OrderStatusMovement.changed_at',
-    )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    
+    def __init__(
+        self,
+        customer: Customer = None,
+        employee: Optional[Employee] = None,
+        order_status: Optional[OrderStatus] = None,
+        payment: Optional[Payment] = None,
+        order_items: List[OrderItem] = [],
+        status_history: Optional[List[OrderStatusMovement]] = [],
+        id: Optional[int] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        inactivated_at: Optional[datetime] = None,
+    ):
+        super().__init__(id, created_at, updated_at, inactivated_at)
+        self.customer = customer
+        self.employee = employee
+        self.order_status = order_status
+        self.payment = payment
+        self.order_items = order_items
+        self.status_history = status_history
+        
         initial_status = OrderStatusMovement(
             order=self,
             old_status=None,
@@ -49,6 +47,54 @@ class Order(BaseEntity):
             changed_by="System",
         )
         self.status_history.append(initial_status)
+        
+    @property
+    def customer(self) -> Customer:
+        return self._customer
+
+    @customer.setter
+    def customer(self, value: Customer) -> None:
+        self._customer = value
+
+    @property
+    def employee(self) -> Optional[Employee]:
+        return self._employee
+
+    @employee.setter
+    def employee(self, value: Optional[Employee]) -> None:
+        self._employee = value
+
+    @property
+    def order_status(self) -> OrderStatus:
+        return self._order_status
+
+    @order_status.setter
+    def order_status(self, value: OrderStatus) -> None:
+        self._order_status = value
+
+    @property
+    def payment(self) -> Optional[Payment]:
+        return self._payment
+
+    @payment.setter
+    def payment(self, value: Optional[Payment]) -> None:
+        self._payment = value
+
+    @property
+    def order_items(self) -> List[OrderItem]:
+        return self._order_items
+
+    @order_items.setter
+    def order_items(self, value: List[OrderItem]) -> None:
+        self._order_items = value
+
+    @property
+    def status_history(self) -> List[OrderStatusMovement]:
+        return self._status_history
+
+    @status_history.setter
+    def status_history(self, value: List[OrderStatusMovement]) -> None:
+        self._status_history = value
 
     @property
     def customer_name(self) -> Optional[str]:
@@ -122,7 +168,6 @@ class Order(BaseEntity):
         ]
         
         categorized_items = {category: [] for category in category_sequence}
-
         for item in self.order_items:
             category = item.product.category
             if category.name in categorized_items:
@@ -146,17 +191,17 @@ class Order(BaseEntity):
 
         order_snapshot = {
             "id": self.id,
-            "id_customer": self.id_customer,
-            "customer_name": self.customer_name,
-            "id_employee": self.id_employee,
-            "employee_name": self.employee_name,
+            "id_customer": self.customer.id,
+            "customer_name": self.customer.person.name,
+            "id_employee": self.employee.id,
+            "employee_name": self.employee.person.name,
             "total": self.total,
             "current_status": self.order_status.status,
             "is_paid": self.is_paid,
             "order_items": [
                 {
                     "id": item.id,
-                    "product_id": item.product_id,
+                    "product_id": item.product.id,
                     "product_name": item.product.name,
                     "quantity": item.quantity,
                     "unit_price": item.product.price,
@@ -168,6 +213,7 @@ class Order(BaseEntity):
         }
         
         movement = OrderStatusMovement(
+            order=self,
             order_snapshot=order_snapshot,
             old_status=self.order_status.status,
             new_status=new_status.status,
@@ -454,20 +500,5 @@ class Order(BaseEntity):
             "description": f"Compra do pedido {self.id}"
         }
 
-class OrderStatusMovement(BaseEntity):
-    __tablename__ = 'order_status_movements'
 
-    id_order: Mapped[int] = Column(Integer, ForeignKey('orders.id'), nullable=False)
-    order = relationship('Order', back_populates='status_history')
-
-    order_snapshot: Mapped[dict] = Column(JSON, nullable=False, default=[])
-    
-    old_status: Mapped[Optional[str]] = Column(String(100), nullable=True)
-    new_status: Mapped[str] = Column(String(100), nullable=False)
-
-    changed_at: Mapped[datetime] = Column(
-        DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False
-    )
-    changed_by: Mapped[str] = Column(String(300), nullable=True)
-
-__all__ = ['Order', 'OrderStatusMovement']
+__all__ = ['Order']

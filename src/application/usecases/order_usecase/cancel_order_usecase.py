@@ -18,7 +18,7 @@ class CancelOrderUseCase:
         if not order:
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
-        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != int(current_user['person']['id']):
+        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.customer.id != int(current_user['person']['id']):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
 
         order.cancel_order(self.order_status_gateway)

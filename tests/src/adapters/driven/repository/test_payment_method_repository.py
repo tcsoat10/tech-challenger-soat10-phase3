@@ -2,6 +2,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from src.adapters.driven.repositories.models.payment_method_model import PaymentMethodModel
 from src.adapters.driven.repositories.payment_method_repository import PaymentMethodRepository
 from src.core.domain.entities.payment_method import PaymentMethod
 from tests.factories.payment_method_factory import PaymentMethodFactory
@@ -16,7 +17,7 @@ class TestPaymentMethodRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(PaymentMethod).delete()
+        self.db_session.query(PaymentMethodModel).delete()
         self.db_session.commit()
 
     def test_create_payment_method_success(self):
@@ -27,7 +28,7 @@ class TestPaymentMethodRepository:
         assert created_payment_method.name == "Credit Card"
         assert created_payment_method.description == "Pay with credit card"
 
-        db_payment_method = self.db_session.query(PaymentMethod).filter_by(name="Credit Card").first()
+        db_payment_method = self.db_session.query(PaymentMethodModel).filter_by(name="Credit Card").first()
         assert db_payment_method is not None
         assert db_payment_method.name == "Credit Card"
         assert db_payment_method.description == "Pay with credit card"
@@ -76,7 +77,7 @@ class TestPaymentMethodRepository:
         assert updated_payment_method.name == "Debit Card"
         assert updated_payment_method.description == "Pay with debit card"
 
-        db_payment_method = self.db_session.query(PaymentMethod).filter_by(name="Debit Card").first()
+        db_payment_method = self.db_session.query(PaymentMethodModel).filter_by(name="Debit Card").first()
         assert db_payment_method is not None
         assert db_payment_method.name == "Debit Card"
         assert db_payment_method.description == "Pay with debit card"
@@ -86,5 +87,5 @@ class TestPaymentMethodRepository:
 
         self.repository.delete(payment_method)
 
-        db_payment_method = self.db_session.query(PaymentMethod).filter_by(name="Credit Card").first()
+        db_payment_method = self.db_session.query(PaymentMethodModel).filter_by(name="Credit Card").first()
         assert db_payment_method is None

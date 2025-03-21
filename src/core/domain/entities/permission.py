@@ -8,7 +8,7 @@ class Permission(BaseEntity):
     def __init__(
         self,
         name: str,
-        description: str,
+        description: Optional[str] = None,
         id: Optional[int] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,

@@ -17,8 +17,10 @@ class ProductRepository(IProductRepository):
         existing = self.identity_map.get(Product, product.id)
         if existing:
             self.identity_map.remove(existing)
-        
+
         product_model = ProductModel.from_entity(product)
+        product_model.category = self.db_session.query(CategoryModel).filter(CategoryModel.id == product.category.id).first()
+
         self.db_session.add(product_model)
         self.db_session.commit()
         self.db_session.refresh(product_model)
@@ -58,6 +60,7 @@ class ProductRepository(IProductRepository):
         
         product_model = ProductModel.from_entity(product)
         product_model.category = CategoryModel.from_entity(product.category)
+
         self.db_session.merge(product_model)
         self.db_session.commit()
 

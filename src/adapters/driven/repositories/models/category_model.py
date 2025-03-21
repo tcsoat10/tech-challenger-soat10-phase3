@@ -24,7 +24,6 @@ class CategoryModel(BaseModel[Category]):
         
     def to_entity(self) -> Category:
         identity_map: IdentityMap = IdentityMap.get_instance()
-
         existing = identity_map.get(Category, self.id)
         if existing:
             return existing
@@ -39,6 +38,7 @@ class CategoryModel(BaseModel[Category]):
         )
         identity_map.add(category)
         return category
+
 
 
 __all__ = ["CategoryModel"]

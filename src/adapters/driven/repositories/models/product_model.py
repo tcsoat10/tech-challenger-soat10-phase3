@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 
+from src.adapters.driven.repositories.models.category_model import CategoryModel
 from src.adapters.driven.repositories.models.base_model import BaseModel
 from src.core.domain.entities.product import Product
 from src.core.shared.identity_map import IdentityMap
@@ -45,12 +46,14 @@ class ProductModel(BaseModel):
             updated_at=self.updated_at,
             inactivated_at=self.inactivated_at,
             name=self.name,
-            description=self.description,
-            category=self.category.to_entity(),
             price=self.price,
+            description=self.description,
             sla_product=self.sla_product,
         )
         identity_map.add(product)
+        
+        product.category = self.category.to_entity()
+        
         return product
         
 
