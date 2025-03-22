@@ -93,7 +93,8 @@ def update_person(
 @router.delete(
     "/person/{person_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_DELETE_PERSON])]
+    dependencies=[Security(get_current_user, scopes=[PersonPermissions.CAN_DELETE_PERSON])],
+    include_in_schema=False
 )
 @inject
 def delete_person(

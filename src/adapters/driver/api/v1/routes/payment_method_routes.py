@@ -18,7 +18,8 @@ router = APIRouter()
         "/payment-methods",
         response_model=PaymentMethodDTO,
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_CREATE_PAYMENT_METHOD])]
+        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_CREATE_PAYMENT_METHOD])],
+        include_in_schema=False
 )
 @inject
 def create_payment_method(
@@ -74,7 +75,8 @@ def get_all_payment_methods(
         "/payment-methods/{payment_method_id}",
         response_model=PaymentMethodDTO,
         status_code=status.HTTP_200_OK,
-        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_UPDATE_PAYMENT_METHOD])]
+        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_UPDATE_PAYMENT_METHOD])],
+    include_in_schema=False
 )
 @inject
 def update_payment_method(
@@ -88,7 +90,8 @@ def update_payment_method(
 @router.delete(
         "/payment-methods/{payment_method_id}",
         status_code=status.HTTP_204_NO_CONTENT,
-        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_DELETE_PAYMENT_METHOD])]
+        dependencies=[Security(get_current_user, scopes=[PaymentMethodPermissions.CAN_DELETE_PAYMENT_METHOD])],
+        include_in_schema=False
 )
 @inject
 def delete_payment_method(

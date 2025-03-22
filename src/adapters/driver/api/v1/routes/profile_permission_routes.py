@@ -18,7 +18,8 @@ router = APIRouter()
     '/profile_permissions',
     response_model=ProfilePermissionDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_CREATE_PROFILE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def create_profile_permission(
@@ -93,7 +94,8 @@ def get_all_profile_permissions(
     '/profile_permissions/{profile_permission_id}',
     response_model=ProfilePermissionDTO,
     status_code=status.HTTP_200_OK,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_UPDATE_PROFILE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_UPDATE_PROFILE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def update_profile_permission(
@@ -108,7 +110,8 @@ def update_profile_permission(
 @router.delete(
     '/profile_permissions/{profile_permission_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_DELETE_PROFILE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissionPermissions.CAN_DELETE_PROFILE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def delete_profile_permission(

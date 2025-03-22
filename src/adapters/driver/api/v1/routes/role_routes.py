@@ -18,7 +18,8 @@ router = APIRouter()
     '/roles',
     response_model=RoleDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_CREATE_ROLE])]
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_CREATE_ROLE])],
+    include_in_schema=False
 )
 @inject
 def create_role(
@@ -78,7 +79,8 @@ def get_all_roles(
     '/roles/{role_id}',
     response_model=RoleDTO,
     status_code=status.HTTP_200_OK,
-    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_UPDATE_ROLE])]
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_UPDATE_ROLE])],
+    include_in_schema=False
 )
 @inject
 def update_role(
@@ -93,7 +95,8 @@ def update_role(
 @router.delete(
     '/roles/{role_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_DELETE_ROLE])]
+    dependencies=[Security(get_current_user, scopes=[RolePermissions.CAN_DELETE_ROLE])],
+    include_in_schema=False
 )
 @inject
 def delete_role(

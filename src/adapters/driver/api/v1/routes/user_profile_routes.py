@@ -89,7 +89,8 @@ def update_user_profile(
 @router.delete(
     path='/user-profiles/{user_profile_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[UserProfilePermissions.CAN_DELETE_USER_PROFILE])]
+    dependencies=[Security(get_current_user, scopes=[UserProfilePermissions.CAN_DELETE_USER_PROFILE])],
+    include_in_schema=False
 )
 @inject
 def delete_user_profile(

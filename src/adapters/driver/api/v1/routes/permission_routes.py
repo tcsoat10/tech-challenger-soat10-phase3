@@ -18,7 +18,8 @@ router = APIRouter()
     path='/permissions',
     response_model=PermissionDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_CREATE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_CREATE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def create_permission(
@@ -78,7 +79,8 @@ def get_all_permissions(
     path='/permissions/{permission_id}',
     response_model=PermissionDTO,
     status_code=status.HTTP_200_OK,
-    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_UPDATE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_UPDATE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def update_permission(
@@ -93,7 +95,8 @@ def update_permission(
 @router.delete(
     path='/permissions/{permission_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_DELETE_PERMISSION])]
+    dependencies=[Security(get_current_user, scopes=[PermissionPermissions.CAN_DELETE_PERMISSION])],
+    include_in_schema=False
 )
 @inject
 def delete_permission(
