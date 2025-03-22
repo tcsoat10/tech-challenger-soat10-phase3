@@ -188,17 +188,28 @@ class Order(BaseEntity):
         :param new_status: The new status of the order.
         :param changed_by: The name of the user who changed the status.
         '''
-
-        order_snapshot = {
-            "id": self.id,
-            "id_customer": self.customer.id,
-            "customer_name": self.customer.person.name,
-            "id_employee": self.employee.id,
-            "employee_name": self.employee.person.name,
-            "total": self.total,
-            "current_status": self.order_status.status,
-            "is_paid": self.is_paid,
-            "order_items": [
+        
+        order_snapshot = { "id": self.id }
+        if self.employee:
+            order_snapshot["id_employee"] = self.employee.id
+            order_snapshot["employee_name"] = self.employee.person.name
+        
+        if self.customer:    
+            order_snapshot["id_customer"] = self.customer.id
+            order_snapshot["customer_name"] = self.customer.person.name
+        
+        if self.payment:
+            order_snapshot["payment_id"] = self.payment.id
+            order_snapshot["transaction_id"] = self.payment.transaction_id
+            order_snapshot["qr_code"] = self.payment.qr_code
+            order_snapshot["amount"] = self.payment.amount
+        
+        order_snapshot["current_status"] = self.order_status.status
+        order_snapshot["total"] = self.total
+        order_snapshot["is_paid"] = self.is_paid
+        
+        if self.order_items and self.order_status.status in [OrderStatusEnum.ORDER_READY_TO_PLACE.status, OrderStatusEnum.ORDER_PLACED.status]:
+            order_snapshot["order_items"] = [
                 {
                     "id": item.id,
                     "product_id": item.product.id,
@@ -209,8 +220,7 @@ class Order(BaseEntity):
                     "observation": item.observation,
                 }
                 for item in self.order_items
-            ],
-        }
+            ]
         
         movement = OrderStatusMovement(
             order=self,
