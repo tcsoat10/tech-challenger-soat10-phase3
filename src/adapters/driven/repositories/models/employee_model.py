@@ -24,6 +24,9 @@ class EmployeeModel(BaseModel):
 
     @classmethod
     def from_entity(cls, employee):
+        if not employee:
+            return None
+        
         return cls(
             id=employee.id,
             admission_date=employee.admission_date,
