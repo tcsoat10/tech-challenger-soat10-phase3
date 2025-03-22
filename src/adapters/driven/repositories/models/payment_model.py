@@ -1,3 +1,4 @@
+from src.adapters.driven.repositories.models.order_model import OrderModel
 from src.adapters.driven.repositories.models.base_model import BaseModel
 from src.core.domain.entities.payment import Payment
 from src.core.shared.identity_map import IdentityMap
@@ -28,11 +29,13 @@ class PaymentModel(BaseModel):
     def from_entity(cls, payment: BaseEntity):
         payment_method_id = payment.payment_method.id if payment.payment_method else None
         payment_status_id = payment.payment_status.id if payment.payment_status else None
-        
+        order_model = [OrderModel.from_entity(order_model) for order_model in payment.order] if payment.order else []
+
         return cls(
             payment_method_id=payment_method_id,
             payment_status_id=payment_status_id,
             amount=payment.amount,
+            order=order_model,
             external_reference=payment.external_reference,
             qr_code=payment.qr_code,
             transaction_id=payment.transaction_id,
@@ -59,12 +62,14 @@ class PaymentModel(BaseModel):
             inactivated_at=self.inactivated_at,
         )
         identity_map.add(payment)
-        
+
+        order = [order_model.to_entity() for order_model in self.order] if self.order else []
         payment_method = self._get_payment_method(identity_map)
         payment_status = self._get_payment_status(identity_map)
 
         payment.payment_method = payment_method
         payment.payment_status = payment_status
+        payment.order = order
 
         return payment
     
