@@ -30,7 +30,7 @@ class PaymentRepository(IPaymentRepository):
         if payment.id is not None:
             existing_payment = self.identity_map.get(Payment, payment.id)
             if existing_payment is not None:
-                self.identity_map.remove(Payment, payment.id)
+                self.identity_map.remove(payment)
         
         payment_model = PaymentModel.from_entity(payment)
         self.db_session.add(payment_model)
@@ -49,8 +49,8 @@ class PaymentRepository(IPaymentRepository):
         if payment.id is not None:
             existing_payment = self.identity_map.get(Payment, payment.id)
             if existing_payment is not None:
-                self.identity_map.remove(Payment, payment.id)
-        
+                self.identity_map.remove(payment)
+
         payment_model = PaymentModel.from_entity(payment)
         payment_model.payment_method = PaymentMethodModel.from_entity(payment.payment_method)
         
