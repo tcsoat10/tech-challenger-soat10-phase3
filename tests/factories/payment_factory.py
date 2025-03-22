@@ -2,7 +2,7 @@ from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 import factory
 
-from src.core.domain.entities.payment import Payment
+from src.adapters.driven.repositories.models.payment_model import PaymentModel
 from tests.factories.payment_method_factory import PaymentMethodFactory
 from tests.factories.payment_status_factory import PaymentStatusFactory
 
@@ -12,7 +12,7 @@ fake = Faker()
 
 class PaymentFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = Payment
+        model = PaymentModel
         sqlalchemy_session_persistence = 'commit'
     
     id = factory.Sequence(lambda n: n + 1)

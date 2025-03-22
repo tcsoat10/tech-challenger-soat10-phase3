@@ -1,12 +1,9 @@
 from typing import Any, Dict
-import uuid
 
 from config.settings import WEBHOOK_URL
-from src.constants.order_status import OrderStatusEnum
 from src.constants.payment_status import PaymentStatusEnum
 from src.core.domain.entities.order import Order
 from src.core.domain.entities.payment import Payment
-from src.core.exceptions.bad_request_exception import BadRequestException
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
@@ -53,7 +50,7 @@ class ProcessPaymentUseCase:
         )
 
     def execute(self, order_id: int, method_payment: str, current_user: dict) -> Dict[str, Any]:
-        order: Order = self.order_repository.get_by_id(order_id)
+        order: Order = self.order_gateway.get_by_id(order_id)
         
         if not order:
             raise EntityNotFoundException("Pedido não encontrado.")
@@ -73,8 +70,8 @@ class ProcessPaymentUseCase:
             raise ValueError(f"Status de pagamento não encontrado: {PaymentStatusEnum.PAYMENT_PENDING.status}")
 
         payment = Payment(
-            payment_method_id=payment_method.id,
-            payment_status_id=payment_status.id,
+            payment_method=payment_method,
+            payment_status=payment_status,
             amount=payment_data['total_amount'],
             external_reference=payment_data["external_reference"],
         )

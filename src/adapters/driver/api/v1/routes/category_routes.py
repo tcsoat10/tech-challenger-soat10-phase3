@@ -17,7 +17,8 @@ router = APIRouter()
     "/categories",
     response_model=CategoryDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_CREATE_CATEGORY])]
+    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_CREATE_CATEGORY])],
+    include_in_schema=False
 )
 @inject
 def create_category(
@@ -71,7 +72,8 @@ def get_all_categories(
 @router.put(
     "/categories/{category_id}",
     response_model=CategoryDTO,
-    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_UPDATE_CATEGORY])]
+    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_UPDATE_CATEGORY])],
+    include_in_schema=False
 )
 @inject
 def update_category(
@@ -85,7 +87,8 @@ def update_category(
 @router.delete(
     "/categories/{category_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_DELETE_CATEGORY])]
+    dependencies=[Security(get_current_user, scopes=[CategoryPermissions.CAN_DELETE_CATEGORY])],
+    include_in_schema=False
 )
 @inject
 def delete_category(

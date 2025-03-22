@@ -18,7 +18,8 @@ router = APIRouter()
         "/payment-status",
         response_model=PaymentStatusDTO,
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS])]
+        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_CREATE_PAYMENT_STATUS])],
+        include_in_schema=False
 )
 @inject
 def create_payment_status(
@@ -72,7 +73,8 @@ def get_all_payment_status(
 @router.put(
         "/payment-status/{payment_status_id}",
         response_model=PaymentStatusDTO,
-        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_UPDATE_PAYMENT_STATUS])]
+        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_UPDATE_PAYMENT_STATUS])],
+        include_in_schema=False
 )
 @inject
 def update_payment_status(
@@ -86,7 +88,8 @@ def update_payment_status(
 @router.delete(
         "/payment-status/{payment_status_id}",
         status_code=status.HTTP_204_NO_CONTENT,
-        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_DELETE_PAYMENT_STATUS])]
+        dependencies=[Security(get_current_user, scopes=[PaymentStatusPermissions.CAN_DELETE_PAYMENT_STATUS])],
+        include_in_schema=False
 )
 @inject
 def delete_payment_status(

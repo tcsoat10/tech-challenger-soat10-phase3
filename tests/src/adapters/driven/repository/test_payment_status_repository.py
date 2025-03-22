@@ -2,6 +2,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from src.adapters.driven.repositories.models.payment_status_model import PaymentStatusModel
 from src.core.domain.entities.payment_status import PaymentStatus
 from src.adapters.driven.repositories.payment_status_repository import PaymentStatusRepository
 from tests.factories.payment_status_factory import PaymentStatusFactory
@@ -16,7 +17,7 @@ class TestPaymentStatusRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(PaymentStatus).delete()
+        self.db_session.query(PaymentStatusModel).delete()
         self.db_session.commit()
 
     def test_create_payment_status_success(self):
@@ -27,7 +28,7 @@ class TestPaymentStatusRepository:
         assert created_payment_status.name == "Paid"
         assert created_payment_status.description == "Payment status paid"
 
-        db_payment_status = self.db_session.query(PaymentStatus).filter_by(name="Paid").first()
+        db_payment_status = self.db_session.query(PaymentStatusModel).filter_by(name="Paid").first()
         assert db_payment_status is not None
         assert db_payment_status.name == "Paid"
         assert db_payment_status.description == "Payment status paid"

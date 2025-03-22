@@ -1,6 +1,7 @@
 import pytest
 from src.adapters.driven.repositories.profile_repository import ProfileRepository
 from src.core.domain.entities.profile import Profile
+from src.adapters.driven.repositories.models.profile_model import ProfileModel
 from sqlalchemy.exc import IntegrityError
 
 
@@ -15,7 +16,7 @@ class TestProfileRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Profile).delete()
+        self.db_session.query(ProfileModel).delete()
         self.db_session.commit()
 
     def test_create_profile_success(self):
@@ -36,12 +37,12 @@ class TestProfileRepository:
         assert created_assistant_profile.description == "Store worker"
 
         # Verifica se o perfil Manager foi persistido no banco
-        db_profile = self.db_session.query(Profile).filter_by(name="Manager").first()
+        db_profile = self.db_session.query(ProfileModel).filter_by(name="Manager").first()
         assert db_profile is not None
         assert db_profile.name == "Manager"
 
         # Verifica se o perfil Assistant foi persistido no banco
-        db_profile = self.db_session.query(Profile).filter_by(name="Assistant").first()
+        db_profile = self.db_session.query(ProfileModel).filter_by(name="Assistant").first()
         assert db_profile is not None
         assert db_profile.name == "Assistant"
     

@@ -12,6 +12,7 @@ from src.core.containers import Container
 from src.constants.order_status import OrderStatusEnum
 from src.app import app
 from config.database import DATABASE, get_db
+from src.core.shared.identity_map import IdentityMap
 from src.core.utils.jwt_util import JWTUtil
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.employee_factory import EmployeeFactory
@@ -127,6 +128,9 @@ def setup_test_database():
             print(f"Banco e usuário removidos: {test_database}, {test_user}")
         except Exception as e:
             print(f"Erro ao limpar banco ou usuário de teste: {e}")
+        finally:
+            identity_map = IdentityMap.get_instance()
+            identity_map.clear()
 
     root_engine.dispose()
 
@@ -239,10 +243,25 @@ def setup_factories(db_session):
         OrderFactory,
         PaymentFactory,
     ]
+    
+    identity_map = IdentityMap.get_instance()
+
+    def after_postgeneration(obj):
+        """
+        Post-generation hook to add the entity to the identity map.
+        
+        Args:
+            obj: The generated object.
+        """
+        if hasattr(obj, 'to_entity'):
+            entity = obj.to_entity()
+            identity_map.add(entity)
+        return obj
 
     for factory in factories:
         factory._meta.sqlalchemy_session = db_session
         factory.reset_sequence()
+        factory._meta.after_postgeneration = after_postgeneration
 
 
 @pytest.fixture(scope="function")

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from src.adapters.driver.api.v1.middleware.identity_map_middleware import IdentityMapMiddleware
 from src.core.containers import Container
 from src.adapters.driver.api.v1.middleware.auth_middleware import AuthMiddleware
 from src.adapters.driver.api.v1.middleware.custom_error_middleware import CustomErrorMiddleware
@@ -31,6 +32,7 @@ app.container = container
 
 app.add_middleware(CustomErrorMiddleware)
 app.add_middleware(AuthMiddleware)
+app.add_middleware(IdentityMapMiddleware)
 
 # Adicionando rotas da versão 1
 app.include_router(health_check_router, prefix="/api/v1")
@@ -40,7 +42,7 @@ app.include_router(payment_routes, prefix="/api/v1", tags=["payment"])
 app.include_router(payment_method_routes, prefix="/api/v1", tags=["payment-methods"])
 app.include_router(category_routes, prefix="/api/v1", tags=["categories"])
 app.include_router(product_routes, prefix="/api/v1", tags=["products"])
-app.include_router(order_item_routes, prefix="/api/v1", tags=["order-items"])
+app.include_router(order_item_routes, prefix="/api/v1", tags=["order-items"], include_in_schema=False)
 app.include_router(permission_routes, prefix="/api/v1", tags=["permissions"])
 app.include_router(profile_routes, prefix="/api/v1", tags=["profiles"])
 app.include_router(profile_permission_routes, prefix='/api/v1', tags=['profile-permissions'])

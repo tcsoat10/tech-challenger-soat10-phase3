@@ -1,5 +1,7 @@
 import pytest
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError
+from src.adapters.driven.repositories.models.category_model import CategoryModel
+from src.adapters.driven.repositories.models.product_model import ProductModel
 from src.core.domain.entities.product import Product
 from src.adapters.driven.repositories.product_repository import ProductRepository
 from tests.factories.category_factory import CategoryFactory
@@ -15,7 +17,7 @@ class TestProductRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Product).delete()
+        self.db_session.query(ProductModel).delete()
         self.db_session.commit()
 
     def test_create_product_success(self):
@@ -23,9 +25,9 @@ class TestProductRepository:
         product = Product(
             name="Cheeseburger",
             description="A delicious cheeseburger.",
-            category_id=category.id,
+            category=category.to_entity(),
             price=39.90,
-            sla_product="Standard SLA"
+            sla_product="15 minutes"
         )
 
         created_product = self.repository.create(product)
@@ -33,9 +35,9 @@ class TestProductRepository:
         assert created_product.id is not None
         assert created_product.name == "Cheeseburger"
         assert created_product.description == "A delicious cheeseburger."
-        assert created_product.category_id == category.id
+        assert created_product.category.id == category.id
         assert created_product.price == 39.90
-        assert created_product.sla_product == "Standard SLA"
+        assert created_product.sla_product == "15 minutes"
 
     def test_repository_create_category_duplicate_error(self, db_session):
         category = CategoryFactory()
@@ -44,7 +46,7 @@ class TestProductRepository:
         product2 = Product(
             name="Cheeseburger",
             description="A delicious cheeseburger.",
-            category_id=category.id,
+            category=category,
             price=39.90,
             sla_product="Standard SLA"
         )
@@ -67,7 +69,7 @@ class TestProductRepository:
         assert product_response.id is not None
         assert product_response.name == "Cheeseburger"
         assert product_response.description == "A delicious cheeseburger."
-        assert product_response.category_id == category.id
+        assert product_response.category.id == category.id
         assert product_response.price == 39.90
         assert product_response.sla_product == "Standard SLA"
 
@@ -91,7 +93,7 @@ class TestProductRepository:
         assert product_response.id is not None
         assert product_response.name == "Cheeseburger"
         assert product_response.description == "A delicious cheeseburger."
-        assert product_response.category_id == category.id
+        assert product_response.category.id == category.id
         assert product_response.price == 39.90
         assert product_response.sla_product == "Standard SLA"
 
@@ -117,11 +119,21 @@ class TestProductRepository:
         )
         
         products = self.repository.get_all()
-       
-        assert products == [
-            product1,
-            product2,
-        ]
+
+        assert products is not None
+        assert len(products) == 2
+        
+        assert products[0].id == product1.id
+        assert products[0].name == product1.name
+        assert products[0].description == product1.description
+        assert products[0].price == product1.price
+        assert products[0].category.id == product1.category_id
+        
+        assert products[1].id == product2.id
+        assert products[1].name == product2.name
+        assert products[1].description == product2.description
+        assert products[1].price == product2.price
+        assert products[1].category.id == product2.category_id
 
     def test_get_all_products_with_emtpy_db(self):
         products = self.repository.get_all()
@@ -151,7 +163,7 @@ class TestProductRepository:
         assert data.name == product.name
         assert data.description == product.description
         assert data.price == product.price
-        assert data.category_id == product.category_id
+        assert data.category.id == product.category_id
 
     def test_delete_product(self):
         category1 = CategoryFactory(name="Drinks")
@@ -167,7 +179,7 @@ class TestProductRepository:
         assert data[0].name == product2.name
         assert data[0].description == product2.description
         assert data[0].price == product2.price
-        assert data[0].category_id == product2.category_id
+        assert data[0].category.id == product2.category_id
         
 
     def test_delete_product_with_inexistent_id(self):
@@ -178,9 +190,15 @@ class TestProductRepository:
             id=999, name="Big Mac", description="Fast food burger", price=20.99, category=category
         )
 
-        with pytest.raises(InvalidRequestError):
-            self.repository.delete(product_not_registered)
+        self.repository.delete(product_not_registered)
 
         products = self.repository.get_all()
+    
         assert len(products) == 1
-        assert products[0] == product
+        assert products[0].id == product.id
+        assert products[0].name == product.name
+        assert products[0].description == product.description
+        assert products[0].price == product.price
+        assert products[0].category.id == product.category_id
+
+    

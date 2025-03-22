@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from src.adapters.driven.repositories.models.user_model import UserModel
 from src.adapters.driven.repositories.user_repository import UserRepository
 from src.core.domain.entities.user import User
 from tests.factories.user_factory import UserFactory
@@ -14,7 +15,7 @@ class TestUserRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(User).delete()
+        self.db_session.query(UserModel).delete()
         self.db_session.commit()
 
     def test_create_user_success(self):
@@ -26,7 +27,8 @@ class TestUserRepository:
         assert created_user.verify_password('test_pass') is True
     
     def test_verify_wrong_password_return_error(self):
-        user = UserFactory(password='test_pass')
+        user_model = UserFactory(password='test_pass')
+        user = user_model.to_entity()
         assert user.verify_password('wrong_pass') is False
 
     def test_create_duplicate_user_return_error(self):
@@ -85,8 +87,9 @@ class TestUserRepository:
         assert users == []
 
     def test_update_user(self):
-        user = UserFactory(name='user1', password='test_pass')
+        user_model = UserFactory(name='user1', password='test_pass')
 
+        user = user_model.to_entity()
         user.name = 'user2'
         user.password = 'new_pass'
 

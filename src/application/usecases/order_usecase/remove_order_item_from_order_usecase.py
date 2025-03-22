@@ -16,7 +16,7 @@ class RemoveOrderItemFromOrderUseCase:
         if not order:
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
-        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.id_customer != int(current_user['person']['id']):
+        if current_user['profile']['name'] in ['customer', 'anonymous'] and order.customer.id != int(current_user['person']['id']):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
         
         order_item = next((order_item for order_item in order.order_items if order_item.id == order_item_id), None)

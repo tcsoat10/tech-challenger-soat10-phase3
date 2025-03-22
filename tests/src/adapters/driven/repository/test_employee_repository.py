@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 
+from src.adapters.driven.repositories.models.employee_model import EmployeeModel
 from src.adapters.driven.repositories.employee_repository import EmployeeRepository
 from src.core.domain.entities.employee import Employee
 from tests.factories.person_factory import PersonFactory
@@ -17,7 +18,7 @@ class TestEmployeeRepository:
         self.clean_database()
     
     def clean_database(self):
-        self.db_session.query(Employee).delete()
+        self.db_session.query(EmployeeModel).delete()
         self.db_session.commit()
 
     def test_create_employee_success(self):
@@ -30,9 +31,9 @@ class TestEmployeeRepository:
         employee = Employee(
             admission_date=admission_date, 
             termination_date=termination_date,
-            person_id=person.id,
-            role_id=role.id,
-            user_id=user.id
+            person=person.to_entity(),
+            role=role.to_entity(),
+            user=user.to_entity()
         )
 
         created_employee = self.repository.create(employee)
@@ -40,9 +41,9 @@ class TestEmployeeRepository:
         assert created_employee.id is not None
         assert created_employee.admission_date == datetime.date(admission_date)
         assert created_employee.termination_date == datetime.date(termination_date)
-        assert created_employee.person_id == person.id
-        assert created_employee.role_id == role.id
-        assert created_employee.user_id == user.id
+        assert created_employee.person.id == person.id
+        assert created_employee.role.id == role.id
+        assert created_employee.user.id == user.id
     
     def test_get_employee_by_id_success(self):
         employee = EmployeeFactory()
@@ -53,9 +54,9 @@ class TestEmployeeRepository:
         assert employee_response.id == employee.id
         assert employee_response.admission_date == employee.admission_date
         assert employee_response.termination_date == employee.termination_date
-        assert employee_response.person_id == employee.person_id
-        assert employee_response.role_id == employee.role_id
-        assert employee_response.user_id == employee.user_id
+        assert employee_response.person.id == employee.person_id
+        assert employee_response.role.id == employee.role_id
+        assert employee_response.user.id == employee.user_id
     
     def test_get_employee_by_person_id_success(self):
         employee = EmployeeFactory()
@@ -66,9 +67,9 @@ class TestEmployeeRepository:
         assert employee_response.id == employee.id
         assert employee_response.admission_date == employee.admission_date
         assert employee_response.termination_date == employee.termination_date
-        assert employee_response.person_id == employee.person_id
-        assert employee_response.role_id == employee.role_id
-        assert employee_response.user_id == employee.user_id
+        assert employee_response.person.id == employee.person_id
+        assert employee_response.role.id == employee.role_id
+        assert employee_response.user.id == employee.user_id
 
     def test_get_employee_by_user_id_success(self):
         employee = EmployeeFactory()
@@ -79,9 +80,9 @@ class TestEmployeeRepository:
         assert employee_response.id == employee.id
         assert employee_response.admission_date == employee.admission_date
         assert employee_response.termination_date == employee.termination_date
-        assert employee_response.person_id == employee.person_id
-        assert employee_response.role_id == employee.role_id
-        assert employee_response.user_id == employee.user_id
+        assert employee_response.person.id == employee.person_id
+        assert employee_response.role.id == employee.role_id
+        assert employee_response.user.id == employee.user_id
 
     def test_get_employees_by_role_id_success(self):
         role = RoleFactory()
@@ -96,8 +97,8 @@ class TestEmployeeRepository:
         assert len(employee_response) == 2
         assert employee_response[0].id == employee1.id
         assert employee_response[1].id == employee2.id
-        assert employee_response[0].role_id == role.id
-        assert employee_response[1].role_id == role.id
+        assert employee_response[0].role.id == role.id
+        assert employee_response[1].role.id == role.id
 
     def test_get_employee_by_id_returns_none_for_unregistered_id(self):
         employee = EmployeeFactory()
@@ -136,9 +137,9 @@ class TestEmployeeRepository:
         assert employee_response.id == employee.id
         assert employee_response.admission_date == employee.admission_date
         assert employee_response.termination_date == employee.termination_date
-        assert employee_response.person_id == employee.person_id
-        assert employee_response.role_id == employee.role_id
-        assert employee_response.user_id == employee.user_id
+        assert employee_response.person.id == employee.person_id
+        assert employee_response.role.id == employee.role_id
+        assert employee_response.user.id == employee.user_id
 
     def test_get_employee_by_username_returns_none_for_unregistered_username(self):
         employee = EmployeeFactory()
@@ -154,7 +155,14 @@ class TestEmployeeRepository:
         employees = self.repository.get_all()
 
         assert len(employees) == 2
-        assert employees == [employee1, employee2]
+        assert employees[0].id == employee1.id
+        assert employees[0].person.id == employee1.person_id
+        assert employees[0].role.id == employee1.role_id
+        assert employees[0].user.id == employee1.user_id
+        assert employees[1].id == employee2.id
+        assert employees[1].person.id == employee2.person_id
+        assert employees[1].role.id == employee2.role_id
+        assert employees[1].user.id == employee2.user_id
 
     def test_get_all_customers_empty_db(self):
         employees = self.repository.get_all()
@@ -163,21 +171,22 @@ class TestEmployeeRepository:
         assert employees == []
 
     def test_update_employee(self):
-        employee = EmployeeFactory()
+        employee_model = EmployeeFactory()
         person = PersonFactory()
         role = RoleFactory()
         user = UserFactory()
-
-        employee.person_id = person.id
-        employee.role_id = role.id
-        employee.user_id = user.id
+        
+        employee = employee_model.to_entity()
+        employee.person = person.to_entity()
+        employee.role = role.to_entity()
+        employee.user = user.to_entity()
 
         data = self.repository.update(employee)
 
         assert data.id == employee.id
-        assert data.person_id == person.id
-        assert data.role_id == role.id
-        assert data.user_id == user.id
+        assert data.person.id == person.id
+        assert data.role.id == role.id
+        assert data.user.id == user.id
 
     def test_delete_employee(self):
         employee = EmployeeFactory()
@@ -197,5 +206,7 @@ class TestEmployeeRepository:
         data = self.repository.get_all()
 
         assert len(data) == 1
-        assert data == [employee]        
-        
+        assert data[0].id == employee.id
+        assert data[0].person.id == employee.person_id
+        assert data[0].role.id == employee.role_id
+        assert data[0].user.id == employee.user_id

@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
+from src.adapters.driven.repositories.models.order_item_model import OrderItemModel
 from src.core.domain.entities.order_item import OrderItem
 from src.adapters.driven.repositories.order_item_repository import OrderItemRepository
 from tests.factories.order_factory import OrderFactory
@@ -16,7 +17,7 @@ class TestOrderItemRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(OrderItem).delete()
+        self.db_session.query(OrderItemModel).delete()
         self.db_session.commit()
 
     def test_create_order_item_success(self):
@@ -26,15 +27,15 @@ class TestOrderItemRepository:
         created_order_item = self.repository.create(order_item)
 
         assert created_order_item.id is not None
-        assert created_order_item.product_id == product.id
+        assert created_order_item.product.id == product.id
         assert created_order_item.total == 12.0
         assert created_order_item.quantity == 2
 
-        db_order_item = self.db_session.query(OrderItem).filter_by(product_id=product.id).first()
+        db_order_item = self.repository.get_by_id(created_order_item.id)
         assert db_order_item is not None
-        assert db_order_item.product_id == product.id
+        assert db_order_item.product.id == product.id
         assert db_order_item.total == 12.0
-        assert db_order_item.product_category == product.category
+        assert db_order_item.product_category.name == product.category.name
 
     def test_try_create_order_item_duplicated_with_repository_and_raise_error(self, db_session):
         product = ProductFactory(price=6.0)
@@ -50,7 +51,7 @@ class TestOrderItemRepository:
 
         order_items_from_db = self.repository.get_by_product_name(order_item.order_id, product.name)
 
-        assert order_items_from_db.product_id == product.id
+        assert order_items_from_db.product.id == product.id
         assert order_items_from_db.quantity == 2
         assert order_items_from_db.observation == "No onions"
         assert order_items_from_db.total == order_item.quantity * order_item.product.price
@@ -69,7 +70,7 @@ class TestOrderItemRepository:
         order_items_from_db = self.repository.get_by_order_id(order_item.order_id)
 
         assert len(order_items_from_db) == 1
-        assert order_items_from_db[0].product_id == order_item.product_id
+        assert order_items_from_db[0].product.id == order_item.product_id
         assert order_items_from_db[0].quantity == 2
         assert order_items_from_db[0].observation == "No onions"
         assert order_items_from_db[0].total == order_item.quantity * order_item.product.price
@@ -80,7 +81,7 @@ class TestOrderItemRepository:
         order_item_from_db = self.repository.get_by_id(order_item.id)
 
         assert order_item_from_db is not None
-        assert order_item_from_db.product_id == order_item_from_db.product_id
+        assert order_item_from_db.product.id == order_item.product_id
         assert order_item_from_db.quantity == 2
         assert order_item_from_db.observation == "No onions"
         assert order_item_from_db.total == order_item.quantity * order_item.product.price
@@ -99,12 +100,12 @@ class TestOrderItemRepository:
         order_items = self.repository.get_all()
 
         assert len(order_items) == 2
-        assert order_items[0].product_id == order_item1.product_id
+        assert order_items[0].product.id == order_item1.product_id
         assert order_items[0].quantity == 2
         assert order_items[0].observation == "No onions"
         assert order_items[0].total == 30.0
 
-        assert order_items[1].product_id == order_item2.product_id
+        assert order_items[1].product.id == order_item2.product_id
         assert order_items[1].observation == ""
         assert order_items[1].quantity == 1
         assert order_items[1].total == 9.0

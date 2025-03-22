@@ -72,7 +72,10 @@ class PaymentProviderWebhookHandlerUseCase:
 
             payment = self.payment_gateway.update_payment_status(payment, new_status.id)
 
-            if new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status:
+            if (
+                new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and
+                payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status
+            ):
                 if len(payment.order) == 0:
                     cancelled_status = self.payment_status_gateway.get_by_name(PaymentStatusEnum.PAYMENT_CANCELLED.status)
                     self.payment_gateway.update_payment_status(payment, cancelled_status.id)

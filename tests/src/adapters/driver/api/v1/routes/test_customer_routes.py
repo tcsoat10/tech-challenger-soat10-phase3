@@ -7,6 +7,7 @@ from pycpfcnpj import gen
 
 from fastapi import status
 from datetime import datetime
+import pytest
 
 def test_create_customer_success(client):
     payload = {

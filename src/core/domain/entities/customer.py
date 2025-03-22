@@ -1,14 +1,19 @@
+from src.core.domain.entities.person import Person
 from src.core.domain.entities.base_entity import BaseEntity
-
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.orm import relationship
+from typing import Optional
 
 
 class Customer(BaseEntity):
-    __tablename__ = 'customers'
-
-    person_id = Column(ForeignKey('persons.id'), nullable=True)
-    person = relationship('Person')
+    def __init__(
+        self,
+        person: Person,
+        id: Optional[int] = None,
+        created_at: Optional[str] = None,
+        updated_at: Optional[str] = None,
+        inactivated_at: Optional[str] = None
+    ):
+        super().__init__(id, created_at, updated_at, inactivated_at)
+        self.person: Person = person
 
 
 __all__ = ['Customer']

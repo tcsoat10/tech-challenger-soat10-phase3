@@ -2,6 +2,7 @@
 import pytest
 
 from sqlalchemy.orm import Session
+from src.adapters.driven.repositories.models.user_profile_model import UserProfileModel
 from src.core.domain.entities.user_profile import UserProfile
 from src.adapters.driven.repositories.user_profile_repository import UserProfileRepository
 from src.core.ports.user_profile.i_user_profile_repository import IUserProfileRepository
@@ -19,19 +20,19 @@ class TestUserProfileRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(UserProfile).delete()
+        self.db_session.query(UserProfileModel).delete()
         self.db_session.commit()
     
     def test_create_user_profile_success(self):
-        UserFactory(id=1)
-        ProfileFactory(id=1)
+        user_model = UserFactory(id=1)
+        profile_model = ProfileFactory(id=1)
 
-        user_profile = UserProfile(user_id=1, profile_id=1)
+        user_profile = UserProfile(user=user_model.to_entity(), profile=profile_model.to_entity())
         created_user_profile = self.repository.create(user_profile)
 
         assert created_user_profile.id is not None
-        assert created_user_profile.user_id == user_profile.user_id
-        assert created_user_profile.profile_id == user_profile.profile_id
+        assert created_user_profile.user.id == user_profile.user.id
+        assert created_user_profile.profile.id == user_profile.profile.id
 
     def test_get_user_profile_by_id_success(self):
         new_user_profile = UserProfileFactory()
@@ -39,12 +40,11 @@ class TestUserProfileRepository:
 
         assert user_profile is not None
         assert user_profile.id == new_user_profile.id
-        assert user_profile.user_id == new_user_profile.user_id
-        assert user_profile.profile_id == new_user_profile.profile_id
+        assert user_profile.user.id == new_user_profile.user_id
+        assert user_profile.profile.id == new_user_profile.profile_id
     
     def test_get_user_profile_by_id_with_unregistered_id(self):
-        new_user_profile = UserProfileFactory()
-        self.repository.create(new_user_profile)
+        UserProfileFactory(id=1)
 
         user_profile = self.repository.get_by_id(999)
 
@@ -56,12 +56,11 @@ class TestUserProfileRepository:
 
         assert user_profile is not None
         assert user_profile.id == new_user_profile.id
-        assert user_profile.user_id == new_user_profile.user_id
-        assert user_profile.profile_id == new_user_profile.profile_id
+        assert user_profile.user.id == new_user_profile.user_id
+        assert user_profile.profile.id == new_user_profile.profile_id
 
     def test_get_user_profile_by_user_id_and_profile_id_with_unregistered_ids(self):
-        new_user_profile = UserProfileFactory()
-        self.repository.create(new_user_profile)
+        UserProfileFactory()
 
         user_profile = self.repository.get_by_user_id_and_profile_id(999, 999)
 

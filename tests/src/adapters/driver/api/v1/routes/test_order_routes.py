@@ -362,7 +362,7 @@ def test_list_order_items_and_return_success(client):
     category = CategoryFactory(name=ProductCategoryEnum.BURGERS.name, description=ProductCategoryEnum.BURGERS.description)
     product = ProductFactory(category=category)
 
-    order_item = OrderItemFactory(order=order, product=product)
+    order_item_model = OrderItemFactory(order=order, product=product)
 
     response = client.get(
         f"/api/v1/orders/{order.id}/items",
@@ -378,6 +378,7 @@ def test_list_order_items_and_return_success(client):
 
     assert response.status_code == status.HTTP_200_OK
 
+    order_item = order_item_model.to_entity()
     data = response.json()
     assert len(data) == 1
     assert data[0]["product"]["category"]["name"] == ProductCategoryEnum.BURGERS.name

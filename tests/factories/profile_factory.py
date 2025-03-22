@@ -2,14 +2,14 @@ import factory
 from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 
-from src.core.domain.entities.profile import Profile
+from src.adapters.driven.repositories.models.profile_model import ProfileModel
 
 fake = Faker()
 
 class ProfileFactory(SQLAlchemyModelFactory):
 
     class Meta:
-        model = Profile
+        model = ProfileModel
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n + 1)

@@ -22,7 +22,7 @@ class UpdateCustomerUsecase:
     def execute(self, customer_id: int, dto: UpdateCustomerDTO, current_user: dict) -> Customer:
         if IsCustomerUsecase.is_customer(current_user) and int(current_user['person']['id']) != customer_id:
             raise EntityNotFoundException(entity_name='Customer')
-        
+
         customer = self.customer_gateway.get_by_id(customer_id)
         if not customer:
             raise EntityNotFoundException(entity_name='Customer')
@@ -45,6 +45,7 @@ class UpdateCustomerUsecase:
         self.person_gateway.update(person)
 
         customer.person_id = person.id
+        customer.person = person
 
         customer = self.customer_gateway.update(customer)
 

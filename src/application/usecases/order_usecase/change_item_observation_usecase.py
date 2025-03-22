@@ -18,7 +18,7 @@ class ChangeItemObservationUseCase:
 
         profile_name = current_user.get('profile', {}).get('name')
         person_id = current_user.get('person', {}).get('id')
-        if profile_name in ['customer', 'anonymous'] and order.id_customer != int(person_id or 0):
+        if profile_name in ['customer', 'anonymous'] and order.customer.id != int(person_id or 0):
             raise EntityNotFoundException(message=f"O pedido com ID '{order_id}' não foi encontrado.")
 
         order_item = next((order_item for order_item in order.order_items if order_item.id == order_item_id), None)

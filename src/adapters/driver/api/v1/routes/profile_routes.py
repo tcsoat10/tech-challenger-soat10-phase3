@@ -18,7 +18,8 @@ router = APIRouter()
     path='/profiles',
     response_model=ProfileDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_CREATE_PROFILE])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_CREATE_PROFILE])],
+    include_in_schema=False
 )
 @inject
 def create_profile(
@@ -78,7 +79,8 @@ def get_all_profiles(
     path='/profiles/{profile_id}',
     response_model=ProfileDTO,
     status_code=status.HTTP_200_OK,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_UPDATE_PROFILE])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_UPDATE_PROFILE])],
+    include_in_schema=False
 )
 @inject
 def update_profile(
@@ -93,7 +95,8 @@ def update_profile(
 @router.delete(
     path='/profiles/{profile_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_DELETE_PROFILE])]
+    dependencies=[Security(get_current_user, scopes=[ProfilePermissions.CAN_DELETE_PROFILE])],
+    include_in_schema=False
 )
 @inject
 def delete_profile(

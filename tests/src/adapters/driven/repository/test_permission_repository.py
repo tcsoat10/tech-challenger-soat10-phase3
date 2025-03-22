@@ -1,7 +1,8 @@
 import pytest
+from src.adapters.driven.repositories.models.permission_model import PermissionModel
 from src.adapters.driven.repositories.permission_repository import PermissionRepository
 from src.core.domain.entities.permission import Permission
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError
 from tests.factories.permission_factory import PermissionFactory
 
 
@@ -16,7 +17,7 @@ class TestPermissionRepository:
         self.clean_database()
 
     def clean_database(self):
-        self.db_session.query(Permission).delete()
+        self.db_session.query(PermissionModel).delete()
         self.db_session.commit()
 
     def test_create_permission_success(self):
@@ -37,12 +38,12 @@ class TestPermissionRepository:
         assert created_employee_permission.description == "System user privileges"
 
         # Verifica se a permissão Admin foi persistida no banco
-        db_permission = self.db_session.query(Permission).filter_by(name="Admin").first()
+        db_permission = self.db_session.query(PermissionModel).filter_by(name="Admin").first()
         assert db_permission is not None
         assert db_permission.name == "Admin"
 
         # Verifica se a permissão Employee foi persistida no banco
-        db_permission = self.db_session.query(Permission).filter_by(name="Employee").first()
+        db_permission = self.db_session.query(PermissionModel).filter_by(name="Employee").first()
         assert db_permission is not None
         assert db_permission.name == "Employee"
     
@@ -175,13 +176,11 @@ class TestPermissionRepository:
         permission = PermissionFactory()
         unregistered_permission = Permission(name='test_permission', description='not_in_db')
 
-        with pytest.raises(InvalidRequestError):
-            self.repository.delete(unregistered_permission)
+        self.repository.delete(unregistered_permission)
 
         permissions = self.repository.get_all()
         assert len(permissions) == 1
-        assert permissions[0] == permission
-
-
-        
+        assert permissions[0].id == permission.id
+        assert permissions[0].name == permission.name
+        assert permissions[0].description == permission.description
         

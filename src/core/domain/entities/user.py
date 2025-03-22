@@ -1,32 +1,49 @@
+from datetime import datetime
+from typing import Optional
 from src.core.domain.entities.base_entity import BaseEntity
-
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship
 import bcrypt
 
-
-
 class User(BaseEntity):
-    __tablename__ = "users"
+    def __init__(
+        self,
+        name: str,
+        password: Optional[str] = None,
+        password_hash: Optional[str] = None,
+        id: Optional[int] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        inactivated_at: Optional[datetime] = None
+    ):
+        super().__init__(id, created_at, updated_at, inactivated_at)
+        self._name = name
+        self._password_hash = password_hash
+        if password:
+            self.password = password
 
-    name = Column(String(100), nullable=False, unique=True)
-    password_hash = Column(String(255), nullable=False, unique=False)
+    @property
+    def name(self) -> str:
+        return self._name
 
-    user_profiles = relationship("UserProfile", back_populates="user", overlaps="profiles")
-    profiles = relationship("Profile", secondary="user_profiles", back_populates="users", overlaps="user_profiles")
-    
+    @name.setter
+    def name(self, name: str) -> None:
+        self._name = name
 
     @property 
     def password(self):
         raise AttributeError('Password not readable')
     
+    @property
+    def password_hash(self):
+        return self._password_hash
+
+
     @password.setter
     def password(self, password: str) -> None:
         enc_pw = password.encode('utf-8')
-        self.password_hash = bcrypt.hashpw(enc_pw, bcrypt.gensalt()).decode('utf-8')
+        self._password_hash = bcrypt.hashpw(enc_pw, bcrypt.gensalt()).decode('utf-8')
 
     def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        return bcrypt.checkpw(password.encode('utf-8'), self._password_hash.encode('utf-8'))
 
     @classmethod
     def hash_password(cls, password: str) -> str:

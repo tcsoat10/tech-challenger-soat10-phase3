@@ -1,7 +1,11 @@
 from typing import List, Optional
-from src.core.domain.entities.order_status import OrderStatus
-from src.core.domain.entities.employee import Employee
-from src.core.domain.entities.customer import Customer
+from src.adapters.driven.repositories.models.order_status_movement_model import OrderStatusMovementModel
+from src.adapters.driven.repositories.models.payment_model import PaymentModel
+from src.adapters.driven.repositories.models.customer_model import CustomerModel
+from src.adapters.driven.repositories.models.employee_model import EmployeeModel
+from src.adapters.driven.repositories.models.order_model import OrderModel
+from src.adapters.driven.repositories.models.order_status_model import OrderStatusModel
+from src.core.shared.identity_map import IdentityMap
 from src.core.domain.entities.order import Order
 from src.core.ports.order.i_order_repository import IOrderRepository
 from sqlalchemy.orm import Session
@@ -10,40 +14,72 @@ class OrderRepository(IOrderRepository):
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
+        self.identity_map: IdentityMap = IdentityMap.get_instance()
 
     def create(self, order: Order) -> Order:
-        self.db_session.add(order)
+        if order.id is not None:
+            existing_order = self.get_by_id(order.id)
+            if existing_order:
+                self.identity_map.remove(existing_order)
+
+        order_model = OrderModel.from_entity(order)
+        self.db_session.add(order_model)
         self.db_session.commit()
-        self.db_session.refresh(order)
-        return order
+        self.db_session.refresh(order_model)
+        return order_model.to_entity()
 
     def get_by_customer_id(self, id_customer: int) -> List[Order]:
-        return self.db_session.query(Order).join(Customer).filter(Customer.id == id_customer, Order.inactivated_at.is_(None)).all()
+        order_models = self.db_session.query(OrderModel).join(CustomerModel).filter(CustomerModel.id == id_customer, OrderModel.inactivated_at.is_(None)).all()
+        return [order.to_entity() for order in order_models]
     
     def get_by_employee_id(self, id_employee: int) -> List[Order]:
-        return self.db_session.query(Order).join(Employee).filter(Employee.id == id_employee, Order.inactivated_at.is_(None)).all()
+        order_models = self.db_session.query(OrderModel).join(EmployeeModel).filter(EmployeeModel.id == id_employee, OrderModel.inactivated_at.is_(None)).all()
+        return [order.to_entity() for order in order_models]
 
     def get_by_id(self, order_id: int) -> Order:
-        return self.db_session.query(Order).filter(Order.id == order_id).first()
+        order_model = self.db_session.query(OrderModel).filter(OrderModel.id == order_id).first()
+        if not order_model:
+            return None
+        return order_model.to_entity()
 
     def get_all(self, status: Optional[List[str]] = None, customer_id: Optional[int] = None, include_deleted: Optional[bool] = False) -> List[Order]:
-        query = self.db_session.query(Order).filter(Order.inactivated_at.is_(None))
+        query = self.db_session.query(OrderModel).filter(OrderModel.inactivated_at.is_(None))
         if status:
-            query = query.filter(Order.order_status.has(OrderStatus.status.in_(status)))
+            query = query.filter(OrderModel.order_status.has(OrderStatusModel.status.in_(status)))
 
         if customer_id:
-            query = query.filter(Order.id_customer == customer_id)
+            query = query.filter(OrderModel.id_customer == customer_id)
 
         if not include_deleted:
-            query = query.filter(Order.inactivated_at.is_(None))
+            query = query.filter(OrderModel.inactivated_at.is_(None))
         
-        return query.all()
+        order_models = query.all()
+        return [order_model.to_entity() for order_model in order_models]
 
     def update(self, order: Order) -> Order:
-        self.db_session.merge(order)
+        if order.id is not None:
+            existing_order = self.get_by_id(order.id)
+            if existing_order:
+                self.identity_map.remove(existing_order)
+
+        order_model = OrderModel.from_entity(order)
+        order_model.customer = CustomerModel.from_entity(order.customer)
+        order_model.employee = EmployeeModel.from_entity(order.employee)
+        order_model.order_status = OrderStatusModel.from_entity(order.order_status)
+        order_model.payment = PaymentModel.from_entity(order.payment) if order.payment else None
+        order_model.status_history = [OrderStatusMovementModel.from_entity(movement) for movement in order.status_history]
+
+        self.db_session.merge(order_model)
         self.db_session.commit()
-        return order
+        return self.get_by_id(order_model.id)
 
     def delete(self, order: Order) -> None:
-        self.db_session.delete(order)
-        self.db_session.commit()
+        order_model = (
+            self.db_session.query(OrderModel)
+                .filter(OrderModel.id == order.id)
+                .first()
+        )
+        if order_model:
+            self.db_session.delete(order)
+            self.db_session.commit()
+            self.identity_map.remove(order)

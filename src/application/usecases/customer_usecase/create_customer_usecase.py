@@ -2,7 +2,6 @@ from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.ports.person.i_person_repository import IPersonRepository
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
 from src.core.domain.entities.customer import Customer
-from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
 from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
 from src.core.domain.entities.person import Person
 
@@ -32,8 +31,7 @@ class CreateCustomerUsecase:
                 email=dto.person.email,
                 birth_date=dto.person.birth_date
             )
-            self.person_gateway.create(person)
-
+            person = self.person_gateway.create(person)
         else:
             person.name = dto.person.name
             person.email = dto.person.email
@@ -51,7 +49,7 @@ class CreateCustomerUsecase:
             self.customer_gateway.update(customer)
         
         else:
-            customer = Customer(person_id=person.id)
+            customer = Customer(person=person)
             customer = self.customer_gateway.create(customer)
         
         return customer
