@@ -458,7 +458,7 @@ class Order(BaseEntity):
             raise BadRequestException(f"Transição de status não suportada: {previous_status.status}")
     
     def is_customer_owner(self, customer_id: int):
-        return self.id_customer == customer_id
+        return self.customer.id == customer_id
         
     def has_payment(self) -> bool:
         return self.payment is not None
