@@ -176,12 +176,9 @@ A página de [documentação](https://dashboard.ngrok.com/get-started/setup/linu
 
 # Diagrama de conteiner
 
-![image](https://github.com/user-attachments/assets/164dde17-fbbc-4901-9a3c-90675b524146)
+![image](https://github.com/user-attachments/assets/ee16a5f5-9222-4daa-9db6-635e7652dd10)
 
 
 # Diagrama de Componentes
 
-![image](https://github.com/user-attachments/assets/20fb7374-c447-4215-858a-74bc6c44de99)
-
-
-
+![image](https://github.com/user-attachments/assets/da0d9d5b-0e51-4bcd-ab25-b9ddec3491e7)
