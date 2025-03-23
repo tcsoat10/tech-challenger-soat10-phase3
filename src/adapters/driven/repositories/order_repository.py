@@ -1,4 +1,5 @@
 from typing import List, Optional
+from src.constants.order_status import OrderStatusEnum
 from src.adapters.driven.repositories.models.order_status_movement_model import OrderStatusMovementModel
 from src.adapters.driven.repositories.models.payment_model import PaymentModel
 from src.adapters.driven.repositories.models.customer_model import CustomerModel
@@ -9,6 +10,7 @@ from src.core.shared.identity_map import IdentityMap
 from src.core.domain.entities.order import Order
 from src.core.ports.order.i_order_repository import IOrderRepository
 from sqlalchemy.orm import Session
+from sqlalchemy import case
 
 class OrderRepository(IOrderRepository):
 
@@ -43,18 +45,30 @@ class OrderRepository(IOrderRepository):
         return order_model.to_entity()
 
     def get_all(self, status: Optional[List[str]] = None, customer_id: Optional[int] = None, include_deleted: Optional[bool] = False) -> List[Order]:
-        query = self.db_session.query(OrderModel).filter(OrderModel.inactivated_at.is_(None))
-        if status:
-            query = query.filter(OrderModel.order_status.has(OrderStatusModel.status.in_(status)))
-
-        if customer_id:
-            query = query.filter(OrderModel.id_customer == customer_id)
-
+        query = self.db_session.query(OrderModel)
+    
         if not include_deleted:
             query = query.filter(OrderModel.inactivated_at.is_(None))
         
-        order_models = query.all()
-        return [order_model.to_entity() for order_model in order_models]
+        if customer_id:
+            query = query.filter(OrderModel.id_customer == customer_id)
+        
+        if status:
+            query = query.filter(OrderModel.order_status.has(OrderStatusModel.status.in_(status)))
+
+        if status is None or OrderStatusEnum.ORDER_COMPLETED.status not in status:
+            query = query.filter(OrderModel.order_status.has(OrderStatusModel.status != OrderStatusEnum.ORDER_COMPLETED.status))
+            
+        status_priority = case(
+            (OrderStatusModel.status == OrderStatusEnum.ORDER_PAID.status, 1),
+            (OrderStatusModel.status == OrderStatusEnum.ORDER_PREPARING.status, 2),
+            (OrderStatusModel.status == OrderStatusEnum.ORDER_READY.status, 3),
+            (OrderStatusModel.status == OrderStatusEnum.ORDER_COMPLETED.status, 4),
+            else_=5
+        )
+
+        query = query.join(OrderStatusModel).order_by(status_priority, OrderModel.created_at.asc())
+        return [order_model.to_entity() for order_model in query.all()]
 
     def update(self, order: Order) -> Order:
         if order.id is not None:
