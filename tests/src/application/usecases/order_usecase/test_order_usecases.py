@@ -515,3 +515,11 @@ class TestOrderUseCases:
         assert orders[0].id == order1.id
         assert orders[1].id == order2.id
         assert orders[2].id == order3.id
+
+    def test_get_order_status_usecase(self, customer_user):
+        order = self.create_order_usecase.execute(current_user=customer_user)
+
+        status = self.get_order_status_usecase.execute(order.id, current_user=customer_user)
+
+        assert status == order.order_status
+        
