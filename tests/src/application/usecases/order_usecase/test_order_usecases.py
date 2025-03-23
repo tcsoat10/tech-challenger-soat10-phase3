@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from pycpfcnpj import gen
 
@@ -439,3 +440,64 @@ class TestOrderUseCases:
                 order_id=999,
                 current_user=customer_user
             )
+
+    def test_sorting_orders_by_status_priority(self, customer_user):
+        order1 = self.create_order_usecase.execute(current_user=customer_user)
+        order1.created_at = datetime(2025, 2, 10, 10, 31, 15)
+        order1.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PREPARING.status)
+        self.order_gateway.update(order1)
+        
+        order2 = self.create_order_usecase.execute(current_user=customer_user)
+        order2.created_at = datetime(2025, 2, 10, 10, 15, 20)
+        order2.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        self.order_gateway.update(order2)
+        
+        order3 = self.create_order_usecase.execute(current_user=customer_user)
+        order3.created_at = datetime(2025, 2, 10, 10, 5, 30)
+        order3.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        self.order_gateway.update(order3)
+        
+        order4 = self.create_order_usecase.execute(current_user=customer_user)
+        order4.created_at = datetime(2025, 2, 10, 9, 25, 40)
+        order4.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        self.order_gateway.update(order4)
+        
+        order5 = self.create_order_usecase.execute(current_user=customer_user)
+        order5.created_at = datetime(2025, 2, 10, 9, 15, 50)
+        order5.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        self.order_gateway.update(order5)
+    
+        orders = self.list_orders_usecase.execute(current_user=customer_user)
+
+        assert orders[0].id == order4.id # created_at: 9:25:40, status: ORDER_PAID
+        assert orders[1].id == order2.id # created_at: 10:15:20, status: ORDER_PAID
+        assert orders[2].id == order1.id # created_at: 10:31:15, status: ORDER_PREPARING
+        assert orders[3].id == order5.id # created_at: 9:15:50, status: ORDER_READY
+        assert orders[4].id == order3.id # created_at: 10:05:30, status: ORDER_READY
+
+    def test_list_orders_with_default_status_filter(self, customer_user):
+        order1 = self.create_order_usecase.execute(current_user=customer_user)
+        order1.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        self.order_gateway.update(order1)
+        
+        order2 = self.create_order_usecase.execute(current_user=customer_user)
+        order2.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PREPARING.status)
+        self.order_gateway.update(order2)
+        
+        order3 = self.create_order_usecase.execute(current_user=customer_user)
+        order3.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        self.order_gateway.update(order3)
+        
+        order4 = self.create_order_usecase.execute(current_user=customer_user)
+        order4.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_COMPLETED.status)
+        self.order_gateway.update(order4)
+        
+        order5 = self.create_order_usecase.execute(current_user=customer_user)
+        order5.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PLACED.status)
+        
+        orders = self.list_orders_usecase.execute(current_user=customer_user)
+        
+        assert len(orders) == 3
+        assert orders[0].id == order1.id
+        assert orders[1].id == order2.id
+        assert orders[2].id == order3.id
