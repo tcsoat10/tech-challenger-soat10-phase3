@@ -1,5 +1,8 @@
+from datetime import datetime
 import pytest
+from pycpfcnpj import gen
 
+from src.core.domain.entities.person import Person
 from src.adapters.driven.repositories.models.customer_model import CustomerModel
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
 from src.core.domain.entities.customer import Customer
@@ -25,6 +28,24 @@ class TestCustomerRepository:
 
         assert created_customer.id is not None
         assert created_customer.person.id == person_model.id
+        
+    def test_create_customer_with_person_when_the_person_is_not_registered(self):
+        cpf = gen.cpf()
+        customer = Customer(
+            person=Person(
+                name="John Doe",
+                cpf=cpf,
+                email="jonhdoe@example.com",
+                birth_date=datetime(1990, 1, 1)
+            )
+        )
+        created_customer = self.repository.create(customer)
+    
+        assert created_customer.id is not None
+        assert created_customer.person.name == customer.person.name
+        assert created_customer.person.cpf == customer.person.cpf
+        assert created_customer.person.email == customer.person.email
+        assert created_customer.person.birth_date == customer.person.birth_date.date()
     
     def test_get_customer_by_id_success(self):
         customer = CustomerFactory()
