@@ -212,6 +212,8 @@ class TestOrderUseCases:
     
     def test_list_orders_usecase(self, customer_user):
         order = self.create_order_usecase.execute(current_user=customer_user)
+        order.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        self.order_gateway.update(order)
         
         orders = self.list_orders_usecase.execute(current_user=customer_user)
         
