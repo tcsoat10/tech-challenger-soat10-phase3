@@ -1,7 +1,6 @@
 from fastapi import status
 import pytest
 
-from src.core.domain.entities.order_status import OrderStatus
 from src.constants.product_category import ProductCategoryEnum
 from src.constants.order_status import OrderStatusEnum
 from tests.factories.category_factory import CategoryFactory
@@ -719,3 +718,28 @@ def test_list_orders_and_return_success(order_status, client):
     assert data[0]["order_status"]["status"] == order_status.status
     assert data[0]["order_status"]["description"] == order_status.description
     
+@pytest.mark.parametrize("order_status", [OrderStatusEnum.ORDER_WAITING_BURGERS,])
+def test_get_order_status_success(client, order_status):
+    order_status_waiting_burger = OrderStatusFactory(status=OrderStatusEnum.ORDER_WAITING_BURGERS.status, description=OrderStatusEnum.ORDER_WAITING_BURGERS.description)
+    order = OrderFactory(order_status=order_status_waiting_burger)
+    
+    person = PersonFactory()
+    EmployeeFactory(person=person)
+
+    res = client.get(
+        f'api/v1/orders/{order.id}/status',
+        permissions=[OrderPermissions.CAN_VIEW_ORDER],
+        profile_name='employee',
+        person={
+            "id": person.id,
+            "cpf": person.cpf,
+            "name": person.name,
+            "email": person.email
+        }
+    )
+    assert res.status_code == status.HTTP_200_OK
+
+    
+
+    data = res.json()
+    assert data['status'] == order.order_status.status
