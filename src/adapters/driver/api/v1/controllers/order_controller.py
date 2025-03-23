@@ -1,5 +1,6 @@
 from typing import List
 
+from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
 from src.application.usecases.order_usecase.revert_order_status_usecase import RevertOrderStatusUseCase
 from src.application.usecases.order_usecase.advance_order_status_usecase import AdvanceOrderStatusUseCase
 from src.application.usecases.order_usecase.list_orders_usecase import ListOrdersUseCase
@@ -22,6 +23,7 @@ from src.core.ports.employee.i_employee_repository import IEmployeeRepository
 from src.core.ports.order.i_order_repository import IOrderRepository
 from src.core.ports.order_status.i_order_status_repository import IOrderStatusRepository
 from src.core.ports.product.i_product_repository import IProductRepository
+from src.application.usecases.order_usecase.get_order_status_usecase import GetOrderStatusUsecase
 
 
 class OrderController:
@@ -99,3 +101,8 @@ class OrderController:
         revert_status_usecase = RevertOrderStatusUseCase.build(self.order_gateway, self.order_status_gateway)
         order = revert_status_usecase.execute(order_id, current_user)
         return DTOPresenter.transform(order, OrderDTO)
+    
+    def get_order_status(self, order_id: int, current_user: dict) -> OrderStatusDTO:
+        get_order_status_usecase = GetOrderStatusUsecase.build(self.order_gateway, self.order_status_gateway)
+        order_status = get_order_status_usecase.execute(order_id, current_user)
+        return DTOPresenter.transform(order_status, OrderStatusDTO)
