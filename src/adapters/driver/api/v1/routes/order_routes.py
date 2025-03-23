@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security, status
 from dependency_injector.wiring import inject, Provide
 
+from src.constants.order_status import OrderStatusEnum
 from src.adapters.driver.api.v1.controllers.order_controller import OrderController
 from src.constants.permissions import OrderPermissions
 from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderItemDTO
@@ -203,7 +204,8 @@ async def go_back(
 async def list_orders(
     status: Optional[List[str]] = Query(
         default=[],
-        description="Lista de status dos pedidos para filtrar, por exemplo: ?status=order_pending&status=order_paid"
+        # example=[s.status for s in OrderStatusEnum],
+        description=f"Lista de status dos pedidos para filtrar. Valores válidos: {', '.join([str(s.status) for s in OrderStatusEnum])}"
     ),
     current_user: dict = Depends(get_current_user),
     controller: OrderController = Depends(Provide[Container.order_controller]),
