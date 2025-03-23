@@ -184,6 +184,8 @@ Request body (form):
 username: <CPF>
 ```
 
+Caso o usuário não deseje se identificar, pode criar um token de usuário anônimo enviando o request sem o body.
+
 Caso seja necessário autenticar como funcionário, deve-se enviar o nome de usuário e a senha:
 
 ```
