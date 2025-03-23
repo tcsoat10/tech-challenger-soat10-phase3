@@ -25,7 +25,7 @@ class LoginCustomerAnonymousUseCase:
         
         anonymous_person = Person(name=f"Anonymous User - {uuid.uuid4().hex}")
         customer = Customer(person=anonymous_person)
-        self.customer_gateway.create(customer)
+        customer = self.customer_gateway.create(customer)
 
         token_payload = {
             "person": {
