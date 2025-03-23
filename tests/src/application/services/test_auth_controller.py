@@ -1,4 +1,6 @@
+from datetime import datetime
 import pytest
+from src.core.domain.entities.person import Person
 from src.adapters.driver.api.v1.controllers.auth_controller import AuthController
 from src.core.domain.entities.customer import Customer
 from src.core.domain.entities.employee import Employee
@@ -54,9 +56,12 @@ def test_login_customer_by_cpf_not_found(auth_controller, mock_customer_reposito
     with pytest.raises(EntityNotFoundException, match="Customer not found."):
         auth_controller.login_customer_by_cpf(auth_dto)
 
-def test_login_anonymous(auth_controller, mock_profile_repository):
+def test_login_anonymous(auth_controller, mock_profile_repository, mock_customer_repository):
     profile = Profile(name="Customer", permissions=[Permission(name="view_orders")])
+    person = Person(name="Anonymous User", cpf="00000000000", email="anonymous@example.com", birth_date=datetime(2000, 1, 1))
+    customer = Customer(id=1, person=person)
     mock_profile_repository.get_by_name.return_value = profile
+    mock_customer_repository.create.return_value = customer
 
     token_dto = auth_controller.login_customer_anonymous()
 
