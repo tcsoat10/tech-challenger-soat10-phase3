@@ -20,6 +20,15 @@ class CustomerRepository(ICustomerRepository):
                 self.identity_map.remove(existing)
         
         customer_model = CustomerModel.from_entity(customer)
+        
+        person_model = None
+        if customer.person.id is not None:
+            person_model = self.db_session.query(PersonModel).get(customer.person.id)
+        if not person_model:
+            person_model = PersonModel.from_entity(customer.person)
+        
+        customer_model.person = person_model
+
         self.db_session.add(customer_model)
         self.db_session.commit()
         self.db_session.refresh(customer_model)
