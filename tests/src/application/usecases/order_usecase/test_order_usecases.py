@@ -475,3 +475,29 @@ class TestOrderUseCases:
         assert orders[3].id == order5.id # created_at: 9:15:50, status: ORDER_READY
         assert orders[4].id == order3.id # created_at: 10:05:30, status: ORDER_READY
 
+    def test_list_orders_with_default_status_filter(self, customer_user):
+        order1 = self.create_order_usecase.execute(current_user=customer_user)
+        order1.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PAID.status)
+        self.order_gateway.update(order1)
+        
+        order2 = self.create_order_usecase.execute(current_user=customer_user)
+        order2.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PREPARING.status)
+        self.order_gateway.update(order2)
+        
+        order3 = self.create_order_usecase.execute(current_user=customer_user)
+        order3.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_READY.status)
+        self.order_gateway.update(order3)
+        
+        order4 = self.create_order_usecase.execute(current_user=customer_user)
+        order4.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_COMPLETED.status)
+        self.order_gateway.update(order4)
+        
+        order5 = self.create_order_usecase.execute(current_user=customer_user)
+        order5.order_status = self.order_status_gateway.get_by_status(OrderStatusEnum.ORDER_PLACED.status)
+        
+        orders = self.list_orders_usecase.execute(current_user=customer_user)
+        
+        assert len(orders) == 3
+        assert orders[0].id == order1.id
+        assert orders[1].id == order2.id
+        assert orders[2].id == order3.id
