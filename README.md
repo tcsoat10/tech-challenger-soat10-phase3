@@ -168,3 +168,20 @@ GET localhost:8000/api/v1/orders
 O projeto utiliza a solução de QR Code do Mercado Pago. Foi utilizado um webhook local, criado com a ferramenta [ngrok](https://ngrok.com/), a fim de capturar a resposta da API do Mercado Pago, podendo assim atualizar o status de um pedido quando seu QR Code for criado e quando este for pago.
 
 A página de [documentação](https://dashboard.ngrok.com/get-started/setup/linux) do ngrok contém as instruções de instalação. Após a instalação e execução, a URL gerada deve ser inserida no arquivo `.env`, como valor da variável `WEBHOOK_URL`.
+
+# Diagrama de Contexto do sistema
+
+![image](https://github.com/user-attachments/assets/6d49ecc1-b854-4455-b442-b8b418b330c0)
+
+
+# Diagrama de conteiner
+
+![image](https://github.com/user-attachments/assets/164dde17-fbbc-4901-9a3c-90675b524146)
+
+
+# Diagrama de Componentes
+
+![image](https://github.com/user-attachments/assets/20fb7374-c447-4215-858a-74bc6c44de99)
+
+
+
