@@ -62,7 +62,11 @@ class BaseEntity:
         self.inactivated_at = None
     
     def __repr__(self):
-        attributes = ", ".join(f"{key}={value!r}" for key, value in vars(self).items() if not key.startswith("_"))
-        return f"<{self.__class__.__name__}({attributes}, created_at={self.created_at}, updated_at={self.updated_at}, inactivated_at={self.inactivated_at})>"
+        attributes_dict = vars(self)
+        attributes = ", ".join(
+            f"{key.lstrip('_')}={value!r}" 
+            for key, value in attributes_dict.items()
+        )
+        return f"{self.__class__.__name__}({attributes})"
 
 __all__ = ["BaseEntity"]

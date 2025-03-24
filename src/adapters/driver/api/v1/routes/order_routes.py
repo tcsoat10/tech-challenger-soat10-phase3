@@ -9,6 +9,7 @@ from src.core.domain.dtos.order_item.create_order_item_dto import CreateOrderIte
 from src.core.domain.dtos.order_item.order_item_dto import OrderItemDTO
 from src.core.domain.dtos.product.product_dto import ProductDTO
 from src.core.domain.dtos.order.order_dto import OrderDTO
+from src.core.domain.dtos.order_status.order_status_dto import OrderStatusDTO
 from src.core.auth.dependencies import get_current_user
 from src.core.containers import Container
 
@@ -211,3 +212,18 @@ async def list_orders(
     controller: OrderController = Depends(Provide[Container.order_controller]),
 ):
     return controller.list_orders(current_user, status)
+
+
+@router.get(
+    '/orders/{order_id}/status',
+    response_model=OrderStatusDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Security(get_current_user, scopes=[OrderPermissions.CAN_VIEW_ORDER])]
+)
+@inject
+async def get_order_status(
+    order_id: int,
+    current_user: dict = Depends(get_current_user),
+    controller: OrderController = Depends(Provide[Container.order_controller])
+):
+    return controller.get_order_status(order_id, current_user)

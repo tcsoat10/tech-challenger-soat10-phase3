@@ -31,6 +31,7 @@ from src.application.usecases.order_usecase.clear_order_usecase import ClearOrde
 from src.application.usecases.order_usecase.advance_order_status_usecase import AdvanceOrderStatusUseCase
 from src.application.usecases.order_usecase.revert_order_status_usecase import RevertOrderStatusUseCase
 from src.application.usecases.order_usecase.list_products_by_order_status_usecase import ListProductsByOrderStatusUseCase
+from src.application.usecases.order_usecase.get_order_status_usecase import GetOrderStatusUsecase
 
 from src.application.usecases.customer_usecase.create_customer_usecase import CreateCustomerUsecase
 from src.application.usecases.category_usecase.create_category_usecase import CreateCategoryUseCase
@@ -96,6 +97,10 @@ class TestOrderUseCases:
         self.list_products_by_order_status_usecase = ListProductsByOrderStatusUseCase.build(
             order_gateway=self.order_gateway,
             product_gateway=self.product_gateway
+        )
+
+        self.get_order_status_usecase = GetOrderStatusUsecase.build(
+            order_gateway=self.order_gateway, order_status_gateway=self.order_status_gateway
         )
           
         self.create_customer_usecase = CreateCustomerUsecase(
@@ -442,7 +447,7 @@ class TestOrderUseCases:
                 order_id=999,
                 current_user=customer_user
             )
-
+            
     def test_sorting_orders_by_status_priority(self, customer_user):
         order1 = self.create_order_usecase.execute(current_user=customer_user)
         order1.created_at = datetime(2025, 2, 10, 10, 31, 15)
@@ -503,3 +508,11 @@ class TestOrderUseCases:
         assert orders[0].id == order1.id
         assert orders[1].id == order2.id
         assert orders[2].id == order3.id
+
+    def test_get_order_status_usecase(self, customer_user):
+        order = self.create_order_usecase.execute(current_user=customer_user)
+
+        status = self.get_order_status_usecase.execute(order.id, current_user=customer_user)
+
+        assert status == order.order_status
+
