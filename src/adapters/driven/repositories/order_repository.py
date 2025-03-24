@@ -37,6 +37,12 @@ class OrderRepository(IOrderRepository):
     def get_by_employee_id(self, id_employee: int) -> List[Order]:
         order_models = self.db_session.query(OrderModel).join(EmployeeModel).filter(EmployeeModel.id == id_employee, OrderModel.inactivated_at.is_(None)).all()
         return [order.to_entity() for order in order_models]
+    
+    def get_by_payment_id(self, id_payment: int) -> Order:
+        order_model = self.db_session.query(OrderModel).join(PaymentModel).filter(PaymentModel.id == id_payment).first()
+        if not order_model:
+            return None
+        return order_model.to_entity()
 
     def get_by_id(self, order_id: int) -> Order:
         order_model = self.db_session.query(OrderModel).filter(OrderModel.id == order_id).first()
