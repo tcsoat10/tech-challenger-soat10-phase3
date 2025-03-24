@@ -72,15 +72,20 @@ class PaymentProviderWebhookHandlerUseCase:
 
             payment = self.payment_gateway.update_payment_status(payment, new_status.id)
 
-            if (
-                new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and
-                payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status
-            ):
-                if len(payment.order) == 0:
+            if not payment.order:
+                payment.order = []
+                order = self.order_gateway.get_by_payment_id(payment.id)
+                if not order:
                     cancelled_status = self.payment_status_gateway.get_by_name(PaymentStatusEnum.PAYMENT_CANCELLED.status)
                     self.payment_gateway.update_payment_status(payment, cancelled_status.id)
                     return {"message": "Pagamento cancelado, pedido não encontrado."}
                 
+                payment.order.append(order)
+
+            if (
+                new_status.name == PaymentStatusEnum.PAYMENT_COMPLETED.status and
+                payment.order[0].order_status.status == OrderStatusEnum.ORDER_PLACED.status
+            ):
                 payment.order[0].advance_order_status(self.order_status_gateway)
                 self.order_gateway.update(payment.order[0])
 

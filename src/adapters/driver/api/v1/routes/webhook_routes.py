@@ -17,10 +17,7 @@ async def webhook(request: Request, payment_controller: PaymentController = Depe
     """
     Endpoint para processar webhooks enviados pelo payment provider.
     """
-    try:
-        payload = await request.json()
+    payload = await request.json()
 
-        payment_controller.payment_provider_webhook(payload)
-        return JSONResponse(content={"message": "Webhook processado com sucesso!"}, status_code=200)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao processar webhook: {str(e)}")
+    payment_controller.payment_provider_webhook(payload)
+    return JSONResponse(content={"message": "Webhook processado com sucesso!"}, status_code=200)

@@ -65,12 +65,14 @@ class OrderModel(BaseModel):
         order.customer = self._get_customer(identity_map)
         order.order_status = self._get_order_status(identity_map)
         order.employee = self._get_employee(identity_map)
-        order.payment = self._get_payment(identity_map)
         order.order_items = self._get_order_items(identity_map)
         order.status_history = self._get_status_history(identity_map)
         order.created_at = self.created_at
         order.updated_at = self.updated_at
         order.inactivated_at = self.inactivated_at
+
+        if self.payment:
+            order.payment = self._get_payment(identity_map)
 
         return order
         
