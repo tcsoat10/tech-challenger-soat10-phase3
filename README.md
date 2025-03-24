@@ -350,15 +350,13 @@ Ao continuar avançando, o pedido receberá os status de "order_ready" e "order_
 
 ![image](https://github.com/user-attachments/assets/6d49ecc1-b854-4455-b442-b8b418b330c0)
 
-
 # Diagrama de conteiner
 
-![image](https://github.com/user-attachments/assets/ee16a5f5-9222-4daa-9db6-635e7652dd10)
-
+![image](https://github.com/user-attachments/assets/79f9c9aa-5d75-4318-a9d2-96585c19678b)
 
 # Diagrama de Componentes
 
-![image](https://github.com/user-attachments/assets/da0d9d5b-0e51-4bcd-ab25-b9ddec3491e7)
+![Diagrama Arquitetura Lanchonete](https://github.com/user-attachments/assets/b661d608-89a3-41a7-869c-76aa0c67bb9e)
 
 # Diagrama de Implantação
 
