@@ -359,3 +359,8 @@ Ao continuar avançando, o pedido receberá os status de "order_ready" e "order_
 # Diagrama de Componentes
 
 ![image](https://github.com/user-attachments/assets/da0d9d5b-0e51-4bcd-ab25-b9ddec3491e7)
+
+# Diagrama de Implantação
+
+![image](https://github.com/user-attachments/assets/c48ed5cc-4cb7-4667-a964-074dfa9dc57d)
+
