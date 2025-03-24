@@ -5,6 +5,16 @@
 
 O projeto visa atender à demanda de uma lanchonete de bairro, que, devido ao seu sucesso, necessita implementar um sistema de autoatendimento.
 
+# Conteúdo
+
+1. [Requisitos do Projeto](#requisitos)
+2. [Executando o Projeto](#executando-o-projeto)
+3. [Documentação do Projeto](#documentação)
+4. [Endpoints relevantes](#endpoints)
+5. [Solução de Pagamento](#pagamento)
+6. [Fluxo do Pedido](#passo-a-passo---fluxo-do-pedido)
+7. [Diagramas de Infraestrutura](#diagramas-de-infraestrutura)
+
 # Requisitos
 
 ## **Docker**
@@ -37,7 +47,7 @@ O banco de dados utilizado foi o MySQL versão 8, executado dentro de um contain
 # Executando o projeto
 ## 1. Clonar o repositório
     
-No diretório definido para armazenar os arquivos do projeto, executar o comando `git clone https://github.com/carlosrjr/tech-challenger-soat10-phase1.git` caso deseje clonar o repositório usando HTTPS. Se for utilizado SSH, o comando deve ser `git clone git@github.com:carlosrjr/tech-challenger-soat10-phase1.git`.
+No diretório definido para armazenar os arquivos do projeto, executar o comando `git clone https://github.com/carlosrjr/tech-challenger-soat10-phase2.git` caso deseje clonar o repositório usando HTTPS. Se for utilizado SSH, o comando deve ser `git clone git@github.com:carlosrjr/tech-challenger-soat10-phase2.git`.
 
 ## 2. Arquivo .env
 
@@ -162,6 +172,19 @@ DELETE localhost:8000/api/v1/products/{product_id}
 ```
 GET localhost:8000/api/v1/orders
 ```
+
+### Checkout do Pedido - Pagamento
+
+```
+POST localhost:8000/api/v1/payments/{order_id}?payment_method=qr_code
+```
+
+### Consulta do Status do Pedido
+
+```
+GET localhost:8000/api/v1/orders/{order_id}/status
+```
+
 
 # Pagamento
 
@@ -345,20 +368,20 @@ Ao [avançar o status do pedido](#3-avançar-status-do-pedido), caso este já es
 
 Ao continuar avançando, o pedido receberá os status de "order_ready" e "order_completed", nesta ordem. Assim é finalizado o fluxo de criação, preparação e entrega de um pedido.
 
-
-# Diagrama de Contexto do sistema
+# Diagramas de Infraestrutura
+## Diagrama de Contexto do sistema
 
 ![image](https://github.com/user-attachments/assets/6d49ecc1-b854-4455-b442-b8b418b330c0)
 
-# Diagrama de conteiner
+## Diagrama de conteiner
 
 ![image](https://github.com/user-attachments/assets/79f9c9aa-5d75-4318-a9d2-96585c19678b)
 
-# Diagrama de Componentes
+## Diagrama de Componentes
 
 ![Diagrama Arquitetura Lanchonete](https://github.com/user-attachments/assets/b661d608-89a3-41a7-869c-76aa0c67bb9e)
 
-# Diagrama de Implantação
+## Diagrama de Implantação
 
 ![image](https://github.com/user-attachments/assets/c48ed5cc-4cb7-4667-a964-074dfa9dc57d)
 
