@@ -51,15 +51,15 @@ users_table = table(
 
 employees = [
     {
-        'name': 'Carla Pereira', 
+        'name': 'employee', 
         'role': 'employee',
-        'user': 'carla.pereira',
+        'user': 'employee',
         'admission_date': datetime.strptime("06/12/2024", "%d/%m/%Y")
     },
     {
-        'name': 'Paulo Santos', 
+        'name': 'manager', 
         'role': 'manager',
-        'user': 'paulo.santos',
+        'user': 'manager',
         'admission_date': datetime.strptime("06/01/2024", "%d/%m/%Y")
     }
 ]
