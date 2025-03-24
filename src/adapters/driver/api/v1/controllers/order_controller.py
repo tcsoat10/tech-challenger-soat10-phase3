@@ -103,6 +103,6 @@ class OrderController:
         return DTOPresenter.transform(order, OrderDTO)
     
     def get_order_status(self, order_id: int, current_user: dict) -> OrderStatusDTO:
-        get_order_status_usecase = GetOrderStatusUsecase.build(self.order_gateway, self.order_status_gateway)
+        get_order_status_usecase = GetOrderStatusUsecase.build(self.order_gateway)
         order_status = get_order_status_usecase.execute(order_id, current_user)
         return DTOPresenter.transform(order_status, OrderStatusDTO)

@@ -17,6 +17,10 @@ class IOrderRepository(ABC):
     @abstractmethod
     def get_by_employee_id(self, id_employee: int) -> List[Order]:
         pass
+    
+    @abstractmethod
+    def get_by_payment_id(self, id_payment: int) -> Order:
+        pass
 
     @abstractmethod
     def get_by_id(self, order_id: int) -> Order:

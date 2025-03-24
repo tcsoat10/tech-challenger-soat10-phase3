@@ -63,13 +63,11 @@ class PaymentModel(BaseModel):
         )
         identity_map.add(payment)
 
-        order = [order_model.to_entity() for order_model in self.order] if self.order else []
-        payment_method = self._get_payment_method(identity_map)
-        payment_status = self._get_payment_status(identity_map)
+        payment.payment_method = self._get_payment_method(identity_map)
+        payment.payment_status = self._get_payment_status(identity_map)
 
-        payment.payment_method = payment_method
-        payment.payment_status = payment_status
-        payment.order = order
+        if self.order:
+            payment.order = [order_model.to_entity() for order_model in self.order]
 
         return payment
     
