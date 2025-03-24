@@ -19,13 +19,14 @@ spec:
         image: kiyoshinoue/tech-challenger-app:1.4
         ports:
         - containerPort: 8000
-        livenessProbe:
-          httpGet:
-            path: /api/v1/health
-            port: 8000
-          periodSeconds: 10
-          failureThreshold: 3
-          initialDelaySeconds: 20
+        # livenessProbe:
+        #   httpGet:
+        #     path: /api/v1/health
+        #     port: 8000
+        #     scheme: HTTPS
+        #   periodSeconds: 10
+        #   failureThreshold: 3
+        #   initialDelaySeconds: 30
         # readinessProbe:
         #   httpGet:
         #     path: /api/v1/health
