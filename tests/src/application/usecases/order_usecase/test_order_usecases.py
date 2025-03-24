@@ -99,9 +99,7 @@ class TestOrderUseCases:
             product_gateway=self.product_gateway
         )
 
-        self.get_order_status_usecase = GetOrderStatusUsecase.build(
-            order_gateway=self.order_gateway, order_status_gateway=self.order_status_gateway
-        )
+        self.get_order_status_usecase = GetOrderStatusUsecase.build(order_gateway=self.order_gateway)
           
         self.create_customer_usecase = CreateCustomerUsecase(
             customer_gateway=self.customer_gateway,
