@@ -30,12 +30,12 @@ users_table = table(
 
 users = [
     {
-        'name': 'carla.pereira',
-        'password_hash': bcrypt.hashpw('carla.pereira'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        'name': 'employee',
+        'password_hash': bcrypt.hashpw('employee'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     },
     {
-        'name': 'paulo.santos',
-        'password_hash': bcrypt.hashpw('paulo.santos'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        'name': 'manager',
+        'password_hash': bcrypt.hashpw('manager'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     }
 ]
     
@@ -48,5 +48,5 @@ def upgrade():
 
 def downgrade():
     op.execute(
-        "DELETE FROM users WHERE name IN ('joao.silva', 'carla.pereira', 'paulo.santos')"
+        "DELETE FROM users WHERE name IN ('employee', 'manager')"
     )

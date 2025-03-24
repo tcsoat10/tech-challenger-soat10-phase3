@@ -40,11 +40,11 @@ users_table = table(
 
 user_profiles = [
     {
-        'user': 'carla.pereira',
+        'user': 'employee',
         'profile': 'employee'
     },
     {
-        'user': 'paulo.santos',
+        'user': 'manager',
         'profile': 'manager'
     }
 ]
