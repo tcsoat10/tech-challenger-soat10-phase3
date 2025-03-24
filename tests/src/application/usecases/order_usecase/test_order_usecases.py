@@ -447,14 +447,7 @@ class TestOrderUseCases:
                 order_id=999,
                 current_user=customer_user
             )
-
-    def test_get_order_status_usecase(self, customer_user):
-        order = self.create_order_usecase.execute(current_user=customer_user)
-
-        status = self.get_order_status_usecase.execute(order.id, current_user=customer_user)
-
-        assert status == order.order_status
-        
+            
     def test_sorting_orders_by_status_priority(self, customer_user):
         order1 = self.create_order_usecase.execute(current_user=customer_user)
         order1.created_at = datetime(2025, 2, 10, 10, 31, 15)
@@ -522,4 +515,4 @@ class TestOrderUseCases:
         status = self.get_order_status_usecase.execute(order.id, current_user=customer_user)
 
         assert status == order.order_status
-        
+
