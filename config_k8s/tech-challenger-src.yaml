@@ -22,7 +22,7 @@ spec:
         # livenessProbe:
         #   httpGet:
         #     path: /api/v1/health
-        #     port: 8000
+        #     port: 80000
         #     scheme: HTTPS
         #   periodSeconds: 10
         #   failureThreshold: 3
