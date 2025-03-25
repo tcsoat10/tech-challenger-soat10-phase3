@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tech-challenger-app
-        image: kiyoshinoue/tech-challenger-app:1.4
+        image: kiyoshinoue/tech-challenger-app:1.5
         ports:
         - containerPort: 8000
         # livenessProbe:
@@ -36,7 +36,7 @@ spec:
         #   initialDelaySeconds: 3
         resources:
           requests:
-            cpu: 50m
+            cpu: 25m
           limits:
             cpu: 100m
         envFrom:
