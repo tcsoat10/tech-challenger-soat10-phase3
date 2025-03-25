@@ -21,6 +21,9 @@ O projeto visa atender à demanda de uma lanchonete de bairro, que, devido ao se
 
 O projeto utiliza o [Docker](https://www.docker.com/) para gerenciamento de containers e volumes. É necessário garantir que o Docker Compose esteja instalado.
 
+## **Kubernetes**
+O [Kubernetes](https://kubernetes.io/pt-br/) é a ferramenta utilizada para orquestração de containers do projeto.
+
 ## **Python**
 
 A versão utilizada do Python foi a 3.12, disponível para [download](https://www.python.org/downloads/).
