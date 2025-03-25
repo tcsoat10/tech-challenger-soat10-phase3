@@ -89,13 +89,32 @@ MERCADO_PAGO_POS_ID=
 WEBHOOK_URL="http://localhost:8000"
 ```
 
-## 3.1. Docker Compose (produção)
+## 3 Kubernetes (produção)
+Agora, utilizamos Kubernetes para o deploy da aplicação e gerenciamento dos recursos. Certifique-se de que o cluster Kubernetes esteja ativo e configurado corretamente antes de executar os comandos.
+Para subir a aplicação e o banco de dados MySQL, siga as instruções abaixo utilizando os arquivos YAML:
 
-Após verificar que a Docker Engine está ativa, executar o comando **`docker compose up -d --build`** no diretório raiz do projeto. Este comando sobe a aplicação e o banco de dados seguindo as instruções definidas no arquivo **`docker-compose.yml`**.
+### 3.1 Configuração Inicial
+Aplique os ConfigMap e Secret para armazenar as configurações e credenciais da aplicação:
+**`kubectl apply -f configmap.yaml`**
+**`kubectl apply -f secret.yaml`**
 
-Dois containers serão executados dentro de uma única rede, um para o banco de dados MySQL e um para a aplicação. O container da aplicação tem sua imagem construída a partir do **`Dockerfile`** presente no projeto.
+### 3.2 Configuração de Métricas e Escalabilidade Automática
+Ative os recursos de métricas e configure o HPA:
+**`kubectl apply -f metrics.yaml`**
+**`kubectl apply -f hpa.yaml`**
 
-Os dados da aplicação são persistidos em um volume, também criado a partir do **`docker compose`**. Caso este volume seja excluído, ele será recriado na próxima execução do docker compose e as migrações necessárias serão automaticamente executadas.
+### 3.3 Configuração do Banco de Dados MySQL
+Implante o volume persistente e configure o deployment e service para o banco de dados:
+**`kubectl apply -f claim-mysql-db.yaml`**
+**`kubectl apply -f mysql-db.yaml`**
+**`kubectl apply -f svc-mysql-db.yaml`**
+
+### 3.4 Deploy da Aplicação
+Implante o serviço e o código da aplicação:
+**`kubectl apply -f svc-tech-challenger.yaml`**
+**`kubectl apply -f tech-challenger-src.yaml`**
+
+Os pods serão executados de forma isolada, com volumes persistentes garantindo a integridade dos dados da aplicação e do banco de dados. Caso algum recurso seja excluído, ele será recriado automaticamente na próxima execução dos arquivos YAML.
 
 ## 4. Testes
 
