@@ -16,7 +16,6 @@ class OrderFactory(SQLAlchemyModelFactory):
         model = OrderModel
         sqlalchemy_session_persistence = "commit"
 
-    id = factory.Sequence(lambda n: n + 1)
     order_status = factory.SubFactory(OrderStatusFactory)
     id_order_status = factory.SelfAttribute("order_status.id")
 

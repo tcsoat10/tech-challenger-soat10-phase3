@@ -12,6 +12,5 @@ class PaymentMethodFactory(SQLAlchemyModelFactory):
         model = PaymentMethodModel
         sqlalchemy_session_persistence = "commit"
 
-    id = factory.Sequence(lambda n: n + 1)
     name = factory.LazyAttribute(lambda _: fake.word())
     description = factory.LazyAttribute(lambda _: fake.sentence(nb_words=10))

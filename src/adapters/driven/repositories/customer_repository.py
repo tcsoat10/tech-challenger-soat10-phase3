@@ -85,13 +85,14 @@ class CustomerRepository(ICustomerRepository):
         self.db_session.commit()
         return self.get_by_id(customer_model.id)
     
-    def delete(self, customer_id: int) -> None:
+    def delete(self, customer: Customer) -> None:
         customer_model = (
             self.db_session.query(CustomerModel)
-            .filter(CustomerModel.id == customer_id)
+            .filter(CustomerModel.id == customer.id)
             .first()
         )
+
         if customer_model:
             self.db_session.delete(customer_model)
             self.db_session.commit()
-            self.identity_map.remove(customer_model.to_entity())
+            self.identity_map.remove(customer)

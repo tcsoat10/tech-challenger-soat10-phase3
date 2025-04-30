@@ -33,15 +33,11 @@ from tests.factories.customer_factory import CustomerFactory
 from tests.factories.payment_factory import PaymentFactory
 
 
-def create_database_url(user: str, password: str, host: str, port: str, database_name: str = ""):
-    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{database_name}"
-
 @pytest.fixture(scope="function")
-def setup_test_database():
-    random_id = uuid.uuid4().hex[:8]
-    test_user = f"temp_user_{random_id}"
-    test_password = f"temp_pass_{random_id}"
-    test_database = f"{os.getenv('MYSQL_DATABASE', 'test_db')}_test_{random_id}"
+def test_engine(tmp_path_factory):
+    db_file = tmp_path_factory.mktemp("data") / "test.sqlite"
+    db_url = f"sqlite:///{db_file}"
+    engine = create_engine(db_url, echo=False)
 
     envs_to_override = {
         'ENVIRONMENT': 'testing',
@@ -50,108 +46,31 @@ def setup_test_database():
     for key, value in envs_to_override.items():
         os.environ[key] = value
 
-    # URL BD root user
-    root_database_url = create_database_url(
-        os.getenv("MYSQL_ROOT_USER", "root"),
-        os.getenv("MYSQL_ROOT_PASSWORD", "root_password"),
-        os.getenv("MYSQL_HOST", "localhost"),
-        os.getenv("MYSQL_PORT", "3306")
-    )
-
-    # Conexão com o banco como root para criação de banco e usuário
-    root_engine = create_engine(root_database_url, echo=True)
-
+    # Configura e roda Alembic
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", db_url)
     try:
-        with root_engine.connect() as connection:
-            # Criando o banco de teste
-            connection.execute(text(f"CREATE DATABASE IF NOT EXISTS `{test_database}`;"))
+        command.upgrade(alembic_cfg, "head")
+        print("Migrações Alembic aplicadas no SQLite.")
+    except Exception as e:
+        pytest.fail(f"Erro ao aplicar migrações Alembic no SQLite: {e}")
 
-            # Criando o usuário com permissões
-            connection.execute(
-                text(
-                    f"CREATE USER IF NOT EXISTS '{test_user}'@'%' IDENTIFIED BY '{test_password}';"
-                )
-            )
-            connection.execute(
-                text(
-                    f"GRANT ALL PRIVILEGES ON `{test_database}`.* TO '{test_user}'@'%';"
-                )
-            )
-            connection.execute(text("FLUSH PRIVILEGES;"))
-
-        # URL do banco de teste com usuário de teste
-        test_database_url = create_database_url(
-            test_user, test_password, os.getenv("MYSQL_HOST", "localhost"),
-            os.getenv("MYSQL_PORT", "3306"), test_database
-        )
-
-        # Redefinindo a constante DATABASE que será executada no env.py 
-        DATABASE.update({
-            "drivername": "mysql+pymysql",
-            "host": os.getenv("MYSQL_HOST", "localhost"),
-            "port": os.getenv("MYSQL_PORT", "3306"),
-            "user": test_user,
-            "password": test_password,
-            "name": test_database,
-        })
-
-        print(f"Usando configuração DATABASE={DATABASE}")
-
-        # Executando as migrações no banco de teste
-        alembic_config = Config("alembic.ini")
-        try:
-            command.upgrade(alembic_config, "head")
-            print("Migrações executadas com sucesso.")
-        except Exception as e:
-            pytest.fail(f"Erro ao aplicar migrações: {e}")
-
-        test_engine = create_engine(test_database_url, echo=True)
-        inspector = inspect(test_engine)
-        created_tables = inspector.get_table_names()
-        print(f"Tabelas criadas: {created_tables}")
-
-        # expected_tables = ["categories"]
-        # if not all(table in created_tables for table in expected_tables):
-        #     pytest.fail(
-        #         f"As seguintes tabelas não foram criadas: "
-        #         f"{[table for table in expected_tables if table not in created_tables]}"
-        #     )
-
-        yield test_database_url
-    finally:
-        # Limpando o banco após cada teste, independentemente de falhas
-        try:
-            with root_engine.connect() as connection:
-                connection.execute(text(f"DROP DATABASE IF EXISTS `{test_database}`;"))
-                connection.execute(text(f"DROP USER IF EXISTS '{test_user}'@'%';"))
-                connection.execute(text("FLUSH PRIVILEGES;"))
-            print(f"Banco e usuário removidos: {test_database}, {test_user}")
-        except Exception as e:
-            print(f"Erro ao limpar banco ou usuário de teste: {e}")
-        finally:
-            identity_map = IdentityMap.get_instance()
-            identity_map.clear()
-
-    root_engine.dispose()
-
+    yield engine
+    engine.dispose() # Fecha conexões, arquivo é removido pelo pytest
 
 @pytest.fixture(scope="function")
-def db_session(setup_test_database):
-    """
-    Cria uma sessão de banco de dados para cada teste.
-    """
-    test_engine = create_engine(setup_test_database, echo=False)
+def db_session(test_engine):
     SessionLocal = sessionmaker(bind=test_engine)
-
     session = SessionLocal()
+
+    # Override de dependência do FastAPI e Container
     def override_get_db():
         try:
             yield session
         finally:
-            pass
+            pass # Sessão é fechada no finally principal
 
     app.dependency_overrides[get_db] = override_get_db
-    
     container = Container()
     container.db_session.override(session)
     app.container = container
@@ -160,8 +79,10 @@ def db_session(setup_test_database):
         yield session
     finally:
         session.close()
-        test_engine.dispose()
         app.dependency_overrides.pop(get_db, None)
+        # Limpeza do IdentityMap se necessário
+        identity_map = IdentityMap.get_instance()
+        identity_map.clear()
 
 
 @pytest.fixture(scope="function")

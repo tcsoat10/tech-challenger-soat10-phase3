@@ -21,8 +21,9 @@ class DeleteCustomerUsecase:
             raise EntityNotFoundException(entity_name='Customer')
         if customer.is_deleted():
             raise EntityNotFoundException(entity_name='Customer')
+
         if DELETE_MODE == 'soft':
             customer.soft_delete()
             self.customer_gateway.update(customer)
         else:
-            self.customer_gateway.delete(customer_id)
+            self.customer_gateway.delete(customer)

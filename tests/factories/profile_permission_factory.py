@@ -14,7 +14,7 @@ class ProfilePermissionFactory(SQLAlchemyModelFactory):
         model = ProfilePermissionModel
         sqlalchemy_session_persistence = 'commit'
     
-    id = factory.Sequence(lambda n: n + 1)
+
     profile = factory.SubFactory(ProfileFactory)
     profile_id = factory.SelfAttribute('profile.id')
     permission = factory.SubFactory(PermissionFactory)

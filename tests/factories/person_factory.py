@@ -12,7 +12,6 @@ class PersonFactory(SQLAlchemyModelFactory):
         model = PersonModel
         sqlalchemy_session_persistence = "commit"
 
-    id = factory.Sequence(lambda n: n + 1)
     cpf = factory.LazyAttribute(lambda _: fake.ssn())
     name = factory.LazyAttribute(lambda _: fake.name())
     email = factory.LazyAttribute(lambda _: fake.email(safe=True, domain='example.com'))

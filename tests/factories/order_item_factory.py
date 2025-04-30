@@ -13,7 +13,6 @@ class OrderItemFactory(SQLAlchemyModelFactory):
         model = OrderItemModel
         sqlalchemy_session_persistence = "commit"
 
-    id = factory.Sequence(lambda n: n + 1)
 
     order = factory.SubFactory("tests.factories.order_factory.OrderFactory")
     order_id = factory.LazyAttribute(lambda obj: obj.order.id)

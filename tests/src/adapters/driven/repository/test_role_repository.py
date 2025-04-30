@@ -101,13 +101,20 @@ class TestRoleRepository:
     def test_delete_role(self):
         role = RoleFactory()
 
-        self.repository.delete(role.id)
+        assert len(self.repository.get_all()) == 1
+        
+        self.repository.delete(role)
 
         assert len(self.repository.get_all()) == 0
-    
-    def test_delete_role_with_inexistent_id(self):
-        role = RoleFactory()
-        
-        self.repository.delete(role.id + 1)
 
-        assert len(self.repository.get_all()) == 1
+    def test_delete_role_with_inexistent_id(self):
+        RoleFactory(name='registered role', description='registered role')
+        
+        unregistered_role = Role(name='Unregistered role', description='Unregistered role')
+        
+        self.repository.delete(unregistered_role)
+
+        roles = self.repository.get_all()
+        assert len(roles) == 1
+        assert roles[0].name == 'registered role'
+        assert roles[0].description == 'registered role'

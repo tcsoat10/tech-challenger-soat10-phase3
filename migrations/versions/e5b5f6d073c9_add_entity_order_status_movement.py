@@ -28,8 +28,8 @@ def upgrade() -> None:
     sa.Column('changed_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('changed_by', sa.String(length=300), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
     sa.Column('inactivated_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['id_order'], ['orders.id'], ),
     sa.PrimaryKeyConstraint('id')

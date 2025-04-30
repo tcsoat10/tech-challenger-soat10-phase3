@@ -29,5 +29,5 @@ class ICustomerRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, customer_id: int) -> None:
+    def delete(self, customer: Customer) -> None:
         pass

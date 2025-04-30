@@ -15,7 +15,7 @@ class PaymentFactory(SQLAlchemyModelFactory):
         model = PaymentModel
         sqlalchemy_session_persistence = 'commit'
     
-    id = factory.Sequence(lambda n: n + 1)
+
     payment_method = factory.SubFactory(PaymentMethodFactory)
     payment_method_id = factory.SelfAttribute('payment_method.id')
     payment_status = factory.SubFactory(PaymentStatusFactory)

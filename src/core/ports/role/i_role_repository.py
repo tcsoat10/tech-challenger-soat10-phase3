@@ -26,7 +26,7 @@ class IRoleRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, role_id: int) -> None:
+    def delete(self, role: Role) -> None:
         pass
 
     @abstractmethod
