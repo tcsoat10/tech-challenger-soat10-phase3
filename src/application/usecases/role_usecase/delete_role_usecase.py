@@ -23,4 +23,4 @@ class DeleteRoleUsecase:
             role.soft_delete()
             self.role_gateway.update(role)
         else:
-            self.role_gateway.delete(role_id)
+            self.role_gateway.delete(role)

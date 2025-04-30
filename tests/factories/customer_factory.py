@@ -14,7 +14,7 @@ class CustomerFactory(SQLAlchemyModelFactory):
         model = CustomerModel
         sqlalchemy_session_persistence = 'commit'
 
-    id = factory.Sequence(lambda n: n + 1)
+
     person = factory.SubFactory(PersonFactory)
     person_id = factory.SelfAttribute('person.id')
     

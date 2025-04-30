@@ -66,6 +66,6 @@ class PaymentMethodRepository(IPaymentMethodRepository):
                 .first()
         )
         if payment_method_model:
-            self.db_session.delete(payment_method)
+            self.db_session.delete(payment_method_model)
             self.db_session.commit()
             self.identity_map.remove(payment_method)

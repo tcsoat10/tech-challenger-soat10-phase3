@@ -14,7 +14,7 @@ class UserProfileFactory(SQLAlchemyModelFactory):
         model = UserProfileModel
         sqlalchemy_session_persistence = 'commit'
 
-    id = factory.Sequence(lambda n: n + 1)
+
     user = factory.SubFactory(UserFactory)
     user_id = factory.SelfAttribute('user.id')
     profile = factory.SubFactory(ProfileFactory)

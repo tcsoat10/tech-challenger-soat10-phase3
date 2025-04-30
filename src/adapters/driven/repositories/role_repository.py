@@ -65,17 +65,17 @@ class RoleRepository(IRoleRepository):
         self.db_session.commit()
         return role_model.to_entity()
     
-    def delete(self, role_id: int) -> None:
+    def delete(self, role: int) -> None:
         role_model = (
             self.db_session
                 .query(RoleModel)
-                .filter(RoleModel.id == role_id)
+                .filter(RoleModel.id == role.id)
                 .first()
         )
         if role_model:
             self.db_session.delete(role_model)
             self.db_session.commit()
-            self.identity_map.remove(role_model.to_entity())
+            self.identity_map.remove(role)
 
     def exists_by_name(self, name: str) -> bool:
         return self.db_session.query(exists().where(Role.name == name)).scalar()

@@ -128,7 +128,7 @@ class TestCustomerRepository:
     def test_delete_customer_success(self):
         customer = CustomerFactory()
         
-        self.repository.delete(customer.id)
+        self.repository.delete(customer)
 
         customers = self.repository.get_all()
 
@@ -136,17 +136,20 @@ class TestCustomerRepository:
         assert customers == []
 
     def test_delete_customer_unregistered_id(self):
-        customer = CustomerFactory()
+        customer_model = CustomerFactory()
 
-        self.repository.delete(customer.id + 1)
+        person = PersonFactory()
+        unregistered_customer = Customer(person=person.to_entity())
+
+        self.repository.delete(unregistered_customer)
 
         customers = self.repository.get_all()
 
         assert len(customers) == 1
-        assert customers[0].id == customer.id
-        assert customers[0].person.id == customer.person_id
-        assert customers[0].person.name == customer.person.name
-        assert customers[0].person.cpf == customer.person.cpf
-        assert customers[0].person.email == customer.person.email
-        assert customers[0].person.birth_date == customer.person.birth_date
+        assert customers[0].id == customer_model.id
+        assert customers[0].person.id == customer_model.person_id
+        assert customers[0].person.name == customer_model.person.name
+        assert customers[0].person.cpf == customer_model.person.cpf
+        assert customers[0].person.email == customer_model.person.email
+        assert customers[0].person.birth_date == customer_model.person.birth_date
     
