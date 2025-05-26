@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "Application is ready to start..."
+echo "Application is ready to start..." 
 # echo "Waiting for database to be ready..."
 
 # MAX_RETRIES=30
