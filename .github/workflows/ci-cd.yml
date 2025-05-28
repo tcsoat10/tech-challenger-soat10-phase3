@@ -174,10 +174,13 @@ jobs:
             --from-literal=WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
+          kubectl delete -f svc-tech-challenger.yaml
+          kubectl delete -f tech-challenger-src.yaml
+
           kubectl apply -f configmap.yaml
-          kubectl apply -f svc-tech-challenger.yaml
           kubectl apply -f hpa.yaml
           kubectl apply -f tech-challenger-src.yaml
+          kubectl apply -f svc-tech-challenger.yaml
 
       - name: Verify Deployment
         run: |
