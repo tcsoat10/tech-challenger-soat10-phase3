@@ -4,7 +4,7 @@ set -e
 # echo "Application is ready to start..." 
 echo "Waiting for database to be ready..."
 
-MAX_RETRIES=30
+MAX_RETRIES=3000
 COUNT=0
 
 while ! nc -z $MYSQL_HOST $MYSQL_PORT; do
