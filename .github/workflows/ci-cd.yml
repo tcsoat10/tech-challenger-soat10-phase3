@@ -138,11 +138,6 @@ jobs:
       - name: Build and Push Docker Image
         id: build-image
         run: |
-          # Ensure venv is properly set up
-          rm -rf .venv || true
-          poetry config virtualenvs.in-project true
-          poetry install --sync
-          
           # Build and push Docker image
           docker build --no-cache -t tech-challenge-api:latest .
           docker tag tech-challenge-api:latest ${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
@@ -191,3 +186,4 @@ jobs:
       - name: Verify Deployment
         run: |
           kubectl get all
+

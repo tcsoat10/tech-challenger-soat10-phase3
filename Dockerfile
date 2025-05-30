@@ -12,7 +12,6 @@ ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
@@ -23,6 +22,8 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi
 
 COPY . .
+
+RUN rm -rf /app/.venv
 
 RUN chmod +x /app/config/init_db/init_db.sh
 
