@@ -7,6 +7,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  REGION_DEFAULT: "us-east-1"
+  AWS_ECR_REGISTRY: "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com"
+  PROJECT_NAME: "soattc"
+
 jobs:
   build:
     name: Build and Cache Dependencies
@@ -87,3 +92,114 @@ jobs:
           path: coverage.xml
           retention-days: 7
  
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.5
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Restore Cached Dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.REGION_DEFAULT }}
+      
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.REGION_DEFAULT }} | docker login --username AWS --password-stdin ${{ env.AWS_ECR_REGISTRY }}
+
+      - name: Build and Push Docker Image
+        id: build-image
+        run: |
+          # Build and push Docker image
+          docker build --no-cache -t tech-challenge-api:latest .
+          docker tag tech-challenge-api:latest ${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
+          docker push ${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest
+
+      - name: Get kubeconfig
+        id: get-kubeconfig
+        run: |
+          echo "Get kubeconfig"
+          aws eks --region ${{ env.REGION_DEFAULT }} update-kubeconfig --name ${{ secrets.AWS_EKS_CLUSTER_NAME }}
+          kubectl cluster-info
+
+      - name: Deploy Application
+        working-directory: config_k8s
+        run: |
+          kubectl create secret generic application-secrets \
+            --from-literal=SECRET_KEY=${{ secrets.SECRET_KEY }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic mysql-secrets \
+            --from-literal=MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+            --from-literal=MYSQL_USER=${{ secrets.MYSQL_USER }} \
+            --from-literal=MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            --from-literal=MYSQL_HOST=${{ secrets.MYSQL_HOST }} \
+            --from-literal=MYSQL_PORT=${{ secrets.MYSQL_PORT }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic mercadopago-secrets \
+            --from-literal=MERCADO_PAGO_ACCESS_TOKEN=${{ secrets.MERCADO_PAGO_ACCESS_TOKEN }} \
+            --from-literal=MERCADO_PAGO_USER_ID=${{ secrets.MERCADO_PAGO_USER_ID }} \
+            --from-literal=MERCADO_PAGO_POS_ID=${{ secrets.MERCADO_PAGO_POS_ID }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl delete -f svc-tech-challenger.yaml
+          kubectl delete -f tech-challenger-src.yaml
+
+          kubectl apply -f svc-tech-challenger.yaml
+
+          echo "Aguardando LoadBalancer receber hostname..."
+          for i in {1..30}; do
+            WEBHOOK_URL=$(kubectl get svc tech-challenger-svc -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            if [ -n "$WEBHOOK_URL" ]; then
+              echo "LoadBalancer hostname: $WEBHOOK_URL"
+              break
+            fi
+            echo "Ainda aguardando..."
+            sleep 10
+          done
+
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "Erro: LoadBalancer não recebeu hostname a tempo."
+            exit 1
+          fi
+
+          kubectl create secret generic webhook-secrets \
+            --from-literal=WEBHOOK_URL="http://$WEBHOOK_URL" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl apply -f configmap.yaml
+          kubectl apply -f hpa.yaml
+          kubectl apply -f tech-challenger-src.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl get all
+

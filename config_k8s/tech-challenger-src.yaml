@@ -16,24 +16,9 @@ spec:
     spec:
       containers:
       - name: tech-challenger-app
-        image: kiyoshinoue/tech-challenger-app:1.5
+        image: 414132512745.dkr.ecr.us-east-1.amazonaws.com/soattc:latest
         ports:
         - containerPort: 8000
-        # livenessProbe:
-        #   httpGet:
-        #     path: /api/v1/health
-        #     port: 80000
-        #     scheme: HTTPS
-        #   periodSeconds: 10
-        #   failureThreshold: 3
-        #   initialDelaySeconds: 30
-        # readinessProbe:
-        #   httpGet:
-        #     path: /api/v1/health
-        #     port: 8000
-        #   periodSeconds: 10
-        #   failureThreshold: 5
-        #   initialDelaySeconds: 3
         resources:
           requests:
             cpu: 25m
@@ -43,4 +28,10 @@ spec:
           - configMapRef:
               name: tc-app-config
           - secretRef:
-              name: tc-app-secret
+              name: application-secrets
+          - secretRef:
+              name: mysql-secrets
+          - secretRef:
+              name: mercadopago-secrets
+          - secretRef:
+              name: webhook-secrets
