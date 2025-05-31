@@ -8,9 +8,9 @@ class IAuthProviderGateway(ABC):
     """
 
     @abstractmethod
-    def authenticate(self, username: str) -> bool:
+    def authenticate(self, cpf: str) -> bool:
         """
-        Authenticates a user with the given username and password.
+        Authenticates a customer with the given CPF.
         Returns True if authentication is successful, False otherwise.
         """
         pass
