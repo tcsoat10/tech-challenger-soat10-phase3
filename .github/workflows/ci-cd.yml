@@ -195,6 +195,19 @@ jobs:
             --from-literal=WEBHOOK_URL="http://$WEBHOOK_URL" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+          API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='lambda_auth'].ApiId" --output text)
+          if [ -z "$API_ID" ]; then
+            echo "API Gateway não encontrada"
+            exit 1
+          fi
+          APIGW_URL=$(aws apigatewayv2 get-api --api-id $API_ID --query "ApiEndpoint" --output text)
+          echo "API Gateway URL: $APIGW_URL"
+          echo "APIGW_URL=$APIGW_URL" >> $GITHUB_ENV
+
+          kubectl create secret generic apigateway-secrets \
+            --from-literal=APIGW_URL="$APIGW_URL" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
           kubectl apply -f configmap.yaml
           kubectl apply -f hpa.yaml
           kubectl apply -f tech-challenger-src.yaml

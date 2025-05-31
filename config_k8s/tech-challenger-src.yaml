@@ -35,3 +35,5 @@ spec:
               name: mercadopago-secrets
           - secretRef:
               name: webhook-secrets
+          - secretRef:
+              name: apigateway-secrets
