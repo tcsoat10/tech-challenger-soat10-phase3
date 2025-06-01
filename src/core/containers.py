@@ -2,6 +2,7 @@ from dependency_injector import containers, providers
 
 from config.database import get_db
 from src.core.shared.identity_map import IdentityMap
+from src.adapters.driven.auth_providers.aws_cognito_gateway import AWSCognitoGateway
 from src.adapters.driver.api.v1.controllers.auth_controller import AuthController
 from src.adapters.driver.api.v1.controllers.category_controller import CategoryController
 from src.adapters.driven.repositories.category_repository import CategoryRepository
@@ -129,9 +130,14 @@ class Container(containers.DeclarativeContainer):
     person_gateway = providers.Factory(PersonRepository, db_session=db_session)
     person_controller = providers.Factory(PersonController, person_gateway=person_gateway)
 
+    auth_provider_gateway = providers.Factory(AWSCognitoGateway)
+
     customer_gateway = providers.Factory(CustomerRepository, db_session=db_session)
     customer_controller = providers.Factory(
-        CustomerController, customer_gateway=customer_gateway, person_gateway=person_gateway
+        CustomerController,
+        customer_gateway=customer_gateway,
+        person_gateway=person_gateway,
+        auth_provider_gateway=auth_provider_gateway,
     )
 
     role_gateway = providers.Factory(RoleRepository, db_session=db_session)
@@ -194,6 +200,7 @@ class Container(containers.DeclarativeContainer):
         AuthController,
         profile_gateway=profile_gateway,
         employee_gateway=employee_gateway,
-        customer_gateway=customer_gateway                
+        customer_gateway=customer_gateway,
+        auth_provider_gateway=auth_provider_gateway            
     )
     

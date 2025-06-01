@@ -1,3 +1,4 @@
+from src.core.ports.auth.i_auth_provider_gateway import IAuthProviderGateway
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.ports.person.i_person_repository import IPersonRepository
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
@@ -7,17 +8,19 @@ from src.core.domain.entities.person import Person
 
 
 class CreateCustomerUsecase:
-    def __init__(self, customer_gateway: ICustomerRepository, person_gateway: IPersonRepository):
+    def __init__(self, customer_gateway: ICustomerRepository, person_gateway: IPersonRepository, auth_provider_gateway: IAuthProviderGateway):
         self.customer_gateway = customer_gateway
         self.person_gateway = person_gateway
+        self.auth_provider_gateway = auth_provider_gateway
 
     @classmethod
     def build(
         cls,
         customer_gateway: ICustomerRepository,
-        person_gateway: IPersonRepository
+        person_gateway: IPersonRepository,
+        auth_provider_gateway: IAuthProviderGateway
     ) -> 'CreateCustomerUsecase':
-        return cls(customer_gateway, person_gateway)
+        return cls(customer_gateway, person_gateway, auth_provider_gateway)
     
     def execute(self, dto: CreateCustomerDTO) -> Customer:
         person = self.person_gateway.get_by_cpf(dto.person.cpf)
@@ -51,5 +54,7 @@ class CreateCustomerUsecase:
         else:
             customer = Customer(person=person)
             customer = self.customer_gateway.create(customer)
+            
+        self.auth_provider_gateway.sync_user(person=customer.person)
         
         return customer

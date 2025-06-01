@@ -1,13 +1,14 @@
 import pytest
 from datetime import datetime
-from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
-from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
-from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
-from src.core.domain.dtos.person.create_person_dto import CreatePersonDTO
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
 from src.adapters.driven.repositories.person_repository import PersonRepository
 from src.application.usecases.customer_usecase.create_customer_usecase import CreateCustomerUsecase
 from src.application.usecases.customer_usecase.get_all_customers_usecase import GetAllCustomersUsecase
+from src.adapters.driven.auth_providers.aws_cognito_gateway import AWSCognitoGateway
+from src.core.exceptions.entity_duplicated_exception import EntityDuplicatedException
+from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
+from src.core.domain.dtos.customer.update_customer_dto import UpdateCustomerDTO
+from src.core.domain.dtos.person.create_person_dto import CreatePersonDTO
 from src.application.usecases.customer_usecase.delete_customer_usecase import DeleteCustomerUsecase
 from src.application.usecases.customer_usecase.update_customer_usecase import UpdateCustomerUsecase
 from pycpfcnpj import gen
@@ -18,7 +19,8 @@ class TestCustomerUsecases:
     def setup(self, db_session):
         self.customer_gateway = CustomerRepository(db_session)
         self.person_gateway = PersonRepository(db_session)
-        self.create_customer_usecase = CreateCustomerUsecase(self.customer_gateway, self.person_gateway)
+        self.auth_provider_gateway = AWSCognitoGateway()
+        self.create_customer_usecase = CreateCustomerUsecase(self.customer_gateway, self.person_gateway, self.auth_provider_gateway)
         self.update_customer_usecase = UpdateCustomerUsecase(self.customer_gateway, self.person_gateway)
         self.get_all_customers_usecase = GetAllCustomersUsecase(self.customer_gateway)
         self.delete_customer_usecase = DeleteCustomerUsecase(self.customer_gateway)

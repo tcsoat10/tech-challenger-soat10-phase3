@@ -13,6 +13,7 @@ from src.core.domain.dtos.category.create_category_dto import CreateCategoryDTO
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
 from src.core.domain.dtos.person.create_person_dto import CreatePersonDTO
 
+from src.adapters.driven.auth_providers.aws_cognito_gateway import AWSCognitoGateway
 from src.adapters.driven.repositories.order_repository import OrderRepository
 from src.adapters.driven.repositories.order_status_repository import OrderStatusRepository
 from src.adapters.driven.repositories.customer_repository import CustomerRepository
@@ -50,6 +51,7 @@ class TestOrderUseCases:
         self.product_gateway = ProductRepository(db_session)
         self.category_gateway = CategoryRepository(db_session)
         self.person_gateway = PersonRepository(db_session)
+        self.auth_provider_gateway = AWSCognitoGateway()
         
         self.create_order_usecase = CreateOrderUseCase.build(
             order_gateway=self.order_gateway,
@@ -103,7 +105,8 @@ class TestOrderUseCases:
           
         self.create_customer_usecase = CreateCustomerUsecase(
             customer_gateway=self.customer_gateway,
-            person_gateway=self.person_gateway
+            person_gateway=self.person_gateway,
+            auth_provider_gateway=self.auth_provider_gateway
         )
         
         self.create_category_usecase = CreateCategoryUseCase(
