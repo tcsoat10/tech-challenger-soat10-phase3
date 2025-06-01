@@ -1,5 +1,6 @@
 
 from typing import Any, Dict
+from src.core.ports.auth.i_auth_provider_gateway import IAuthProviderGateway
 from src.core.domain.dtos.auth.auth_dto import AuthByCpfDTO
 from src.core.domain.entities.customer import Customer
 from src.core.exceptions.entity_not_found_exception import EntityNotFoundException
@@ -11,15 +12,25 @@ from src.core.ports.profile.i_profile_repository import IProfileRepository
 
 class LoginCustomerByCpfUseCase:
     
-    def __init__(self, customer_gateway: ICustomerRepository, profile_gateway: IProfileRepository):
+    def __init__(self, customer_gateway: ICustomerRepository, profile_gateway: IProfileRepository, auth_provider_gateway: IAuthProviderGateway):
         self.customer_gateway = customer_gateway
         self.profile_gateway = profile_gateway
+        self.auth_provider_gateway = auth_provider_gateway
         
     @classmethod
-    def build(cls, customer_gateway: ICustomerRepository, profile_gateway: IProfileRepository) -> 'LoginCustomerByCpfUseCase':
-        return cls(customer_gateway, profile_gateway)
+    def build(
+        cls,
+        customer_gateway: ICustomerRepository,
+        profile_gateway: IProfileRepository,
+        auth_provider_gateway: IAuthProviderGateway
+    ) -> 'LoginCustomerByCpfUseCase':
+        return cls(customer_gateway, profile_gateway, auth_provider_gateway)
     
     def execute(self, dto: AuthByCpfDTO) -> Dict[str, Any]:
+        customer_exists = self.auth_provider_gateway.authenticate(dto.cpf)
+        if customer_exists is False:
+            raise InvalidCredentialsException("Invalid CPF or password.")
+
         customer: Customer = self.customer_gateway.get_by_cpf(dto.cpf)
         if not customer:
             raise EntityNotFoundException(entity_name="Customer")

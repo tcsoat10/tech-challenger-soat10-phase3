@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from src.core.ports.auth.i_auth_provider_gateway import IAuthProviderGateway
 from src.core.ports.person.i_person_repository import IPersonRepository
 from src.core.ports.customer.i_customer_repository import ICustomerRepository
 from src.core.domain.dtos.customer.create_customer_dto import CreateCustomerDTO
@@ -15,12 +16,13 @@ from src.application.usecases.customer_usecase.delete_customer_usecase import De
 
 
 class CustomerController:
-    def __init__(self, customer_gateway: ICustomerRepository, person_gateway: IPersonRepository):
+    def __init__(self, customer_gateway: ICustomerRepository, person_gateway: IPersonRepository, auth_provider_gateway: IAuthProviderGateway):
         self.customer_gateway: ICustomerRepository = customer_gateway
         self.person_gateway: IPersonRepository = person_gateway
+        self.auth_provider_gateway: IAuthProviderGateway = auth_provider_gateway
 
     def create_customer(self, dto: CreateCustomerDTO) -> CustomerDTO:
-        create_customer_usecase = CreateCustomerUsecase.build(self.customer_gateway, self.person_gateway)
+        create_customer_usecase = CreateCustomerUsecase.build(self.customer_gateway, self.person_gateway, self.auth_provider_gateway)
         customer = create_customer_usecase.execute(dto)
         return DTOPresenter.transform(customer, CustomerDTO)
     
