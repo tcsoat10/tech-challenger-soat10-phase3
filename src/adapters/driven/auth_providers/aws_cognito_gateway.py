@@ -56,6 +56,10 @@ class AWSCognitoGateway(IAuthProviderGateway):
                 headers=self.headers
             )
             
+            # show response status code and text
+            print(f"Response Status Code: {response.status_code}")
+            print(f"Response Text: {response.text}")
+            
             if response.status_code != HTTPStatus.OK:
                 print(f"Erro ao sincronizar usuário: {response.text}")
         except Exception as e:
