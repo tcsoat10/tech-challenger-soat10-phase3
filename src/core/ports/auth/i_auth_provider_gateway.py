@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from src.core.domain.entities.person import Person
+
 
 class IAuthProviderGateway(ABC):
     """
@@ -16,7 +18,7 @@ class IAuthProviderGateway(ABC):
         pass
 
     @abstractmethod
-    def sync_user(self, user_id: str) -> None:
+    def sync_user(self, person: Person) -> None:
         """
         Synchronizes the user data with the authentication provider.
         This method should be called when user data is updated in the system.
