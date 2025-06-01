@@ -29,7 +29,7 @@ class LoginCustomerByCpfUseCase:
     def execute(self, dto: AuthByCpfDTO) -> Dict[str, Any]:
         customer_exists = self.auth_provider_gateway.authenticate(dto.cpf)
         if customer_exists is False:
-            raise InvalidCredentialsException("Invalid CPF or password.")
+            raise InvalidCredentialsException()
 
         customer: Customer = self.customer_gateway.get_by_cpf(dto.cpf)
         if not customer:
