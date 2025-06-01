@@ -51,7 +51,7 @@ class AWSCognitoGateway(IAuthProviderGateway):
                     "cpf": person.cpf,
                     "email": person.email,
                     "name": person.name,
-                    "birth_date": person.birth_date.isoformat() if person.birth_date else None
+                    "birthdate": person.birth_date.isoformat() if person.birth_date else None
                 },
                 headers=self.headers
             )
