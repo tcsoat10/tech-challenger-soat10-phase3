@@ -22,7 +22,7 @@ DATABASE_URL = (
 DELETE_MODE = os.getenv("DELETE_MODE", "soft")
 
 # Criar o motor do SQLAlchemy
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=3600)
 
 # Configurar a sessão
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -35,4 +35,4 @@ def get_db() -> Generator[Session, None, None]:
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
