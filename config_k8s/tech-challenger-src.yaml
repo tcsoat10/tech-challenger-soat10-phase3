@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tech-challenger-app
-        image: 414132512745.dkr.ecr.us-east-1.amazonaws.com/soattc:latest
+        image: ${IMAGE}
         ports:
         - containerPort: 8000
         resources:
