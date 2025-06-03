@@ -149,11 +149,16 @@ jobs:
           aws eks --region ${{ env.REGION_DEFAULT }} update-kubeconfig --name ${{ secrets.AWS_EKS_CLUSTER_NAME }}
           kubectl cluster-info
 
-      - name: Patch & apply Deployment com envsubst
+      # - name: Patch & apply Deployment com envsubst
+      #   working-directory: config_k8s
+      #   run: |
+      #     export IMAGE="${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest"
+      #     envsubst < tech-challenger-src.yaml | kubectl apply -f -
+
+      - name: Replace image path in Deployment
         working-directory: config_k8s
         run: |
-          export IMAGE="${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest"
-          kubectl apply -f <(envsubst '$IMAGE' < tech-challenger-src.yaml)
+          sed -i 's|${IMAGE}|${{ env.AWS_ECR_REGISTRY }}/${{ env.PROJECT_NAME }}:latest|g' tech-challenger-src.yaml
 
       - name: Deploy Application
         working-directory: config_k8s
