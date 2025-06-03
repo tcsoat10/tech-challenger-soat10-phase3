@@ -69,5 +69,8 @@ Este repositório contém apenas o código fonte da aplicação. Os demais repos
 - WEBHOOK_URL: url do webhook que recebe as respostas da API do Mercado Pago para confirmação do pagamento
 - SECRET_KEY: chave secreta do token JWT
 
+ [Topo](#tópicos)
 
+# Diagrama de Arquitetura
+![Diagrama Implantação Lanchonete](https://github.com/user-attachments/assets/7717045c-5541-46dc-9180-ee56f0523bbd)
  [Topo](#tópicos)
