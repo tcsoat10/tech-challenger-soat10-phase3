@@ -72,6 +72,6 @@ Este repositório contém apenas o código fonte da aplicação. Os demais repos
  [Topo](#tópicos)
 
 # Diagrama de Arquitetura
-![Diagrama Implantação Lanchonete](https://github.com/user-attachments/assets/e1dd1df1-3fe4-4f7e-aa3e-4b64277c3314)
+![Diagrama Implantação Lanchonete20250603](https://github.com/user-attachments/assets/e3b0a0df-547d-4a85-b2fc-08f7dade1c13)
 
 [Topo](#tópicos)
