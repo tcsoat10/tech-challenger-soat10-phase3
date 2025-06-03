@@ -170,8 +170,8 @@ jobs:
             --from-literal=MERCADO_PAGO_POS_ID=${{ secrets.MERCADO_PAGO_POS_ID }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
-          kubectl get -f svc-tech-challenger.yaml && kubectl delete -f svc-tech-challenger.yaml || echo "svc-tech-challenger.yaml does not exist"
-          kubectl get -f tech-challenger-src.yaml && kubectl delete -f tech-challenger-src.yaml || echo "tech-challenger-src.yaml does not exist"
+          kubectl delete -f svc-tech-challenger.yaml --ignore-not-found
+          kubectl delete -f tech-challenger-src.yaml --ignore-not-found
 
           kubectl apply -f svc-tech-challenger.yaml
 
