@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tech-challenger-app
-        image: ${IMAGE}
+        image: "${IMAGE}"
         ports:
         - containerPort: 8000
         resources:
